@@ -1,0 +1,9 @@
+
+2. auth/registration-email-resending
+3. auth/registration-confirmation
+4. auth/login
+5. auth/me
+6. auth/password-recovery
+7. auth/new-password
+8. auth/refresh-token
+9. logout
