@@ -9,8 +9,6 @@ export class Security {
 
   @Column() device_title: string;
 
-  @Column() browser: string;
-
   @Column() ip_address: string;
 
   @Column() iat: string;
