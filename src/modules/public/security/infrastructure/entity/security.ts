@@ -3,15 +3,15 @@ import { Users } from "../../../../super-admin/infrastructure/entity/users";
 
 @Entity()
 export class Security {
-  @PrimaryColumn('uuid') userId: string;
+  @PrimaryColumn('uuid') user_id: string;
 
-  @PrimaryColumn('uuid') deviceId: string;
+  @PrimaryColumn('uuid') device_id: string;
 
-  @Column() deviceTitle: string;
+  @Column() device_title: string;
 
   @Column() browser: string;
 
-  @Column() ipAddress: string;
+  @Column() ip_address: string;
 
   @Column() iat: string;
 

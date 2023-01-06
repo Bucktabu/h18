@@ -3,13 +3,13 @@ import { Users } from "./users";
 
 @Entity()
 export class EmailConfirmation {
-  @PrimaryColumn('uuid') userId: string;
+  @PrimaryColumn('uuid') user_id: string;
 
-  @Column() confirmationCode: string;
+  @Column() confirmation_code: string;
 
-  @Column() expirationDate: string;
+  @Column() expiration_date: string;
 
-  @Column({ default: false }) isConfirmation: boolean;
+  @Column({ default: false }) is_confirmation: boolean;
 
   @OneToOne(() => Users, u => u.emailConfirmation)
   @JoinColumn()

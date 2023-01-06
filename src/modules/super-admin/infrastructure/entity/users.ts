@@ -15,11 +15,11 @@ export class Users {
 
   @Column() email: string;
 
-  @Column() passwordSalt: string;
+  @Column() password_salt: string;
 
-  @Column() passwordHash: string;
+  @Column() password_sash: string;
 
-  @Column() createdAt: string;
+  @Column() created_at: string;
 
   @OneToOne(() => UserBanInfo, bi => bi.user)
   banInfo: UserBanInfo
