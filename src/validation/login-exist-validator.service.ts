@@ -4,9 +4,6 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../modules/super-admin/infrastructure/entity/user';
-import { PgUsersRepository } from '../modules/super-admin/infrastructure/pg-users.repository';
 import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
 
 @Injectable()

@@ -10,7 +10,7 @@ export class PgSecurityRepository {
 
   async createUserDevice(createDevice: UserDeviceModel): Promise<boolean> {
     const query = `
-      INSERT INTO public.device_security
+      INSERT INTO public.security
              (user_id, device_id, device_title, ip_address, iat, exp)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING (user_id);
@@ -37,7 +37,7 @@ export class PgSecurityRepository {
     exp: string,
   ): Promise<boolean> {
     const query = `
-      UPDATE public.device_security
+      UPDATE public.security
          SET iat = $1, exp = $2
        WHERE device_id = $3;
     `;
@@ -54,7 +54,7 @@ export class PgSecurityRepository {
     deviceId: string,
   ): Promise<boolean> {
     const query = `
-      DELETE FROM public.device_security
+      DELETE FROM public.security
        WHERE user_id = $1 AND device_id != $2
     `;
     await this.dataSource.query(query, [userId, deviceId]);
@@ -63,7 +63,7 @@ export class PgSecurityRepository {
 
   async deleteDeviceById(deviceId: string): Promise<boolean> {
     const query = `
-      DELETE FROM public.device_security
+      DELETE FROM public.security
        WHERE device_id = $1
     `;
     const result = await this.dataSource.query(query, [deviceId]);

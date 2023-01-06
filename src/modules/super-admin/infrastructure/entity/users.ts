@@ -3,12 +3,12 @@ import {
   Entity, OneToOne,
   PrimaryColumn
 } from "typeorm";
-import { BanInfo } from "./ban.info";
+import { UserBanInfo } from "./userBanInfo";
 import { Security } from "../../../public/security/infrastructure/entity/security";
 import { EmailConfirmation } from "./email-confirmation.entity";
 
 @Entity()
-export class User {
+export class Users {
   @PrimaryColumn('uuid') id: string;
 
   @Column() login: string;
@@ -21,8 +21,8 @@ export class User {
 
   @Column() createdAt: string;
 
-  @OneToOne(() => BanInfo, bi => bi.user)
-  banInfo: BanInfo
+  @OneToOne(() => UserBanInfo, bi => bi.user)
+  banInfo: UserBanInfo
 
   @OneToOne(() => Security, s => s.user)
   security: Security

@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-import { User } from "../../../../super-admin/infrastructure/entity/user";
+import { Users } from "../../../../super-admin/infrastructure/entity/users";
 
 @Entity()
 export class Security {
@@ -17,7 +17,7 @@ export class Security {
 
   @Column() exp: string;
 
-  @OneToOne(() => User, u => u.security)
+  @OneToOne(() => Users, u => u.security)
   @JoinColumn()
-  user: User
+  user: Users
 }

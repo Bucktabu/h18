@@ -20,9 +20,9 @@ import { UsersService } from './modules/super-admin/application/users.service';
 import { PgBanInfoRepository } from './modules/super-admin/infrastructure/pg-ban-info.repository';
 import { PgEmailConfirmationRepository } from './modules/super-admin/infrastructure/pg-email-confirmation.repository';
 import { PgUsersRepository } from './modules/super-admin/infrastructure/pg-users.repository';
-import { BanInfo } from './modules/super-admin/infrastructure/entity/ban.info';
+import { UserBanInfo } from './modules/super-admin/infrastructure/entity/userBanInfo';
 import { EmailConfirmation } from './modules/super-admin/infrastructure/entity/email-confirmation.entity';
-import { User } from './modules/super-admin/infrastructure/entity/user';
+import { Users } from './modules/super-admin/infrastructure/entity/users';
 import { PgSecurityRepository } from './modules/public/security/infrastructure/pg-security.repository';
 import { PgQuerySecurityRepository } from './modules/public/security/infrastructure/pg-query-security.repository';
 import { CreateUserUseCase } from './modules/super-admin/use-cases/create-user.use-case';
@@ -31,7 +31,7 @@ import { EmailResendingValidator } from './validation/email-resending.validator'
 import { ThrottlerModule } from '@nestjs/throttler';
 import { settings } from './settings';
 import { Security } from "./modules/public/security/infrastructure/entity/security";
-import { Jwt } from "./modules/public/auth/infrastructure/entity/jwt";
+import { TokenBlackList } from "./modules/public/auth/infrastructure/entity/tokenBlackList";
 
 const controllers = [
   AuthController,
@@ -41,11 +41,11 @@ const controllers = [
 ];
 
  const entity = [
-   BanInfo,
+   UserBanInfo,
    EmailConfirmation,
-   Jwt,
+   TokenBlackList,
    Security,
-   User
+   Users
  ];
 
 const repositories = [

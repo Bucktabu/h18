@@ -11,7 +11,7 @@ export class PgQuerySecurityRepository {
   async getAllActiveSessions(userId: string): Promise<UserDeviceModel[]> {
     const query = `
       SELECT user_id as "userId", device_id as "deviceId", device_title as "deviceTitle", ip_address as "ipAddress", iat, exp
-        FROM public.device_security
+        FROM public.security
        WHERE user_id = $1;
     `;
     try {
@@ -25,7 +25,7 @@ export class PgQuerySecurityRepository {
   async getDeviseById(deviceId: string): Promise<UserDeviceModel | null> {
     const query = `
       SELECT user_id as "userId", device_id as "deviceId", device_title as "deviceTitle", ip_address as "ipAddress", iat, exp
-        FROM public.device_security
+        FROM public.security
        WHERE device_id = $1;
     `;
     try {

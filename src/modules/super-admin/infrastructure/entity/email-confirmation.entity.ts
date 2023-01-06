@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-import { User } from "./user";
+import { Users } from "./users";
 
 @Entity()
 export class EmailConfirmation {
@@ -11,7 +11,7 @@ export class EmailConfirmation {
 
   @Column({ default: false }) isConfirmation: boolean;
 
-  @OneToOne(() => User, u => u.emailConfirmation)
+  @OneToOne(() => Users, u => u.emailConfirmation)
   @JoinColumn()
-  user: User
+  user: Users
 }
