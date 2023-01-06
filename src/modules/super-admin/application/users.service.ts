@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { UserDBModel } from '../infrastructure/entity/userDB.model';
 import { BanUserDTO } from '../api/dto/ban-user.dto';
-import { PgUsersRepository } from "../infrastructure/pg-users.repository";
-import { PgEmailConfirmationRepository } from "../infrastructure/pg-email-confirmation.repository";
-import { PgBanInfoRepository } from "../infrastructure/pg-ban-info.repository";
+import { PgUsersRepository } from '../infrastructure/pg-users.repository';
+import { PgEmailConfirmationRepository } from '../infrastructure/pg-email-confirmation.repository';
+import { PgBanInfoRepository } from '../infrastructure/pg-ban-info.repository';
 import { _generateHash } from '../../../helper.functions';
-import { UserDto } from '../api/dto/userDto';
 import { BanInfoModel } from '../infrastructure/entity/banInfo.model';
-import { EmailConfirmation } from '../infrastructure/entity/emailConfirm.scheme';
-import {EmailConfirmationModel} from "../infrastructure/entity/emailConfirmation.model";
+import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
+import { UserDto } from '../api/dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +17,11 @@ export class UsersService {
     protected usersRepository: PgUsersRepository,
   ) {}
 
-  async createUser(dto: UserDto, emailConfirmation: EmailConfirmationModel, userId: string) {
+  async createUser(
+    dto: UserDto,
+    emailConfirmation: EmailConfirmationModel,
+    userId: string,
+  ) {
     const hash = await _generateHash(dto.password);
 
     const user = new UserDBModel(
@@ -30,33 +33,27 @@ export class UsersService {
       new Date().toISOString(),
     );
 
-    const banInfo = new BanInfoModel(
-      userId,
-      false,
-      null,
-      null,
-      null,
-    );
+    const banInfo = new BanInfoModel(userId, false, null, null, null);
 
     const createdUser = await this.usersRepository.createUser(user);
     const createdBanInfo = await this.banInfoRepository.createBanInfo(banInfo);
     await this.emailConfirmationRepository.createEmailConfirmation(
       emailConfirmation,
-    )
+    );
 
-    return {createdUser, createdBanInfo}
+    return { createdUser, createdBanInfo };
   }
 
   async updateUserPassword(
-      userId: string,
-      newPassword: string,
+    userId: string,
+    newPassword: string,
   ): Promise<boolean> {
     const hash = await _generateHash(newPassword);
 
     return await this.usersRepository.updateUserPassword(
-        userId,
-        hash.passwordSalt,
-        hash.passwordHash,
+      userId,
+      hash.passwordSalt,
+      hash.passwordHash,
     );
   }
 

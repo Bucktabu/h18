@@ -1,8 +1,8 @@
-import { UserViewModelWithBanInfo } from './modules/super-admin/api/dto/userView.model';
 import { ContentPageModel } from './global-model/contentPage.model';
 import { settings } from './settings';
-import { ViewBanInfoModel } from "./modules/super-admin/api/dto/view-ban-info.model";
+import { ViewBanInfoModel } from './modules/super-admin/api/dto/view-ban-info.model';
 import bcrypt from 'bcrypt';
+import { UserViewModelWithBanInfo } from './modules/super-admin/api/dto/user.view.model';
 
 export const giveSkipNumber = (pageNumber: number, pageSize: number) => {
   return (pageNumber - 1) * pageSize;
@@ -24,12 +24,11 @@ export const _generateHash = async (password: string) => {
 export const paginationContentPage = (
   pageNumber: number,
   pageSize: number,
-  content:
-    //| BlogViewModel[]
-    // | BlogViewWithOwnerAndBanInfo[]
-    // | CommentWithAdditionalInfoModel[]
-    // | PostViewModel[]
-    | UserViewModelWithBanInfo[]
+  content: //| BlogViewModel[]
+  // | BlogViewWithOwnerAndBanInfo[]
+  // | CommentWithAdditionalInfoModel[]
+  // | PostViewModel[]
+  | UserViewModelWithBanInfo[]
     //| CommentViewModel[]
     | ViewBanInfoModel[],
   totalCount: number,

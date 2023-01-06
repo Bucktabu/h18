@@ -3,15 +3,15 @@ import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmati
 import add from 'date-fns/add';
 import { v4 as uuidv4 } from 'uuid';
 import { settings } from '../../../settings';
-import { EmailManager } from "../../public/auth/email-transfer/email.manager";
-import {UserDto} from "../api/dto/userDto";
-import {UsersService} from "../application/users.service";
+import { EmailManager } from '../../public/auth/email-transfer/email.manager';
+import { UsersService } from '../application/users.service';
+import { UserDto } from '../api/dto/user.dto';
 
 @Injectable()
 export class CreateUserUseCase {
   constructor(
     protected emailManager: EmailManager,
-    protected usersService: UsersService
+    protected usersService: UsersService,
   ) {}
 
   async execute(dto: UserDto): Promise<boolean> {
@@ -19,7 +19,9 @@ export class CreateUserUseCase {
     const emailConfirmation = new EmailConfirmationModel(
       userId,
       uuidv4(),
-      (add(new Date(), { hours: Number(settings.timeLife.CONFIRMATION_CODE) })).toISOString(),
+      add(new Date(), {
+        hours: Number(settings.timeLife.CONFIRMATION_CODE),
+      }).toISOString(),
       false,
     );
 
@@ -27,8 +29,12 @@ export class CreateUserUseCase {
       dto.email,
       emailConfirmation.confirmationCode,
     );
-    console.log('confirmationCode:', emailConfirmation.confirmationCode, 'from use-case for registration')
+    console.log(
+      'confirmationCode:',
+      emailConfirmation.confirmationCode,
+      'from use-case for registration',
+    );
     await this.usersService.createUser(dto, emailConfirmation, userId);
-    return true
+    return true;
   }
 }

@@ -1,11 +1,10 @@
 import { Controller, Delete, HttpCode } from '@nestjs/common';
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Controller('testing')
 export class TestingController {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   @Delete('all-data')
   @HttpCode(204)
@@ -16,7 +15,7 @@ export class TestingController {
       DELETE FROM device_security;
       DELETE FROM email_confirmation;
       DELETE FROM token_black_list;
-    `)
+    `);
   }
 
   // @Delete('all-data')

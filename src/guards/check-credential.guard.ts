@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import { UserDBModel } from '../modules/super-admin/infrastructure/entity/userDB.model';
-import { PgBanInfoRepository } from "../modules/super-admin/infrastructure/pg-ban-info.repository";
-import { PgQueryUsersRepository } from "../modules/super-admin/infrastructure/pg-query-users.repository";
+import { PgBanInfoRepository } from '../modules/super-admin/infrastructure/pg-ban-info.repository';
+import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
 
 @Injectable()
 export class CheckCredentialGuard implements CanActivate {
@@ -20,9 +20,7 @@ export class CheckCredentialGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     const user: UserDBModel | null =
-      await this.usersRepository.getUserByLoginOrEmail(
-        req.body.loginOrEmail,
-      );
+      await this.usersRepository.getUserByLoginOrEmail(req.body.loginOrEmail);
 
     if (!user) {
       throw new UnauthorizedException();

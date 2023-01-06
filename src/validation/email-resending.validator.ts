@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PgQueryUsersRepository } from "../modules/super-admin/infrastructure/pg-query-users.repository";
-import { PgEmailConfirmationRepository } from "../modules/super-admin/infrastructure/pg-email-confirmation.repository";
-import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
-import { request } from "express";
+import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
+import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg-email-confirmation.repository';
+import {
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { request } from 'express';
 
 @ValidatorConstraint({ name: 'EmailResendingValidator', async: true })
 @Injectable()
@@ -27,7 +31,7 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
       return false;
     }
 
-    request.user = user
+    request.user = user;
     return true;
   }
 

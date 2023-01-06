@@ -1,6 +1,6 @@
-import { SrvRecord } from "dns"
+import { SrvRecord } from 'dns';
 
 export class HashModel {
-	passwordSalt: string
-  passwordHash: string
+  passwordSalt: string;
+  passwordHash: string;
 }

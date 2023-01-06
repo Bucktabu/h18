@@ -4,8 +4,8 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { PgEmailConfirmationRepository } from "../modules/super-admin/infrastructure/pg-email-confirmation.repository";
-import {request} from "express";
+import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg-email-confirmation.repository';
+import { request } from 'express';
 
 @ValidatorConstraint({ name: 'ConfirmationCodeValidator', async: true })
 @Injectable()
@@ -16,9 +16,7 @@ export class ConfirmationCodeValidator implements ValidatorConstraintInterface {
 
   async validate(code: string) {
     const emailConfirmation =
-      await this.emailConfirmationRepository.getEmailConfirmationByCode(
-        code,
-      );
+      await this.emailConfirmationRepository.getEmailConfirmationByCode(code);
 
     if (!emailConfirmation) {
       return false;
@@ -32,7 +30,7 @@ export class ConfirmationCodeValidator implements ValidatorConstraintInterface {
       return false;
     }
 
-    request.emailConfirmation = emailConfirmation
+    request.emailConfirmation = emailConfirmation;
     return true;
   }
 

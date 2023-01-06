@@ -1,6 +1,5 @@
-import { UserViewModel } from '../modules/super-admin/api/dto/userView.model';
-import { ViewBanInfoModel } from "../modules/super-admin/api/dto/view-ban-info.model";
-
+import { ViewBanInfoModel } from '../modules/super-admin/api/dto/view-ban-info.model';
+import { UserViewModel } from '../modules/super-admin/api/dto/user.view.model';
 
 export class ContentPageModel {
   constructor(
@@ -8,12 +7,11 @@ export class ContentPageModel {
     public page: number,
     public pageSize: number,
     public totalCount: number,
-    public items:
-      //| BlogViewModel[]
-      //| BlogViewWithOwnerAndBanInfo[]
-      //| CommentWithAdditionalInfoModel[]
-      //| PostViewModel[]
-      | UserViewModel[]
+    public items: //| BlogViewModel[]
+    //| BlogViewWithOwnerAndBanInfo[]
+    //| CommentWithAdditionalInfoModel[]
+    //| PostViewModel[]
+    | UserViewModel[]
       //| CommentViewModel[]
       | ViewBanInfoModel[],
   ) {}

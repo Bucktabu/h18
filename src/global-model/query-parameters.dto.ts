@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { SortDirections, SortParametersModel } from './sort-parameters.model';
 import { BanStatusModel } from './ban-status.model';
@@ -11,12 +11,16 @@ export class QueryParametersDto {
   @IsEnum(SortParametersModel)
   @IsOptional()
   @Transform(({ value }) => {
-    if (!value) return
+    if (!value) return;
     switch (value) {
-      case 'youtubeUrl': return value = SortParametersModel.YoutubeUrl;
-      case 'blogId': return value = SortParametersModel.BlogId;
-      case 'createdAt': return value = SortParametersModel.CreatedAt;
-      default: return value;
+      case 'youtubeUrl':
+        return (value = SortParametersModel.YoutubeUrl);
+      case 'blogId':
+        return (value = SortParametersModel.BlogId);
+      case 'createdAt':
+        return (value = SortParametersModel.CreatedAt);
+      default:
+        return value;
     }
   })
   sortBy: string = SortParametersModel.CreatedAt;
@@ -24,10 +28,12 @@ export class QueryParametersDto {
   @IsEnum(SortDirections)
   @IsOptional()
   @Transform(({ value }) => {
-    if (!value) return
+    if (!value) return;
     switch (value) {
-      case 'asc': return value = SortDirections.Ascending;
-      default: return SortDirections.Distending;
+      case 'asc':
+        return (value = SortDirections.Ascending);
+      default:
+        return SortDirections.Distending;
     }
   })
   sortDirection: string = SortDirections.Distending;

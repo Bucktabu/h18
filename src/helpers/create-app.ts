@@ -1,11 +1,14 @@
-import { BadRequestException, INestApplication, ValidationPipe } from "@nestjs/common";
-import cookieParser from "cookie-parser";
-import { ErrorExceptionFilter } from "../exception-filters/error-exception.filter";
-import { HttpExceptionFilter } from "../exception-filters/exception.filter";
-import { useContainer } from "class-validator";
-import { AppModule } from "../app.module";
-import { NestExpressApplication } from "@nestjs/platform-express";
-
+import {
+  BadRequestException,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
+import cookieParser from 'cookie-parser';
+import { ErrorExceptionFilter } from '../exception-filters/error-exception.filter';
+import { HttpExceptionFilter } from '../exception-filters/exception.filter';
+import { useContainer } from 'class-validator';
+import { AppModule } from '../app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 export const createApp = (app: INestApplication): INestApplication => {
   app.enableCors();
@@ -35,5 +38,5 @@ export const createApp = (app: INestApplication): INestApplication => {
     }),
   );
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  return app
-}
+  return app;
+};

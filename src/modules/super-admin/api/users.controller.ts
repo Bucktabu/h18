@@ -14,11 +14,11 @@ import {
 import { AuthBasicGuard } from '../../../guards/auth.basic.guard';
 import { UsersService } from '../application/users.service';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
-import { UserDto } from './dto/userDto';
-import { UserViewModelWithBanInfo} from './dto/userView.model';
 import { BanUserDTO } from './dto/ban-user.dto';
 import { CreateUserBySaUseCase } from '../use-cases/create-user-by-sa.use-case';
-import {PgQueryUsersRepository} from "../infrastructure/pg-query-users.repository";
+import { PgQueryUsersRepository } from '../infrastructure/pg-query-users.repository';
+import { UserDto } from './dto/user.dto';
+import { UserViewModelWithBanInfo } from './dto/user.view.model';
 
 @UseGuards(AuthBasicGuard)
 @Controller('sa/users')
@@ -34,13 +34,12 @@ export class UsersController {
     @Query()
     query: QueryParametersDto,
   ) {
-
     return this.queryUsersRepository.getUsers(query);
   }
 
   @Post()
   async createUser(@Body() dto: UserDto): Promise<UserViewModelWithBanInfo> {
-    const user = await this.createUserUseCase.execute(dto)
+    const user = await this.createUserUseCase.execute(dto);
 
     return user;
   }
@@ -54,9 +53,9 @@ export class UsersController {
     const result = await this.usersService.updateBanStatus(userId, dto);
 
     if (!result) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
-    return
+    return;
   }
 
   @Delete(':id')

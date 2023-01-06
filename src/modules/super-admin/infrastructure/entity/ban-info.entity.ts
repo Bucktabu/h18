@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class BanInfoEntity {

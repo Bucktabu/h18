@@ -1,7 +1,9 @@
-import { UserDeviceModel } from "../modules/public/security/infrastructure/entity/userDevice.model";
-import { ViewSecurityDeviseModel } from "../modules/public/security/infrastructure/entity/viewSecurityDeviseModel";
+import { UserDeviceModel } from '../modules/public/security/infrastructure/entity/userDevice.model';
+import { ViewSecurityDeviseModel } from '../modules/public/security/api/dto/viewSecurityDeviseModel';
 
-export const toActiveSessionsViewModel = (device: UserDeviceModel): ViewSecurityDeviseModel => {
+export const toActiveSessionsViewModel = (
+  device: UserDeviceModel,
+): ViewSecurityDeviseModel => {
   return {
     deviceId: device.deviceId,
     title: device.deviceTitle,

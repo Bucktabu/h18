@@ -4,17 +4,19 @@ import {
   Get,
   Headers,
   HttpCode,
-  Ip, NotFoundException,
+  Ip,
+  NotFoundException,
   NotImplementedException,
   Post,
   Req,
   Res,
-  UseGuards, UsePipes
-} from "@nestjs/common";
+  UseGuards,
+  UsePipes,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from '../application/auth.service';
 import { SecurityService } from '../../security/application/security.service';
-import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { RegistrationConfirmationDTO } from './dto/registration-confirmation.dto';
 import { EmailManager } from '../email-transfer/email.manager';
 import { UsersService } from '../../../super-admin/application/users.service';
@@ -23,15 +25,15 @@ import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.m
 import { User } from '../../../../decorator/user.decorator';
 import { toAboutMeViewModel } from '../../../../data-mapper/to-about-me-view.model';
 import { CheckCredentialGuard } from '../../../../guards/check-credential.guard';
-import { UserDto } from '../../../super-admin/api/dto/userDto';
 import { RefreshTokenValidationGuard } from '../../../../guards/refresh-token-validation.guard';
-import {PgQueryUsersRepository} from "../../../super-admin/infrastructure/pg-query-users.repository";
-import {CreateUserUseCase} from "../../../super-admin/use-cases/create-user.use-case";
-import { PgEmailConfirmationRepository } from "../../../super-admin/infrastructure/pg-email-confirmation.repository";
-import { ResendingDto } from "./dto/resending.dto";
-import { AuthDto } from "./dto/auth.dto";
-import { EmailDto } from "./dto/email.dto";
-import { NewPasswordDto } from "./dto/new-password.dto";
+import { PgQueryUsersRepository } from '../../../super-admin/infrastructure/pg-query-users.repository';
+import { CreateUserUseCase } from '../../../super-admin/use-cases/create-user.use-case';
+import { PgEmailConfirmationRepository } from '../../../super-admin/infrastructure/pg-email-confirmation.repository';
+import { ResendingDto } from './dto/resending.dto';
+import { AuthDto } from './dto/auth.dto';
+import { EmailDto } from './dto/email.dto';
+import { NewPasswordDto } from './dto/new-password.dto';
+import { UserDto } from '../../../super-admin/api/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -59,17 +61,20 @@ export class AuthController {
     @Ip() ipAddress: string,
     @User() user: UserDBModel,
     @Res() res: Response,
-    @Headers('user-agent') title: string
+    @Headers('user-agent') title: string,
   ) {
-
-    const token = await this.securityService.createUserDevice(user.id, title, ipAddress);
+    const token = await this.securityService.createUserDevice(
+      user.id,
+      title,
+      ipAddress,
+    );
 
     return res
       .status(200)
       .cookie('refreshToken', token.refreshToken, {
         secure: true,
         httpOnly: true,
-        maxAge: 24*60*60*1000
+        maxAge: 24 * 60 * 60 * 1000,
       })
       .send({ accessToken: token.accessToken });
   }
@@ -77,7 +82,9 @@ export class AuthController {
   @Post('password-recovery')
   @HttpCode(204)
   async passwordRecovery(@Body() dto: EmailDto) {
-    const user = await this.queryUsersRepository.getUserByLoginOrEmail(dto.email);
+    const user = await this.queryUsersRepository.getUserByLoginOrEmail(
+      dto.email,
+    );
 
     if (!user) {
       const result = await this.authService.sendPasswordRecovery(
@@ -95,11 +102,8 @@ export class AuthController {
 
   @Post('new-password')
   @HttpCode(204)
-  async createNewPassword(
-    @Body() dto: NewPasswordDto,
-    @Req() req: Request
-  ) {
-    const userId = req.emailConfirmation.userId
+  async createNewPassword(@Body() dto: NewPasswordDto, @Req() req: Request) {
+    const userId = req.emailConfirmation.userId;
     const user = await this.queryUsersRepository.getUserById(userId);
 
     if (!user) {
@@ -107,8 +111,8 @@ export class AuthController {
     }
 
     const result = await this.userService.updateUserPassword(
-        userId,
-        dto.newPassword,
+      userId,
+      dto.newPassword,
     );
 
     if (!result) {
@@ -123,7 +127,7 @@ export class AuthController {
   @Post('registration')
   @HttpCode(204)
   async registration(@Body() dto: UserDto) {
-    await this.createUserUseCase.execute(dto)
+    await this.createUserUseCase.execute(dto);
 
     return;
   }
@@ -132,12 +136,9 @@ export class AuthController {
   // @UseGuards(ThrottlerGuard)
   @Post('registration-confirmation')
   @HttpCode(204)
-  async registrationConfirmation(
-    @Body() dto: RegistrationConfirmationDTO,
-  ) {
-    const result = await this.emailConfirmationRepository.updateConfirmationInfo(
-      dto.code,
-    );
+  async registrationConfirmation(@Body() dto: RegistrationConfirmationDTO) {
+    const result =
+      await this.emailConfirmationRepository.updateConfirmationInfo(dto.code);
 
     if (!result) {
       throw new NotImplementedException();
@@ -152,9 +153,8 @@ export class AuthController {
   @HttpCode(204)
   async registrationEmailResending(
     @Body() email: ResendingDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<void> {
-
     const newConfirmationCode = await this.authService.updateConfirmationCode(
       req.user.id,
     );

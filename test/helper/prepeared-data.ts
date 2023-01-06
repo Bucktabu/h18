@@ -30,13 +30,13 @@ export const preparedUser = {
 export const banUserDto = {
   valid: {
     isBanned: true,
-    banReason: "Length-20_stringstri"
+    banReason: 'Length-20_stringstri',
   },
   notValid: {
     isBanned: 'true',
-    banReason: "Length-19_stringstr"
-  }
-}
+    banReason: 'Length-19_stringstr',
+  },
+};
 
 export const preparedBlog = {
   valid: {

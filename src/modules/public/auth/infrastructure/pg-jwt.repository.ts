@@ -1,21 +1,19 @@
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 export class PgJwtRepository {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getToken(refreshToken: string): Promise<string | null> {
     const query = `
       SELECT token
         FROM public.token_black_list
        WHERE token = $1;
-    `
-    const result = await this.dataSource.query(query, [refreshToken])
+    `;
+    const result = await this.dataSource.query(query, [refreshToken]);
 
     if (!result.length) {
-      return null
+      return null;
     }
     return result[0].token;
   }
@@ -25,12 +23,12 @@ export class PgJwtRepository {
       INSERT INTO public.token_black_list
              (token)
       VALUES ($1);
-    `
-    const result = await this.dataSource.query(query, [refreshToken])
+    `;
+    const result = await this.dataSource.query(query, [refreshToken]);
 
     if (result[1] !== 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 }

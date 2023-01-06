@@ -1,4 +1,4 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class JwtEntity {

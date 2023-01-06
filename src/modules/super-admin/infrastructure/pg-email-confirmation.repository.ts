@@ -1,13 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { EmailConfirmationModel } from "./entity/emailConfirmation.model";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { EmailConfirmationModel } from './entity/emailConfirmation.model';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PgEmailConfirmationRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   // async getEmailConfirmationByCodeOrId(
   //   userId: string,
@@ -29,9 +28,9 @@ export class PgEmailConfirmationRepository {
       SELECT user_id as "userId", confirmation_code as "confirmationCode", expiration_date as "expirationDate", is_confirmed as "isConfirmed"
         FROM public.email_confirmation
        WHERE confirmation_code = '${code}';
-    `
-    const result = await this.dataSource.query(query)
-    return result[0]
+    `;
+    const result = await this.dataSource.query(query);
+    return result[0];
   }
 
   async checkConfirmation(userId: string): Promise<boolean | null> {
@@ -39,25 +38,27 @@ export class PgEmailConfirmationRepository {
       SELECT is_confirmed
         FROM public.email_confirmation
        WHERE user_id = $1;
-    `
-    const result = await this.dataSource.query(query, [ userId ])
+    `;
+    const result = await this.dataSource.query(query, [userId]);
 
     if (!result.length) {
-      return null
+      return null;
     }
-    return result[0].is_confirmed
+    return result[0].is_confirmed;
   }
 
-  async createEmailConfirmation(emailConfirmation: EmailConfirmationModel): Promise<EmailConfirmationModel | null> {
-    const filter = this.getCreateFilter(emailConfirmation)
+  async createEmailConfirmation(
+    emailConfirmation: EmailConfirmationModel,
+  ): Promise<EmailConfirmationModel | null> {
+    const filter = this.getCreateFilter(emailConfirmation);
     const query = `
       INSERT INTO public.email_confirmation 
              (user_id, confirmation_code, expiration_date, is_confirmed)
       VALUES (${filter})
-    `
-    await this.dataSource.query(query)
+    `;
+    await this.dataSource.query(query);
 
-    return emailConfirmation
+    return emailConfirmation;
   }
 
   async updateConfirmationInfo(confirmation_code: string): Promise<boolean> {
@@ -65,13 +66,13 @@ export class PgEmailConfirmationRepository {
       UPDATE public.email_confirmation
          SET is_confirmed = true
        WHERE confirmation_code = $1;
-    `
-    const result = await this.dataSource.query(query, [confirmation_code])
+    `;
+    const result = await this.dataSource.query(query, [confirmation_code]);
 
     if (result[1] !== 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async updateConfirmationCode(
@@ -79,46 +80,52 @@ export class PgEmailConfirmationRepository {
     confirmationCode: string,
     expirationDate?: Date,
   ): Promise<boolean> {
-    const filter = this.getUpdateConfirmationCodeFilter(confirmationCode, expirationDate)
+    const filter = this.getUpdateConfirmationCodeFilter(
+      confirmationCode,
+      expirationDate,
+    );
     const query = `
       UPDATE public.email_confirmation
          SET ${filter}
        WHERE user_id = '${userId}';
-    `
-    const result = await this.dataSource.query(query) //TODO here
+    `;
+    const result = await this.dataSource.query(query); //TODO here
 
     if (result[1] !== 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deleteEmailConfirmationById(userId: string): Promise<boolean> {
     const query = `
       DELETE FROM public.email_confirmation
        WHERE user_id = $1;
-    `
+    `;
 
-    const result = await this.dataSource.query(query, [userId])
+    const result = await this.dataSource.query(query, [userId]);
 
     if (result[1] !== 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   private getCreateFilter(emailConfirmation: EmailConfirmationModel): string {
-    let filter = `'${emailConfirmation.id}', null, null, '${emailConfirmation.isConfirmed}'`
+    let filter = `'${emailConfirmation.id}', null, null, '${emailConfirmation.isConfirmed}'`;
     if (emailConfirmation.confirmationCode !== null) {
-      return filter = `'${emailConfirmation.id}', '${emailConfirmation.confirmationCode}', '${emailConfirmation.expirationDate}', '${emailConfirmation.isConfirmed}'`
+      return (filter = `'${emailConfirmation.id}', '${emailConfirmation.confirmationCode}', '${emailConfirmation.expirationDate}', '${emailConfirmation.isConfirmed}'`);
     }
-    return filter
+    return filter;
   }
 
-  private getUpdateConfirmationCodeFilter(confirmationCode: string, expirationDate?: Date): string {
+  private getUpdateConfirmationCodeFilter(
+    confirmationCode: string,
+    expirationDate?: Date,
+  ): string {
     if (!expirationDate) {
-      return `confirmation_code = '${confirmationCode}'`
+      return `confirmation_code = '${confirmationCode}'`;
     }
-    return `confirmation_code = '${confirmationCode}', expiration_date = '${expirationDate}'`
+    return `confirmation_code = '${confirmationCode}', expiration_date = '${expirationDate}'`;
   }
 }

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '../../auth/application/jwt.service';
-import { ViewSecurityDeviseModel } from '../infrastructure/entity/viewSecurityDeviseModel';
+import { ViewSecurityDeviseModel } from '../api/dto/viewSecurityDeviseModel';
 import { UserDeviceModel } from '../infrastructure/entity/userDevice.model';
 import { toActiveSessionsViewModel } from '../../../../data-mapper/to-active-session-view.model';
-import { PgSecurityRepository } from "../infrastructure/pg-security.repository";
-import { PgQuerySecurityRepository } from "../infrastructure/pg-query-security.repository";
+import { PgSecurityRepository } from '../infrastructure/pg-security.repository';
+import { PgQuerySecurityRepository } from '../infrastructure/pg-query-security.repository';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -12,22 +12,20 @@ export class SecurityService {
   constructor(
     protected jwtService: JwtService,
     protected securityRepository: PgSecurityRepository,
-    protected querySecurityRepository: PgQuerySecurityRepository
+    protected querySecurityRepository: PgQuerySecurityRepository,
   ) {}
 
-  async getAllActiveSessions(userId: string): Promise<ViewSecurityDeviseModel[] | null> {
-
-    const activeSessions = await this.querySecurityRepository.getAllActiveSessions(
-      userId,
-    );
+  async getAllActiveSessions(
+    userId: string,
+  ): Promise<ViewSecurityDeviseModel[] | null> {
+    const activeSessions =
+      await this.querySecurityRepository.getAllActiveSessions(userId);
 
     if (!activeSessions) {
       return null;
     }
 
-    return activeSessions.map((a) =>
-      toActiveSessionsViewModel(a)
-    );
+    return activeSessions.map((a) => toActiveSessionsViewModel(a));
   }
 
   async getDeviceById(deviceId: string): Promise<UserDeviceModel | null> {
@@ -44,7 +42,7 @@ export class SecurityService {
     userId: string,
     title: string,
     ipAddress: string,
-  ): Promise<{refreshToken: string, accessToken: string}> {
+  ): Promise<{ refreshToken: string; accessToken: string }> {
     const deviceId = uuidv4();
     const token = await this.jwtService.createToken(userId, deviceId);
     const tokenPayload = await this.jwtService.getTokenPayload(
@@ -54,7 +52,7 @@ export class SecurityService {
     const userDevice = new UserDeviceModel(
       tokenPayload.userId,
       tokenPayload.deviceId,
-      title ,
+      title,
       ipAddress,
       tokenPayload.iat,
       tokenPayload.exp,
