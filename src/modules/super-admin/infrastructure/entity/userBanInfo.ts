@@ -6,7 +6,7 @@ import { Users } from "./users";
 export class UserBanInfo {
   @PrimaryColumn('uuid') user_id: string;
 
-  @Column({ default: false }) is_banned: boolean;
+  @Column({ default: false }) ban_status: boolean;
 
   @Column({ default: null }) ban_date: string | null;
 

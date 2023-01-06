@@ -5,11 +5,11 @@ import { Users } from "./users";
 export class EmailConfirmation {
   @PrimaryColumn('uuid') user_id: string;
 
-  @Column() confirmation_code: string;
+  @Column({ default: null}) confirmation_code: string | null;
 
-  @Column() expiration_date: string;
+  @Column({ default: null}) expiration_date: string | null;
 
-  @Column({ default: false }) is_confirmation: boolean;
+  @Column({ default: false }) is_confirmed: boolean;
 
   @OneToOne(() => Users, u => u.emailConfirmation)
   @JoinColumn()

@@ -17,7 +17,7 @@ export class Users {
 
   @Column() password_salt: string;
 
-  @Column() password_sash: string;
+  @Column() password_hash: string;
 
   @Column() created_at: string;
 
