@@ -1,12 +1,17 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
+import { User } from "./user";
 
 @Entity()
-export class EmailConfirmationEntity {
-  @PrimaryColumn() userId: number;
+export class EmailConfirmation {
+  @PrimaryColumn('uuid') userId: string;
 
   @Column() confirmationCode: string;
 
   @Column() expirationDate: string;
 
-  @Column() isConfirmation: boolean;
+  @Column({ default: false }) isConfirmation: boolean;
+
+  @OneToOne(() => User, u => u.emailConfirmation)
+  @JoinColumn()
+  user: User
 }

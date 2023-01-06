@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { settings } from '../../../../settings';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PgJwtRepository } from '../infrastructure/pg-jwt.repository';
-import { JwtEntity } from '../infrastructure/entity/jwt.entity';
+import { Jwt } from '../infrastructure/entity/jwt';
 
 @Injectable()
 export class JwtService {

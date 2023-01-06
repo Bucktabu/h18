@@ -20,9 +20,9 @@ import { UsersService } from './modules/super-admin/application/users.service';
 import { PgBanInfoRepository } from './modules/super-admin/infrastructure/pg-ban-info.repository';
 import { PgEmailConfirmationRepository } from './modules/super-admin/infrastructure/pg-email-confirmation.repository';
 import { PgUsersRepository } from './modules/super-admin/infrastructure/pg-users.repository';
-import { BanInfoEntity } from './modules/super-admin/infrastructure/entity/ban-info.entity';
-import { EmailConfirmationEntity } from './modules/super-admin/infrastructure/entity/email-confirmation.entity';
-import { UserEntity } from './modules/super-admin/infrastructure/entity/user.entity';
+import { BanInfo } from './modules/super-admin/infrastructure/entity/ban.info';
+import { EmailConfirmation } from './modules/super-admin/infrastructure/entity/email-confirmation.entity';
+import { User } from './modules/super-admin/infrastructure/entity/user';
 import { PgSecurityRepository } from './modules/public/security/infrastructure/pg-security.repository';
 import { PgQuerySecurityRepository } from './modules/public/security/infrastructure/pg-query-security.repository';
 import { CreateUserUseCase } from './modules/super-admin/use-cases/create-user.use-case';
@@ -30,6 +30,8 @@ import { PgQueryUsersRepository } from './modules/super-admin/infrastructure/pg-
 import { EmailResendingValidator } from './validation/email-resending.validator';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { settings } from './settings';
+import { Security } from "./modules/public/security/infrastructure/entity/security";
+import { Jwt } from "./modules/public/auth/infrastructure/entity/jwt";
 
 const controllers = [
   AuthController,
@@ -38,7 +40,13 @@ const controllers = [
   UsersController,
 ];
 
-const entity = [BanInfoEntity, EmailConfirmationEntity, UserEntity];
+ const entity = [
+   BanInfo,
+   EmailConfirmation,
+   Jwt,
+   Security,
+   User
+ ];
 
 const repositories = [
   PgBanInfoRepository,
@@ -81,9 +89,9 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       // username: settings.postgres.USERNAME,
       // password: settings.postgres.PASSWORD,
       // database: settings.postgres.DATABASE_NAME,
-      // autoLoadEntities: true,
-      // entities: [...entity],
-      // synchronize: true,
+      entities: [...entity],
+      autoLoadEntities: true,
+      synchronize: true,
     }),
     // ThrottlerModule.forRoot({
     //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),

@@ -3,7 +3,7 @@ import add from 'date-fns/add';
 import { Inject, Injectable } from '@nestjs/common';
 import { EmailManager } from '../email-transfer/email.manager';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EmailConfirmationEntity } from '../../../super-admin/infrastructure/entity/email-confirmation.entity';
+import { EmailConfirmation } from '../../../super-admin/infrastructure/entity/email-confirmation.entity';
 import { PgEmailConfirmationRepository } from '../../../super-admin/infrastructure/pg-email-confirmation.repository';
 
 @Injectable()
