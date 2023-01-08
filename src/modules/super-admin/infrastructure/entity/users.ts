@@ -1,11 +1,12 @@
 import {
   Column,
-  Entity, OneToOne,
+  Entity, ManyToOne, OneToMany, OneToOne,
   PrimaryColumn
 } from "typeorm";
 import { UserBanInfo } from "./userBanInfo";
 import { Security } from "../../../public/security/infrastructure/entity/security";
 import { EmailConfirmation } from "./email-confirmation.entity";
+import { Blogs } from "../../../public/blogs/infrastructure/entity/blogs.entity";
 
 @Entity()
 export class Users {
@@ -29,4 +30,10 @@ export class Users {
 
   @OneToOne(() => EmailConfirmation, ec => ec.user)
   emailConfirmation: EmailConfirmation
+
+  @OneToMany(() => Blogs, b => b.blogger)
+  blogs: Blogs
+
+  // @ManyToOne(() => Blogs, b => b.banned_users)
+  // bannedForBlog: Blogs
 }

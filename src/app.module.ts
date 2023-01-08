@@ -32,6 +32,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { settings } from './settings';
 import { Security } from "./modules/public/security/infrastructure/entity/security";
 import { TokenBlackList } from "./modules/public/auth/infrastructure/entity/tokenBlackList";
+import { Blogs } from "./modules/public/blogs/infrastructure/entity/blogs.entity";
 
 const controllers = [
   AuthController,
@@ -42,6 +43,7 @@ const controllers = [
 
  const entity = [
    UserBanInfo,
+   Blogs,
    EmailConfirmation,
    TokenBlackList,
    Security,

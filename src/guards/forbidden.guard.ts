@@ -1,18 +1,17 @@
-// import {
-//   CanActivate,
-//   ExecutionContext,
-//   ForbiddenException,
-//   Inject,
-//   Injectable,
-//   NotFoundException,
-// } from '@nestjs/common';
-// import { IBlogsRepository } from '../modules/public/blogs/infrastructure/blogs-repository.interface';
-//
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+
 // @Injectable()
 // export class ForbiddenGuard implements CanActivate {
 //   constructor(
 //     @Inject(IBlogsRepository)
-//     protected blogsRepository: IBlogsRepository,
+//     protected blogsRepository: PgQueryBlogsRepositop,
 //   ) {}
 //
 //   async canActivate(context: ExecutionContext): Promise<boolean> {

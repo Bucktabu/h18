@@ -3,8 +3,6 @@ import { Users } from "../../../../super-admin/infrastructure/entity/users";
 
 @Entity()
 export class Security {
-  @PrimaryColumn('uuid') user_id: string;
-
   @PrimaryColumn('uuid') device_id: string;
 
   @Column() device_title: string;
@@ -16,6 +14,6 @@ export class Security {
   @Column() exp: string;
 
   @OneToOne(() => Users, u => u.security)
-  @JoinColumn()
   user: Users
+  @PrimaryColumn() user_id: string;
 }

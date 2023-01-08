@@ -9,7 +9,7 @@ export class PgBanInfoRepository {
 
   async getBanInfo(userId: string): Promise<BanInfoModel | null> {
     const query = `
-      SELECT user_id as "userId", ban_status as "isBanned", ban_date as "banDate", ban_reason as "banReason", blog_id as "blogId"
+      SELECT user_id as "userId", ban_status as "isBanned", ban_date as "banDate", ban_reason as "banReason"
         FROM public.user_ban_info
        WHERE user_id = $1;
     `;
@@ -23,7 +23,7 @@ export class PgBanInfoRepository {
 
     await this.dataSource.query(`
         INSERT INTO public.user_ban_info
-               (user_id, ban_status, ban_reason, ban_date, blog_id)
+               (user_id, ban_status, ban_reason, ban_date)
         VALUES (${filter})
     `);
 
@@ -65,11 +65,10 @@ export class PgBanInfoRepository {
   }
 
   private getCreateFilter(banInfo: BanInfoModel): string {
-    let filter = `'${banInfo.parentId}', '${banInfo.isBanned}', null, null, null`;
     if (banInfo.banReason !== null) {
-      return (filter = `'${banInfo.parentId}', '${banInfo.isBanned}', '${banInfo.banReason}', '${banInfo.banDate}', '${banInfo.blogId}'`);
+      return `'${banInfo.parentId}', '${banInfo.isBanned}', '${banInfo.banReason}', '${banInfo.banDate}'`;
     }
-    return filter;
+    return `'${banInfo.parentId}', '${banInfo.isBanned}', null, null, null`;
   }
 
   private getUpdateFilter(
