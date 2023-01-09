@@ -10,6 +10,7 @@ export class EmailConfirmation {
   @Column({ default: false }) is_confirmed: boolean;
 
   @OneToOne(() => Users, u => u.emailConfirmation)
+  @JoinColumn()
   user: Users
-  @PrimaryColumn() user_id: string;
+  @PrimaryColumn() userId: string;
 }

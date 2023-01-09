@@ -14,6 +14,7 @@ export class Security {
   @Column() exp: string;
 
   @OneToOne(() => Users, u => u.security)
+  @JoinColumn()
   user: Users
-  @PrimaryColumn() user_id: string;
+  @PrimaryColumn() userId: string;
 }

@@ -11,6 +11,7 @@ export class UserBanInfo {
   @Column({ default: null }) ban_reason: string | null;
 
   @OneToOne(() => Users, u => u.banInfo)
-  user: Users
-  @PrimaryColumn() user_id: string;
+  @JoinColumn()
+  user: Users;
+  @PrimaryColumn() userId: string;
 }

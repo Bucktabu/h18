@@ -18,8 +18,8 @@ export class Blogs {
   // @OneToMany(() => Users, u => u.bannedForBlog)
   // @Column() banned_users: Users;
 
-  @Column() blogger_id: string;
-
   @ManyToOne(() => Users, u => u.blogs)
-  blogger: Users
+  @JoinColumn()
+  blogger: Users;
+  @PrimaryColumn() bloggerId: string;
 }
