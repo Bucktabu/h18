@@ -1,6 +1,6 @@
 import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn} from "typeorm";
 import { Users } from "../../../../super-admin/infrastructure/entity/users";
-import {BannedUsersForBlogEntity} from "./banned-users-for-blog.entity";
+import {BannedUsersForBlog} from "./banned-users-for-blog.entity";
 
 @Entity()
 export class Blogs {
@@ -16,11 +16,11 @@ export class Blogs {
 
   @Column() is_banned: string;
 
-  @OneToOne(() => Users, u => u.blogs)
+  @ManyToOne(() => Users, u => u.blogs)
   @JoinColumn()
   blogger: Users;
   @PrimaryColumn() bloggerId: string;
 
-  @OneToMany(() => BannedUsersForBlogEntity, bu => bu.blog)
-  bannedUsers: BannedUsersForBlogEntity[];
+  // @OneToMany(() => BannedUsersForBlog, bu => bu.blog)
+  // bannedUsers: BannedUsersForBlog[];
 }

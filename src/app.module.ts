@@ -33,7 +33,9 @@ import { settings } from './settings';
 import { Security } from "./modules/public/security/infrastructure/entity/security";
 import { TokenBlackList } from "./modules/public/auth/infrastructure/entity/tokenBlackList";
 import { Blogs } from "./modules/public/blogs/infrastructure/entity/blogs.entity";
-import {BannedUsersForBlogEntity} from "./modules/public/blogs/infrastructure/entity/banned-users-for-blog.entity";
+import {
+  BannedUsersForBlog,
+} from "./modules/public/blogs/infrastructure/entity/banned-users-for-blog.entity";
 
 const controllers = [
   AuthController,
@@ -45,7 +47,7 @@ const controllers = [
  const entity = [
    UserBanInfo,
    Blogs,
-   BannedUsersForBlogEntity,
+   BannedUsersForBlog,
    EmailConfirmation,
    TokenBlackList,
    Security,
