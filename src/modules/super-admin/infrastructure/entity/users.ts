@@ -7,6 +7,7 @@ import { UserBanInfo } from "./userBanInfo";
 import { Security } from "../../../public/security/infrastructure/entity/security";
 import { EmailConfirmation } from "./email-confirmation.entity";
 import { Blogs } from "../../../public/blogs/infrastructure/entity/blogs.entity";
+import {BannedUsersForBlogEntity} from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
 
 @Entity()
 export class Users {
@@ -32,8 +33,8 @@ export class Users {
   emailConfirmation: EmailConfirmation
 
   @OneToMany(() => Blogs, b => b.blogger)
-  blogs: Blogs
+  blogs: Blogs[]
 
-  // @ManyToOne(() => Blogs, b => b.banned_users)
-  // bannedForBlog: Blogs
+  @OneToMany(() => BannedUsersForBlogEntity, bu => bu.user)
+  bannedForBlog: BannedUsersForBlogEntity[]
 }
