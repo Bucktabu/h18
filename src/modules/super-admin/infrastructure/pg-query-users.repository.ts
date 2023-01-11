@@ -11,6 +11,7 @@ import { BanStatusModel } from '../../../global-model/ban-status.model';
 import { toUserViewModel } from '../../../data-mapper/to-create-user-view.model';
 import { ContentPageModel } from '../../../global-model/contentPage.model';
 import { SortParametersModel } from '../../../global-model/sort-parameters.model';
+import {toBannedUsersModel} from "../../../data-mapper/to-banned-users.model";
 
 @Injectable()
 export class PgQueryUsersRepository {
@@ -41,10 +42,48 @@ export class PgQueryUsersRepository {
     return result[0];
   }
 
+  async getBannedUsers(blogId: string, queryDto:QueryParametersDto): Promise<ContentPageModel> {
+    const filter = this.userFilter(queryDto);
+
+    const usersQuery = `
+      SELECT b.ban_date as "banDate", b.ban_reason as "banReason",
+             u.id, u.login
+        FROM public.banned_users_for_blog b
+        LEFT JOIN public.users u  
+          ON b.userId = u.id
+       WHERE ${filter}
+       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+       LIMIT $1 OFFSET ${giveSkipNumber(
+         queryDto.pageNumber,
+         queryDto.pageSize,
+       )};
+    `
+    const bannedUsersDB = await this.dataSource.query(usersQuery, [
+      queryDto.pageSize,
+    ]);
+
+    const bannedUsers = bannedUsersDB.map(u => toBannedUsersModel(u))
+
+    const totalCountQuery = `
+      SELECT COUNT(b.blogId)
+        FROM public.banned_users_for_blog b
+        LEFT JOIN public.users u  
+          ON b.userId = u.id
+       WHERE ${filter}
+    `;
+    const totalCount = await this.dataSource.query(totalCountQuery);
+
+    return paginationContentPage(
+        queryDto.pageNumber,
+        queryDto.pageSize,
+        bannedUsers,
+        Number(totalCount[0].count),
+    );
+  }
+
   async getUsers(queryDto: QueryParametersDto): Promise<ContentPageModel> {
     const filter = this.getFilter(queryDto);
-    //const sortFilter = this.sortFilter(queryDto)
-    console.log(queryDto.sortBy);
+
     const usersQuery = `
       SELECT u.id, u.login, u.email, u.created_at as "createdAt",
              b.ban_status as "isBanned", b.ban_date as "banDate", b.ban_reason as "banReason"
@@ -58,17 +97,6 @@ export class PgQueryUsersRepository {
          queryDto.pageSize,
        )};
     `;
-    console.log(usersQuery);
-    // const usersQuery = `
-    //   SELECT u.id, u.login, u.email, u.created_at as "createdAt",
-    //          b.ban_status as "isBanned", b.ban_date as "banDate", b.ban_reason as "banReason"
-    //     FROM public.users u
-    //     LEFT JOIN public.user_ban_info b
-    //       ON u.id = b.user_id
-    //    WHERE ${filter}
-    //    ORDER BY ${sortFilter} ${queryDto.sortDirection}
-    //    LIMIT $1 OFFSET ${giveSkipNumber(queryDto.pageNumber, queryDto.pageSize)};
-    // `
 
     const usersDB = await this.dataSource.query(usersQuery, [
       queryDto.pageSize,

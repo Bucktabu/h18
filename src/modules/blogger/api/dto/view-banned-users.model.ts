@@ -1,9 +1,9 @@
-export class ViewBanInfoModel {
+export class ViewBannedUser {
   id: string;
   login: string;
   banInfo: {
     isBanned: boolean;
-    banDate: Date;
+    banDate: string;
     banReason: string;
   };
 }

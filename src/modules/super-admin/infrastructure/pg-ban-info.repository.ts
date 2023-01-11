@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BanInfoModel } from './entity/banInfo.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import {BanUserDto} from "../../blogger/api/dto/ban-user.dto";
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -18,6 +19,20 @@ export class PgBanInfoRepository {
     return result[0];
   }
 
+  async isBanned(userId, blogId): Promise<boolean> {
+    const query = `
+      SELECT "blogId"
+        FROM public.banned_users_for_blog
+       WHERE "userId" = $1 AND "blogId" = $2
+    `
+    const result = await this.dataSource.query(query, [userId, blogId])
+
+    if (!result.length) {
+      return false
+    }
+    return true
+  }
+
   async createBanInfo(banInfo: BanInfoModel): Promise<BanInfoModel> {
     const filter = this.getCreateFilter(banInfo);
 
@@ -28,6 +43,21 @@ export class PgBanInfoRepository {
     `);
 
     return banInfo;
+  }
+
+  async createBannedUserForBlog(userId: string, blogId: string, banReason: string, banDate: string): Promise<boolean> {
+    const query = `
+      INSERT INTO public.banned_users_for_blog
+             ("blogId", "userId", ban_reason, ban_date)
+      VALUES ($1, $2, $3, $4)   
+              RETURNING ("blogId")
+    `
+    const result = await this.dataSource.query(query, [blogId, userId, banReason, banDate])
+
+    if(!result.length) {
+      return false
+    }
+    return true
   }
 
   async saUpdateBanStatus(
@@ -57,6 +87,21 @@ export class PgBanInfoRepository {
     `;
 
     const result = await this.dataSource.query(query, [userId]);
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
+
+  async deleteBannedUserForBlog(userId: string, blogId: string): Promise<boolean> {
+    const query = `
+      DELETE 
+        FROM public.banned_users_for_blog
+       WHERE "userId" = $1 AND "blogId" = $2;
+    `;
+
+    const result = await this.dataSource.query(query, [userId, blogId]);
 
     if (result[1] !== 1) {
       return false;

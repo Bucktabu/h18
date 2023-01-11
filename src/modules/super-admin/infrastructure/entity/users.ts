@@ -10,6 +10,8 @@ import { Blogs } from "../../../public/blogs/infrastructure/entity/blogs.entity"
 import {
   BannedUsersForBlog,
 } from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
+import {Comments} from "../../../public/comments/infrastructure/entity/comments.entity";
+import {CommentReactions} from "../../../public/likes/infrastructure/entity/comment-reactions.entity";
 
 @Entity()
 export class Users {
@@ -39,4 +41,10 @@ export class Users {
 
   @OneToMany(() => BannedUsersForBlog, bu => bu.user)
   bannedForBlog: BannedUsersForBlog[]
+
+  @OneToMany(() => Comments, c => c.user)
+  comments: Comments[]
+
+  @OneToMany(() => CommentReactions, r => r.user)
+  reactions: CommentReactions[]
 }
