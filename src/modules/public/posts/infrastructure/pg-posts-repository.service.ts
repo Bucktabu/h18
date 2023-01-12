@@ -45,18 +45,17 @@ export class PgPostsRepository {
   }
 
   async updatePost(postId: string, dto: PostDto): Promise<boolean> {
-    const result = await this.postsRepository.updateOne(
-      { id: postId },
-      {
-        $set: {
-          title: dto.title,
-          shortDescription: dto.shortDescription,
-          content: dto.content,
-        },
-      },
-    );
+    const query = `
+      UPDATE public.posts
+         SET title = $1, shortDescription = $2, content = $3
+       WHERE id = $4  
+    `
+    const result = await this.dataSource.query(query, [dto.title, dto.shortDescription, dto.content, postId])
 
-    return result.matchedCount === 1;
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 
   async updatePostsBanStatus(
@@ -72,8 +71,15 @@ export class PgPostsRepository {
   }
 
   async deletePost(postId: string): Promise<boolean> {
-    const result = await this.postsRepository.deleteOne({ id: postId });
+    const query = `
+      DELETE FROM public.posts
+       WHERE id = $1;
+    `;
+    const result = await this.dataSource.query(query, [postId]);
 
-    return result.deletedCount === 1;
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 }

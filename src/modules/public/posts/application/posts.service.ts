@@ -46,4 +46,12 @@ export class PostsService {
 
     return await this.likesRepository.updatePostReaction(userId, postId, likeStatus, addedAt)
   }
+
+  async updatePost(postId: string, dto: PostDto): Promise<boolean> {
+    return await this.postsRepository.updatePost(postId, dto);
+  }
+
+  async deletePost(postId: string): Promise<boolean> {
+    return await this.postsRepository.deletePost(postId);
+  }
 }

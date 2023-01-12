@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { toBlogViewModel } from '../../../../data-mapper/to-blog-view.model';
 import { BlogViewModel } from '../api/dto/blogView.model';
-import {PgQueryBlogsRepository} from "../infrastructure/pg-query-blogs.repository";
 import {BlogDto} from "../../../blogger/api/dto/blog.dto";
 import {BlogDBModel} from "../infrastructure/entity/blog-db.model";
 import { v4 as uuidv4 } from 'uuid';
@@ -27,12 +25,14 @@ export class BlogsService {
         userId
     );
 
-    const createdBlog = await this.blogsRepository.createBlog(newBlog);
+    return await this.blogsRepository.createBlog(newBlog);
+  }
 
-    if (!createdBlog) {
-      return null;
-    }
+  async updateBlog(blogId: string, dto: BlogDto): Promise<boolean> {
+    return await this.blogsRepository.updateBlog(blogId, dto);
+  }
 
-    return toBlogViewModel(createdBlog);
+  async deleteBlog(blogId: string): Promise<boolean> {
+    return await this.blogsRepository.deleteBlog(blogId);
   }
 }

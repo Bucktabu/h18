@@ -76,10 +76,10 @@ export class BloggerBlogsController {
     @Put(':blogId')
     @HttpCode(204)
     async updateBlog(
-        @Body() inputModel: BlogDto,
+        @Body() dto: BlogDto,
         @Param('blogId') blogId: string,
     ) {
-        const result = await this.blogsService.updateBlog(blogId, inputModel);
+        const result = await this.blogsService.updateBlog(blogId, dto);
 
         if (!result) {
             throw new NotFoundException();
@@ -106,7 +106,7 @@ export class BloggerBlogsController {
     @HttpCode(204)
     async deleteBlog(@Param('blogId') blogId: string) {
         console.log(blogId);
-        const result = await this.bloggerBlogsService.deleteBlog(blogId);
+        const result = await this.blogsService.deleteBlog(blogId);
 
         if (!result) {
             throw new NotFoundException();

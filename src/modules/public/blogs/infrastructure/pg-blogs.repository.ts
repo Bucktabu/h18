@@ -20,7 +20,7 @@ export class PgBlogsRepository {
       INSERT INTO public.blogs
              (id, title, description, website_url, created_at, is_banned, "bloggerId")
       VAlUES ($1, $2, $3, $4, $5, $6, $7)  
-             RETURNING (id, title, description, website_url, created_at, is_banned, "bloggerId")
+             RETURNING (id, title, description, website_url, created_at)
     `
     const result = await this.dataSource.query(query, [
       newBlog.id,
@@ -32,9 +32,18 @@ export class PgBlogsRepository {
       newBlog.userId
     ]);
 
-    const blogArr = result[0].row.slice(1, -1).split(',');
-
-    //TODO here
+    try {
+      const blogArr = result[0].row.slice(1, -1).split(',');
+      return {
+        id: blogArr[0],
+        name: blogArr[1],
+        description: blogArr[2],
+        websiteUrl: blogArr[3],
+        createdAt: blogArr[4],
+      }
+    } catch (e) {
+      return null
+    }
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {
@@ -46,19 +55,18 @@ export class PgBlogsRepository {
     return result.matchedCount === 1;
   }
 
-  async updateBlog(id: string, inputModel: BlogDto): Promise<boolean> {
-    const result = await this.blogsRepository.updateOne(
-      { id },
-      {
-        $set: {
-          name: inputModel.name,
-          description: inputModel.description,
-          websiteUrl: inputModel.websiteUrl,
-        },
-      },
-    );
+  async updateBlog(id: string, dto: BlogDto): Promise<boolean> {
+    const query = `
+      UPDATE public.blogs
+         SET title = $1, description = $2, website_url = $3
+       WHERE id = $4
+    `
+    const result = await this.dataSource.query(query, [dto.name, dto.description, dto.websiteUrl, id])
 
-    return result.matchedCount === 1;
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 
   async updateBanStatus(id: string, isBanned: boolean): Promise<boolean> {
@@ -71,9 +79,16 @@ export class PgBlogsRepository {
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {
-    const result = await this.blogsRepository.deleteOne({ id: blogId });
+    const query = `
+      DELETE FROM public.blogs
+       WHERE id = $1;
+    `;
+    const result = await this.dataSource.query(query, [blogId]);
 
-    return result.deletedCount === 1;
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 
   private userIdFilter(userId: string | null) {
