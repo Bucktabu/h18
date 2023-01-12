@@ -2,9 +2,10 @@ import {Injectable} from "@nestjs/common";
 import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
 import {QueryParametersDto} from "../../../../global-model/query-parameters.dto";
-import {Blogs} from "./entity/blogs.entity";
 import {giveSkipNumber, paginationContentPage} from "../../../../helper.functions";
 import {ContentPageModel} from "../../../../global-model/contentPage.model";
+import { dbBlogWithAdditionalInfo} from "./entity/blog-db.model";
+import {toBlogWithAdditionalInfoModel} from "../../../../data-mapper/to-blog-with-additional-info.model";
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -48,7 +49,7 @@ export class PgQueryBlogsRepository {
             SELECT b.id, b.title AS name, b.description, b.website_url AS "websiteUrl", b.created_at AS "createdAt"
                    u.id AS "userId", u.login AS "userLogin",
                    (SELECT ban_status AS "isBanned" FROM public.user_ban_info WHERE "userId" = u.id),
-                   (SELECT ban_date AS "banDate" FROM public.user_ban_info WHERE "userId" = u.id)
+                   (SELECT ban_date AS "banDate" FROM public.user_ban_info WHERE "userId" = u.id) 
               FROM public.blogs
               LEFT JOIN public.users u
                 ON b."bloggerId" = u.id
@@ -58,10 +59,26 @@ export class PgQueryBlogsRepository {
                 queryDto.pageNumber,
                 queryDto.pageSize,
              )};
-        `
-        const blogsDB = await this.dataSource.query(blogsQuery, [queryDto.pageSize])
-// TODO HERE
-        const blogs = blogsDB.map(b => ) // BlogViewWithOwnerAndBanInfo
+        `// TODO if i don't create a column in ban_info table
+        const blogsDB: dbBlogWithAdditionalInfo[] = await this.dataSource.query(blogsQuery, [queryDto.pageSize])
+
+        const blogs = blogsDB.map(b => toBlogWithAdditionalInfoModel(b))
+
+        const totalCountQuery = `
+          SELECT COUNT(id)
+            FROM public.blogs
+            LEFT JOIN public.users u
+              ON b."bloggerId" = u.id
+           WHERE ${filter}
+        `;
+        const totalCount = await this.dataSource.query(totalCountQuery);
+
+        return paginationContentPage(
+            queryDto.pageNumber,
+            queryDto.pageSize,
+            blogs,
+            Number(totalCount[0].count),
+        );
     }
 
     async getBlogById(blogId: string) {

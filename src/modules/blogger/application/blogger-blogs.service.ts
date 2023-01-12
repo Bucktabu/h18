@@ -10,20 +10,9 @@ import {PgBlogsRepository} from "../../public/blogs/infrastructure/pg-blogs.repo
 export class BloggerBlogService {
     constructor(
         protected banInfoRepository: PgBanInfoRepository,
-        protected blogsRepository: PgBlogsRepository,
-        //protected userRepository: PgUsersRepository,
         protected queryUserRepository: PgQueryUsersRepository
     ) {
     }
-
-    async createBlog(userId: string, dto: BlogDto) {
-
-    }
-
-    async updateBlog(blogId: string, inputModel: BlogDto): Promise<boolean> {
-        return await this.blogsRepository.updateBlog(blogId, inputModel);
-    }
-
     async updateUserBanStatus(
         userId: string,
         dto: BanUserDto,
@@ -34,7 +23,7 @@ export class BloggerBlogService {
             return null;
         }
 
-        const isBanned = await this.banInfoRepository.isBanned(
+        const isBanned = await this.banInfoRepository.youBanned(
             userId,
             dto.blogId
         );
@@ -48,9 +37,5 @@ export class BloggerBlogService {
         }
         await this.banInfoRepository.deleteBannedUserForBlog(userId, dto.blogId)
         return true
-    }
-
-    async deleteBlog(blogId: string): Promise<boolean> {
-        return await this.blogsRepository.deleteBlog(blogId);
     }
 }

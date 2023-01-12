@@ -19,7 +19,7 @@ export class PgBanInfoRepository {
     return result[0];
   }
 
-  async isBanned(userId, blogId): Promise<boolean> {
+  async youBanned(userId, blogId): Promise<boolean> {
     const query = `
       SELECT "blogId"
         FROM public.banned_users_for_blog

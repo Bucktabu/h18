@@ -17,20 +17,21 @@ import {QueryParametersDto} from "../../../global-model/query-parameters.dto";
 import {User} from "../../../decorator/user.decorator";
 import {UserDBModel} from "../../super-admin/infrastructure/entity/userDB.model";
 import {BlogDto} from "./dto/blog.dto";
-//import {BlogViewModel} from "./dto/blogView.model";
 import {PgQueryBlogsRepository} from "../../public/blogs/infrastructure/pg-query-blogs.repository";
-import {BloggerPostsService} from "../application/blogger-posts.service";
 import {ForbiddenGuard} from "../../../guards/forbidden.guard";
 import {PostDto} from "./dto/post.dto";
 import {CommentsRepository} from "../../public/comments/infrastructure/comments.repository";
 import {ContentPageModel} from "../../../global-model/contentPage.model";
+import {BlogViewModel} from "../../public/blogs/api/dto/blogView.model";
+import {PostsService} from "../../public/posts/application/posts.service";
+import {BlogsService} from "../../public/blogs/application/blogs.service";
 
 @UseGuards(AuthBearerGuard)
 @Controller('blogger/blogs')
 export class BloggerBlogsController {
     constructor(
-        protected blogsService: BloggerBlogService,
-        protected postsService: BloggerPostsService,
+        protected blogsService: BlogsService,
+        protected postsService: PostsService,
         protected queryBlogsRepository: PgQueryBlogsRepository,
         protected queryCommentsRepository: CommentsRepository
     ) {}
@@ -47,17 +48,17 @@ export class BloggerBlogsController {
 
     @Post()
     @HttpCode(201)
-    createBlog(
+    async createBlog(
         @Body() dto: BlogDto,
         @User() user: UserDBModel,
-    )/*: Promise<BlogViewModel>*/ {
-        const createdBlog = this.blogsService.createBlog(user.id, dto);
+    ): Promise<BlogViewModel> {
+        const createdBlog = await this.blogsService.createBlog(user.id, dto);
 
         if (!createdBlog) {
             throw new Error('Blog was not created');
         }
 
-        //return createdBlog;
+        return createdBlog;
     }
 
     @UseGuards(ForbiddenGuard)
@@ -105,7 +106,7 @@ export class BloggerBlogsController {
     @HttpCode(204)
     async deleteBlog(@Param('blogId') blogId: string) {
         console.log(blogId);
-        const result = await this.blogsService.deleteBlog(blogId);
+        const result = await this.bloggerBlogsService.deleteBlog(blogId);
 
         if (!result) {
             throw new NotFoundException();

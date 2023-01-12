@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '../../auth/application/jwt.service';
 import { LikesService } from '../../likes/application/likes.service';
 import { CommentsRepository } from '../infrastructure/comments.repository';
-import { LikesRepository } from '../../likes/infrastructure/likes.repository';
+import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
 import { CommentBDModel } from '../infrastructure/entity/commentDB.model';
 import { CommentViewModel } from '../api/dto/commentView.model';
 import { v4 as uuidv4 } from 'uuid';

@@ -21,25 +21,41 @@ import { AuthBearerGuard } from '../../../../guards/auth.bearer.guard';
 import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { ReactionDto } from '../../../../global-model/reaction.dto';
+import {PgQueryPostsRepository} from "../infrastructure/pg-query-posts.repository";
+import {JwtService} from "../../auth/application/jwt.service";
+import {PgLikesRepository} from "../../likes/infrastructure/pg-likes.repository";
 
 @Controller('posts')
 export class PostsController {
   constructor(
     protected commentsService: CommentsService,
+    protected jwtService: JwtService,
     protected postsService: PostsService,
+    protected queryPostsRepository: PgQueryPostsRepository
   ) {}
 
   @Get()
-  getPosts(@Query() query: QueryParametersDto, @Req() req: Request) {
-    const blogId = '';
-    return this.postsService.getPosts(query, blogId, req.headers.authorization);
+  async getPosts(@Query() query: QueryParametersDto, @Req() req: Request) {
+    let userId = undefined
+    if (req.headers.authorization) {
+      const tokenPayload = await this.jwtService.getTokenPayload(req.headers.authorization);
+      userId = tokenPayload.userId
+    }
+
+    return this.queryPostsRepository.getPosts(query, userId);
   }
 
   @Get(':id')
   async getPostById(@Param('id') postId: string, @Req() req: Request) {
-    const post = await this.postsService.getPostById(
+    let userId = undefined
+    if (req.headers.authorization) {
+      const tokenPayload = await this.jwtService.getTokenPayload(req.headers.authorization);
+      userId = tokenPayload.userId
+    }
+
+    const post = await this.queryPostsRepository.getPostById(
       postId,
-      req.headers.authorization,
+      userId,
     );
 
     if (!post) {
@@ -76,16 +92,16 @@ export class PostsController {
     @Param('id') postId: string,
     @User() user: UserDBModel,
   ) {
-    const post = await this.postsService.getPostById(postId);
+    const post = await this.queryPostsRepository.postExist(postId);
 
     if (!post) {
       throw new NotFoundException();
     }
 
-    const banStatus = await this.postsService.checkBanStatus(user.id, postId);
+    const banStatus = await this.postsService.checkUserBanStatus(user.id, postId);
 
     if (banStatus) {
-      throw new ForbiddenException();
+      throw new ForbiddenException(); // if user banned for this blog
     }
 
     return this.commentsService.createComment(postId, dto.content, user);
@@ -96,16 +112,16 @@ export class PostsController {
   @UseGuards(AuthBearerGuard)
   async updateLikeStatus(
     @Body() dto: ReactionDto,
-    @Param('id') commentId: string,
+    @Param('id') postId: string,
     @User() user: UserDBModel,
   ) {
-    const post = await this.postsService.getPostById(commentId);
+    const post = await this.queryPostsRepository.postExist(postId);
 
     if (!post) {
       throw new NotFoundException();
     }
 
-    await this.postsService.updateLikesInfo(user.id, commentId, dto.likeStatus);
+    await this.postsService.updatePostReaction(user.id, postId, dto.likeStatus);
 
     return;
   }

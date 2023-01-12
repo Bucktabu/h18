@@ -21,7 +21,7 @@ export class SaBlogsController {
         @Query()
             query: QueryParametersDto,
     ): Promise<ContentPageModel> {
-        return this.queryBlogsRepository.getBlogs(query);
+        return this.queryBlogsRepository.saGetBlogs(query);
     }
 
     @Put(':id/ban')

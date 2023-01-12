@@ -5,12 +5,13 @@ import { LikesModel } from './entity/likes.model';
 import { ILikesRepository } from './likes-repository.interface';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import {InjectDataSource} from "@nestjs/typeorm";
+import {DataSource} from "typeorm";
 
 @Injectable()
-export class LikesRepository implements ILikesRepository {
-  constructor(
-    @InjectModel(Like.name) private likesRepository: Model<LikeDocument>,
-  ) {}
+export class PgLikesRepository {
+  constructor(@InjectDataSource() private dataSource: DataSource) {
+  }
 
   async getUserReaction(
     parentId: string,
@@ -77,6 +78,20 @@ export class LikesRepository implements ILikesRepository {
     }
   }
 
+  async updatePostReaction(userId: string, postId: string, likeStatus: string, addedAt: string): Promise<boolean> {
+    const query = `
+      UPDATE public.post_reactions
+         SET status = $1, added_at = $2
+       WHERE "userId" = $3 AND "postId" = $4
+    `
+    const result = await this.dataSource.query(query, [likeStatus, addedAt, userId, postId])
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
+
   async updateBanStatus(userId: string, isBanned: boolean): Promise<boolean> {
     try {
       await this.likesRepository.updateOne({ userId }, { $set: { isBanned } });
@@ -84,5 +99,18 @@ export class LikesRepository implements ILikesRepository {
     } catch (e) {
       return false;
     }
+  }
+
+  async deleteReaction(userId: string, postId: string): Promise<boolean> {
+    const query = `
+      DELETE FROM public.post_reactions
+       WHERE "userId" = $1 AND "postId" = $2
+    `
+    const result = await this.dataSource.query(query, [userId, postId])
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 }

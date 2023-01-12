@@ -11,7 +11,7 @@ export class BlogViewWithOwnerAndBanInfo {
     },
     public banInfo: {
       isBanned: boolean;
-      banDate: Date;
+      banDate: string;
     },
   ) {}
 }

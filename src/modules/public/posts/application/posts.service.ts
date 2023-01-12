@@ -1,109 +1,49 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { JwtService } from '../../auth/application/jwt.service';
-import { PostViewModel } from '../api/dto/postsView.model';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { ContentPageModel } from '../../../../global-model/contentPage.model';
-import { paginationContentPage } from '../../../../helper.functions';
-import { PostDBModel } from '../infrastructure/entity/post-db.model';
-import { IPostsRepository } from '../infrastructure/posts-repository.interface';
+import { Injectable } from '@nestjs/common';
+import {PgBanInfoRepository} from "../../../super-admin/infrastructure/pg-ban-info.repository";
+import {PgLikesRepository} from "../../likes/infrastructure/pg-likes.repository";
+import {ReactionModel} from "../../../../global-model/reaction.model";
+import {PostDto} from "../../../blogger/api/dto/post.dto";
+import {PostViewModel} from "../api/dto/postsView.model";
+import {PostDBModel} from "../infrastructure/entity/post-db.model";
+import { v4 as uuidv4 } from 'uuid';
+import {PgPostsRepository} from "../infrastructure/pg-posts-repository.service";
 
 @Injectable()
 export class PostsService {
   constructor(
-    protected jwtService: JwtService,
-   // protected likesService: LikesService,
-    protected queryPostsRepository: PgQueryPostsRepository
+    protected banInfoRepository: PgBanInfoRepository,
+    protected likesRepository: PgLikesRepository,
+    protected postsRepository: PgPostsRepository
   ) {}
 
-  async getPosts(
-    query: QueryParametersDto,
-    blogId: string,
-    token?: string,
-  ): Promise<ContentPageModel | null> {
-    const postsDB = await this.postsRepository.getPosts(query, blogId);
-
-    if (!postsDB) {
-      return null;
-    }
-
-    const totalCount = await this.postsRepository.getTotalCount(blogId);
-    const user = await this.jwtService.getTokenPayload(token);
-    const posts = await Promise.all(
-      postsDB.map(async (p) => await this.addLikesInfoForPost(p, user.id)),
-    );
-
-    return paginationContentPage(
-      query.pageNumber,
-      query.pageSize,
-      posts,
-      totalCount,
-    );
+  async checkUserBanStatus(userId: string, postId: string): Promise<boolean> {
+    return await this.banInfoRepository.youBanned(userId, postId);
   }
 
-  async getPostById(
-    postId: string,
-    token?: string,
+  async createPost(
+      dto: PostDto,
+      blogId: string,
   ): Promise<PostViewModel | null> {
-    const post = await this.postsRepository.getPostById(postId);
+    const newPost = new PostDBModel(
+        uuidv4(),
+        dto.title,
+        dto.shortDescription,
+        dto.content,
+        new Date().toISOString(),
+        false,
+        blogId
+    );
 
-    if (!post) {
-      return null;
+    return await this.postsRepository.createPost(newPost);
+  }
+
+  async updatePostReaction(userId, postId, likeStatus): Promise<boolean> {
+    if (likeStatus === ReactionModel.None) {
+      return await this.likesRepository.deleteReaction(userId, postId)
     }
 
-    const user = await this.jwtService.getTokenPayload(token);
+    const addedAt = new Date().toISOString()
 
-    return await this.addLikesInfoForPost(post, user.id);
-  }
-
-  async checkBanStatus(userId: string, postId: string): Promise<boolean> {
-    return await this.banInfoRepository.checkBanStatus(userId, postId);
-  }
-
-  async updateLikesInfo(
-    userId: string,
-    commentId: string,
-    likeStatus: string,
-  ): Promise<boolean> {
-    const addedAt = new Date().toISOString();
-    const login = await this.usersRepository.getUserByIdOrLoginOrEmail(userId);
-
-    if (!login) {
-      return false;
-    }
-
-    // return await this.likesService.updateUserReaction(
-    //   commentId,
-    //   userId,
-    //   likeStatus,
-    //   addedAt,
-    //   login.login,
-    // );
-  }
-
-  private async addLikesInfoForPost(
-    post: PostDBModel,
-    userId: string | null,
-  ): Promise<PostViewModel> {
-    // const result = await this.likesService.getReactionAndReactionCount(
-    //   post.id,
-    //   userId!,
-    // );
-    // const newestLikes = await this.likesService.getNewestLikes(post.id);
-
-    return {
-      id: post.id,
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      blogId: post.blogId,
-      blogName: post.blogName,
-      createdAt: post.createdAt,
-      extendedLikesInfo: {
-        myStatus: result.reaction,
-        likesCount: result.likesCount,
-        dislikesCount: result.dislikesCount,
-        newestLikes: newestLikes!,
-      },
-    };
+    return await this.likesRepository.updatePostReaction(userId, postId, likeStatus, addedAt)
   }
 }

@@ -1,43 +1,38 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { ContentPageModel } from '../../../../global-model/contentPage.model';
-import { paginationContentPage } from '../../../../helper.functions';
+import { Injectable } from '@nestjs/common';
 import { toBlogViewModel } from '../../../../data-mapper/to-blog-view.model';
 import { BlogViewModel } from '../api/dto/blogView.model';
-import { IBlogsRepository } from '../infrastructure/blogs-repository.interface';
+import {PgQueryBlogsRepository} from "../infrastructure/pg-query-blogs.repository";
+import {BlogDto} from "../../../blogger/api/dto/blog.dto";
+import {BlogDBModel} from "../infrastructure/entity/blog-db.model";
+import { v4 as uuidv4 } from 'uuid';
+import {PgBlogsRepository} from "../infrastructure/pg-blogs.repository";
 
 @Injectable()
 export class BlogsService {
   constructor(
-    @Inject(IBlogsRepository) protected blogsRepository: IBlogsRepository,
+    protected blogsRepository: PgBlogsRepository,
   ) {}
 
-  async getBlogs(query: QueryParametersDto): Promise<ContentPageModel | null> {
-    const blogs = await this.blogsRepository.getBlogs(query);
+  async createBlog(
+      userId: string,
+      inputModel: BlogDto,
+  ): Promise<BlogViewModel | null> {
+    const newBlog = new BlogDBModel(
+        uuidv4(),
+        inputModel.name,
+        inputModel.description,
+        inputModel.websiteUrl,
+        new Date().toISOString(),
+        false,
+        userId
+    );
 
-    if (!blogs) {
+    const createdBlog = await this.blogsRepository.createBlog(newBlog);
+
+    if (!createdBlog) {
       return null;
     }
 
-    const totalCount = await this.blogsRepository.getTotalCount(
-      query.searchNameTerm,
-    );
-
-    return paginationContentPage(
-      query.pageNumber,
-      query.pageSize,
-      blogs,
-      totalCount,
-    );
-  }
-
-  async getBlogById(blogId: string): Promise<BlogViewModel | null> {
-    const blog = await this.blogsRepository.getBlogById(blogId);
-
-    if (!blog) {
-      return null;
-    }
-
-    return toBlogViewModel(blog);
+    return toBlogViewModel(createdBlog);
   }
 }

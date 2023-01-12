@@ -14,7 +14,6 @@ export class PgUsersRepository {
       VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING (id, login, email, created_at);
     `;
-
     const result = await this.dataSource.query(query, [
       newUser.id,
       newUser.login,

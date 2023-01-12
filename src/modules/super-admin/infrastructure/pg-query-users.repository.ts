@@ -12,6 +12,7 @@ import { toUserViewModel } from '../../../data-mapper/to-create-user-view.model'
 import { ContentPageModel } from '../../../global-model/contentPage.model';
 import { SortParametersModel } from '../../../global-model/sort-parameters.model';
 import {toBannedUsersModel} from "../../../data-mapper/to-banned-users.model";
+import {DbBannedUsersModel} from "./entity/db-banned-users.model";
 
 @Injectable()
 export class PgQueryUsersRepository {
@@ -58,7 +59,7 @@ export class PgQueryUsersRepository {
          queryDto.pageSize,
        )};
     `
-    const bannedUsersDB = await this.dataSource.query(usersQuery, [
+    const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(usersQuery, [
       queryDto.pageSize,
     ]);
 

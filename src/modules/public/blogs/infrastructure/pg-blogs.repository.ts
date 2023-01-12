@@ -7,56 +7,34 @@ import { BindBlogDto } from '../../../super-admin/api/dto/bind-blog.dto';
 import {QueryParametersDto} from "../../../../global-model/query-parameters.dto";
 import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
+import {BlogDBModel} from "./entity/blog-db.model";
+import {BlogViewModel} from "../api/dto/blogView.model";
 
 @Injectable()
 export class PgBlogsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {
   }
 
-  async saGetBlogs(query: QueryParametersDto): Promise<BlogDBModel[]> {
-    const filter = this.banStatusFilter(query.banStatus);
+  async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
+    const query = `
+      INSERT INTO public.blogs
+             (id, title, description, website_url, created_at, is_banned, "bloggerId")
+      VAlUES ($1, $2, $3, $4, $5, $6, $7)  
+             RETURNING (id, title, description, website_url, created_at, is_banned, "bloggerId")
+    `
+    const result = await this.dataSource.query(query, [
+      newBlog.id,
+      newBlog.name,
+      newBlog.description,
+      newBlog.websiteUrl,
+      newBlog.createdAt,
+      newBlog.isBanned,
+      newBlog.userId
+    ]);
 
-    return this.blogsRepository
-      .find(
-        {
-          $and: [
-            { name: { $regex: query.searchNameTerm, $options: 'i' } },
-            filter,
-          ],
-        },
-        { _id: false, __v: false },
-      )
-      .sort({ [query.sortBy]: query.sortDirection === 'asc' ? 1 : -1 })
-      .skip(giveSkipNumber(query.pageNumber, query.pageSize))
-      .limit(query.pageSize)
-      .lean();
-  }
+    const blogArr = result[0].row.slice(1, -1).split(',');
 
-  async saGetTotalCount(
-    banStatus: string,
-    searchNameTerm: string,
-  ): Promise<number> {
-    const filter = this.banStatusFilter(banStatus);
-
-    return this.blogsRepository.countDocuments({
-      $and: [{ name: { $regex: searchNameTerm, $options: 'i' } }, filter],
-    });
-  }
-
-  async getBlogById(id: string): Promise<BlogDBModel | null> {
-    return this.blogsRepository.findOne(
-      { $and: [{ id }, { isBanned: false }] },
-      { _id: false, __v: false },
-    );
-  }
-
-  async createBlog(newBlog: BlogDBModel): Promise<BlogDBModel | null> {
-    try {
-      await this.blogsRepository.create(newBlog);
-      return newBlog;
-    } catch (e) {
-      return null;
-    }
+    //TODO here
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {

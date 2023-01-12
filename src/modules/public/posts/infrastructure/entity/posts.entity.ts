@@ -9,7 +9,7 @@ export class Posts {
 
     @Column() title: string;
 
-    @Column() shortDescription: string;
+    @Column() short_description: string;
 
     @Column() content: string;
 
