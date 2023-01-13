@@ -12,9 +12,9 @@ export class PgPostsRepository {
   async createPost(newPost: PostDBModel): Promise<PostViewModel> {
     const query = `
       INSERT INTO public.posts
-             (id, title, short_description, content, created_at, is_banned, "blogId")
+             (id, title, short_description, content, created_at, "blogId")
       VAlUES ($1, $2, $3, $4, $5, $6, $7)
-             RETURNING (id, title, short_description, content, created_at, is_banned, "blogId")                
+             RETURNING (id, title, short_description, content, created_at, "blogId")                
     `;
     const result = await this.dataSource.query(query, [
       newPost.id,
@@ -22,7 +22,6 @@ export class PgPostsRepository {
       newPost.shortDescription,
       newPost.content,
       newPost.createdAt,
-      newPost.isBanned,
       newPost.blogId
     ]);
 
@@ -56,18 +55,6 @@ export class PgPostsRepository {
       return false;
     }
     return true;
-  }
-
-  async updatePostsBanStatus(
-    blogId: string,
-    isBanned: boolean,
-  ): Promise<boolean> {
-    try {
-      await this.postsRepository.updateMany({ blogId }, { $set: { isBanned } });
-      return true;
-    } catch (e) {
-      return false;
-    }
   }
 
   async deletePost(postId: string): Promise<boolean> {

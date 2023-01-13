@@ -48,8 +48,8 @@ export class PgQueryBlogsRepository {
         const blogsQuery = `
             SELECT b.id, b.title AS name, b.description, b.website_url AS "websiteUrl", b.created_at AS "createdAt"
                    u.id AS "userId", u.login AS "userLogin",
-                   (SELECT ban_status AS "isBanned" FROM public.user_ban_info WHERE "userId" = u.id),
-                   (SELECT ban_date AS "banDate" FROM public.user_ban_info WHERE "userId" = u.id) 
+                   (SELECT ban_status AS "isBanned" FROM public.banned_blog WHERE "blogId" = b.id),
+                   (SELECT ban_date AS "banDate" FROM public.banned_blog WHERE "blogId" = b.id) 
               FROM public.blogs
               LEFT JOIN public.users u
                 ON b."bloggerId" = u.id

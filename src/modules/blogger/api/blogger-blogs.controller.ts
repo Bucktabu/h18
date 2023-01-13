@@ -20,11 +20,12 @@ import {BlogDto} from "./dto/blog.dto";
 import {PgQueryBlogsRepository} from "../../public/blogs/infrastructure/pg-query-blogs.repository";
 import {ForbiddenGuard} from "../../../guards/forbidden.guard";
 import {PostDto} from "./dto/post.dto";
-import {CommentsRepository} from "../../public/comments/infrastructure/comments.repository";
+import {PgCommentsRepository} from "../../public/comments/infrastructure/pg-comments.repository";
 import {ContentPageModel} from "../../../global-model/contentPage.model";
 import {BlogViewModel} from "../../public/blogs/api/dto/blogView.model";
 import {PostsService} from "../../public/posts/application/posts.service";
 import {BlogsService} from "../../public/blogs/application/blogs.service";
+import {PgQueryCommentsRepository} from "../../public/comments/infrastructure/pg-query-comments.repository";
 
 @UseGuards(AuthBearerGuard)
 @Controller('blogger/blogs')
@@ -33,7 +34,7 @@ export class BloggerBlogsController {
         protected blogsService: BlogsService,
         protected postsService: PostsService,
         protected queryBlogsRepository: PgQueryBlogsRepository,
-        protected queryCommentsRepository: CommentsRepository
+        protected queryCommentsRepository: PgQueryCommentsRepository
     ) {}
 
     @Get()

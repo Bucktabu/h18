@@ -5,7 +5,6 @@ export class PostDBModel {
     public shortDescription: string,
     public content: string,
     public createdAt: string,
-    public isBanned: boolean,
     public blogId: string,
   ) {}
 }

@@ -33,6 +33,20 @@ export class PgBanInfoRepository {
     return true
   }
 
+  async blogBanned(blogId): Promise<boolean> {
+    const query = `
+      SELECT "blogId" 
+        FROM public.banned_blog
+       WHERE "blogId" = $1
+    `
+    const result = await this.dataSource.query(query, [blogId])
+
+    if (!result.length) {
+      return false
+    }
+    return true
+  }
+
   async createBanInfo(banInfo: BanInfoModel): Promise<BanInfoModel> {
     const filter = this.getCreateFilter(banInfo);
 
@@ -45,7 +59,7 @@ export class PgBanInfoRepository {
     return banInfo;
   }
 
-  async createBannedUserForBlog(userId: string, blogId: string, banReason: string, banDate: string): Promise<boolean> {
+  async createUserBanForBlogStatus(userId: string, blogId: string, banReason: string, banDate: string): Promise<boolean> {
     const query = `
       INSERT INTO public.banned_users_for_blog
              ("blogId", "userId", ban_reason, ban_date)
@@ -60,7 +74,22 @@ export class PgBanInfoRepository {
     return true
   }
 
-  async saUpdateBanStatus(
+  async createBlogBanStatus(blogId: string, banDate: string): Promise<boolean> {
+    const query = `
+      INSERT INTO public.banned_blog
+             ("blogId", ban_date)
+      VALUES ($1, $2)
+             RETURNING ("blogId")
+    `
+    const result = await this.dataSource.query(query, [blogId, banDate])
+
+    if(!result.length) {
+      return false
+    }
+    return true
+  }
+
+  async saUpdateUserBanStatus(
     userId: string,
     banStatus: boolean,
     banReason: string | null,
@@ -79,7 +108,8 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  async deleteBanInfoById(userId: string): Promise<boolean> {
+
+  async deleteUserBanInfoById(userId: string): Promise<boolean> {
     const query = `
       DELETE 
         FROM public.user_ban_info
@@ -94,7 +124,7 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  async deleteBannedUserForBlog(userId: string, blogId: string): Promise<boolean> {
+  async deleteUserBanForBlogStatus(userId: string, blogId: string): Promise<boolean> {
     const query = `
       DELETE 
         FROM public.banned_users_for_blog
@@ -102,6 +132,21 @@ export class PgBanInfoRepository {
     `;
 
     const result = await this.dataSource.query(query, [userId, blogId]);
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
+
+  async deleteBlogBanStatus(blogId: string): Promise<boolean> {
+    const query = `
+      DELETE 
+        FROM public.banned_blog
+       WHERE "blogId" = $1;
+    `;
+
+    const result = await this.dataSource.query(query, [blogId]);
 
     if (result[1] !== 1) {
       return false;

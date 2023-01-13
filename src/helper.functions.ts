@@ -8,7 +8,7 @@ import {CommentWithAdditionalInfoModel} from "./modules/blogger/api/dto/comment-
 import {PostViewModel} from "./modules/public/posts/api/dto/postsView.model";
 import {BlogViewModel} from "./modules/public/blogs/api/dto/blogView.model";
 import {ViewBannedUser} from "./modules/blogger/api/dto/view-banned-users.model";
-import {CommentViewModel} from "./modules/public/comments/api/dto/commentView.model";
+import {CommentViewModel, CommentWithAdditionalInfo} from "./modules/public/comments/api/dto/commentView.model";
 
 export const giveSkipNumber = (pageNumber: number, pageSize: number) => {
   return (pageNumber - 1) * pageSize;
@@ -34,7 +34,7 @@ export const paginationContentPage = (
     | ViewBannedUser[]
     | BlogViewModel[]
     | BlogViewWithOwnerAndBanInfo[]
-    | CommentWithAdditionalInfoModel[]
+    | CommentWithAdditionalInfo[]
     | PostViewModel[]
     | UserViewModelWithBanInfo[]
     | CommentViewModel[]

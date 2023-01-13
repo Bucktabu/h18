@@ -5,7 +5,6 @@ export class BlogDBModel {
     public description: string,
     public websiteUrl: string,
     public createdAt: string,
-    public isBanned: boolean,
     public userId: string,
   ) {}
 }

@@ -33,11 +33,14 @@ import { settings } from './settings';
 import { Security } from "./modules/public/security/infrastructure/entity/security";
 import { TokenBlackList } from "./modules/public/auth/infrastructure/entity/tokenBlackList";
 import { Blogs } from "./modules/public/blogs/infrastructure/entity/blogs.entity";
-import {
-  BannedUsersForBlog,
-} from "./modules/public/blogs/infrastructure/entity/banned-users-for-blog.entity";
-import {Comments} from "./modules/public/comments/infrastructure/entity/comments.entity";
+// import {
+//   BannedUsersForBlog,
+// } from "./modules/super-admin/infrastructure/entity/banned-users-for-blog.entity";
+//import {Comments} from "./modules/public/comments/infrastructure/entity/comments.entity";
 import {Posts} from "./modules/public/posts/infrastructure/entity/posts.entity";
+// import {BannedBlog} from "./modules/super-admin/infrastructure/entity/banned_blog.entity";
+// import {CommentReactions} from "./modules/public/likes/infrastructure/entity/comment-reactions.entity";
+// import {PostReactions} from "./modules/public/likes/infrastructure/entity/post-reactions.entity";
 
 const controllers = [
   AuthController,
@@ -48,10 +51,13 @@ const controllers = [
 
  const entity = [
    Blogs,
-   BannedUsersForBlog,
-   Comments,
+   //BannedBlog,
+   //BannedUsersForBlog,
+   //Comments,
+   //CommentReactions,
    EmailConfirmation,
    Posts,
+   //PostReactions,
    TokenBlackList,
    Security,
    UserBanInfo,

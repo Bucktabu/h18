@@ -11,13 +11,13 @@ import { PostsService } from '../../posts/application/posts.service';
 import { Request } from 'express';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import {PgQueryBlogsRepository} from "../infrastructure/pg-query-blogs.repository";
+import {PgQueryPostsRepository} from "../../posts/infrastructure/pg-query-posts.repository";
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    protected blogsService: BlogsService,
     protected queryBlogsRepository: PgQueryBlogsRepository,
-    protected postsService: PostsService,
+    protected queryPostsRepository: PgQueryPostsRepository
   ) {}
 
   @Get()
@@ -51,6 +51,6 @@ export class BlogsController {
       throw new NotFoundException();
     }
 
-    return this.postsService.getPosts(query, blogId, req.headers.authorization);
+    return this.queryPostsRepository.getPosts(query, blogId, req.headers.authorization);
   }
 }

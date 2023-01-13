@@ -24,10 +24,16 @@ export class PgQueryPostsRepository {
         const query = `
             SELECT id, title, short_description AS "shortDescription", content, created_at AS "createdAt", "blogId",
                    (SELECT title AS "blogName" FROM public.blogs WHERE id.blogs = "blogId".posts),
-                   (SELECT SUM("postID") AS "likesCount" FROM public.post_reactions WHERE "postId".post_reactions = id.posts AND status = "Like"),
-                   (SELECT SUM("postID") AS "dislikesCount" FROM public.post_reactions WHERE "postId".post_reactions = id.posts AND status = "Dislike"),
+                   (SELECT SUM("postID") AS "likesCount"
+                      FROM public.post_reactions
+                     WHERE "postId".post_reactions = id.posts AND status = "Like"),
+                   (SELECT SUM("postID") AS "dislikesCount"
+                      FROM public.post_reactions
+                     WHERE "postId".post_reactions = id.posts AND status = "Dislike"),
                    (SELECT added_at AS "addedAt", "userId",
-                           (SELECT id AS "userId", login, added_at AS "addedAt" FROM public.users WHERE id.users = "usersId".post_reactions)) AS "newestLikes"
+                           (SELECT id AS "userId", login, added_at AS "addedAt"
+                              FROM public.users
+                             WHERE id.users = "usersId".post_reactions)) AS "newestLikes"
                       FROM public.post_reactions
                      WHERE postId.post_reactions = id.posts)
                    ${myStatusFilter}
@@ -39,9 +45,9 @@ export class PgQueryPostsRepository {
                 queryDto.pageSize,
              )};      
         `
-        const postsDB: DbPostModel[] = await this.dataSource.query(query, [blogId])
+        const postsDB: DbPostModel[] = await this.dataSource.query(query, [queryDto.pageNumber])
 
-        const post = postsDB.map(p => toPostsViewModel(p))
+        const posts = postsDB.map(p => toPostsViewModel(p))
 
         const totalCountQuery = `
           SELECT COUNT(id)
@@ -53,7 +59,7 @@ export class PgQueryPostsRepository {
         return paginationContentPage(
             queryDto.pageNumber,
             queryDto.pageSize,
-            post,
+            posts,
             Number(totalCount[0].count),
         );
     }

@@ -23,19 +23,18 @@ export class BloggerBlogService {
             return null;
         }
 
-        const isBanned = await this.banInfoRepository.youBanned(
+        const youBanned = await this.banInfoRepository.youBanned(
             userId,
             dto.blogId
-        );
+        ); // TODO можно объединить эти два запроса, НО в случае если я селекчу несучествующую строчку в таблице мне вернет undefined или 500?
 
-        if (isBanned === dto.isBanned) {
+        if (youBanned === dto.isBanned) {
             return true
         }
-        if (!isBanned) {
+        if (!youBanned) {
             const banDate = new Date().toISOString();
-            await this.banInfoRepository.createBannedUserForBlog(userId, dto.blogId, dto.banReason, banDate)
+            return await this.banInfoRepository.createUserBanForBlogStatus(userId, dto.blogId, dto.banReason, banDate)
         }
-        await this.banInfoRepository.deleteBannedUserForBlog(userId, dto.blogId)
-        return true
+        return await this.banInfoRepository.deleteUserBanForBlogStatus(userId, dto.blogId)
     }
 }

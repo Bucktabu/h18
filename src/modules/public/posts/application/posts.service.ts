@@ -30,7 +30,6 @@ export class PostsService {
         dto.shortDescription,
         dto.content,
         new Date().toISOString(),
-        false,
         blogId
     );
 

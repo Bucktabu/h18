@@ -21,7 +21,6 @@ export class BlogsService {
         inputModel.description,
         inputModel.websiteUrl,
         new Date().toISOString(),
-        false,
         userId
     );
 

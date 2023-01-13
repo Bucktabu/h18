@@ -24,6 +24,7 @@ import { ReactionDto } from '../../../../global-model/reaction.dto';
 import {PgQueryPostsRepository} from "../infrastructure/pg-query-posts.repository";
 import {JwtService} from "../../auth/application/jwt.service";
 import {PgLikesRepository} from "../../likes/infrastructure/pg-likes.repository";
+import {PgQueryCommentsRepository} from "../../comments/infrastructure/pg-query-comments.repository";
 
 @Controller('posts')
 export class PostsController {
@@ -31,6 +32,7 @@ export class PostsController {
     protected commentsService: CommentsService,
     protected jwtService: JwtService,
     protected postsService: PostsService,
+    protected queryCommentsRepository: PgQueryCommentsRepository,
     protected queryPostsRepository: PgQueryPostsRepository
   ) {}
 
@@ -71,13 +73,19 @@ export class PostsController {
     @Param('id') postId: string,
     @Req() req: Request,
   ) {
-    const comment = await this.commentsService.getComments(
-      postId,
+    let userId = undefined
+    if (req.headers.authorization) {
+      const tokenPayload = await this.jwtService.getTokenPayload(req.headers.authorization);
+      userId = tokenPayload.userId
+    }
+
+    const comment = await this.queryCommentsRepository.getCommentByPostId(
       query,
-      req.headers.authorization,
+      postId,
+      userId,
     );
 
-    if (!comment) {
+    if (!comment.items.length) {
       throw new NotFoundException();
     }
 

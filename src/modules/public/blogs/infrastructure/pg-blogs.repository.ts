@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { giveSkipNumber } from '../../../../helper.functions';
 import { BlogDto } from '../../../blogger/api/dto/blog.dto';
 import { BanStatusModel } from '../../../../global-model/ban-status.model';
 import { BindBlogDto } from '../../../super-admin/api/dto/bind-blog.dto';
-
-import {QueryParametersDto} from "../../../../global-model/query-parameters.dto";
 import {InjectDataSource} from "@nestjs/typeorm";
 import {DataSource} from "typeorm";
 import {BlogDBModel} from "./entity/blog-db.model";
@@ -18,8 +15,8 @@ export class PgBlogsRepository {
   async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
     const query = `
       INSERT INTO public.blogs
-             (id, title, description, website_url, created_at, is_banned, "bloggerId")
-      VAlUES ($1, $2, $3, $4, $5, $6, $7)  
+             (id, title, description, website_url, created_at, "bloggerId")
+      VAlUES ($1, $2, $3, $4, $5, $6)  
              RETURNING (id, title, description, website_url, created_at)
     `
     const result = await this.dataSource.query(query, [
@@ -28,7 +25,6 @@ export class PgBlogsRepository {
       newBlog.description,
       newBlog.websiteUrl,
       newBlog.createdAt,
-      newBlog.isBanned,
       newBlog.userId
     ]);
 
@@ -47,12 +43,17 @@ export class PgBlogsRepository {
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {
-    const result = await this.blogsRepository.updateOne(
-      { id: params.id },
-      { $set: { userId: params.userId } },
-    );
+    const query = `
+      UPDATE public.blogs
+         SET "bloggerId" = $1
+       WHERE id = $2
+    `
+    const result = await this.dataSource.query(query, [params.userId, params.id])
 
-    return result.matchedCount === 1;
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
   }
 
   async updateBlog(id: string, dto: BlogDto): Promise<boolean> {
@@ -69,15 +70,6 @@ export class PgBlogsRepository {
     return true;
   }
 
-  async updateBanStatus(id: string, isBanned: boolean): Promise<boolean> {
-    const result = await this.blogsRepository.updateOne(
-      { $or: [{ id }, { userId: id }] },
-      { $set: { isBanned } },
-    );
-
-    return result.matchedCount === 1;
-  }
-
   async deleteBlog(blogId: string): Promise<boolean> {
     const query = `
       DELETE FROM public.blogs
@@ -89,25 +81,5 @@ export class PgBlogsRepository {
       return false;
     }
     return true;
-  }
-
-  private userIdFilter(userId: string | null) {
-    let filter = {};
-    if (userId) {
-      filter = { userId };
-    }
-
-    return filter;
-  }
-
-  private banStatusFilter(banStatus: string | null) {
-    let filter = {};
-    if (banStatus === BanStatusModel.Banned) {
-      filter = { isBanned: true };
-    } else if (banStatus === BanStatusModel.NotBanned) {
-      filter = { isBanned: false };
-    }
-
-    return filter;
   }
 }

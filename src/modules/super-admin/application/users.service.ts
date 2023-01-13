@@ -64,9 +64,8 @@ export class UsersService {
       banDate = new Date().toISOString();
       banReason = dto.banReason;
     }
-    //await this.blogsRepository.updateBanStatus(userId, dto.isBanned);
-    //await this.likesRepository.updateBanStatus(userId, dto.isBanned);
-    return this.banInfoRepository.saUpdateBanStatus(
+
+    return this.banInfoRepository.saUpdateUserBanStatus(
       userId,
       dto.isBanned,
       banReason,
@@ -76,7 +75,7 @@ export class UsersService {
 
   async deleteUserById(userId: string): Promise<boolean> {
     const userDeleted = await this.usersRepository.deleteUserById(userId);
-    await this.banInfoRepository.deleteBanInfoById(userId);
+    await this.banInfoRepository.deleteUserBanInfoById(userId);
     await this.emailConfirmationRepository.deleteEmailConfirmationById(userId);
 
     if (!userDeleted) {
