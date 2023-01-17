@@ -18,11 +18,18 @@ import {DbBannedUsersModel} from "./entity/db-banned-users.model";
 export class PgQueryUsersRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  async isLoginOrEmailExistForValidation (loginOrEmail: string) {
+    const query = `SELECT id FROM public.users WHERE login = $1 OR email = $1`;
+    const result = await this.dataSource.query(query, [loginOrEmail]);
+
+    return result[0];
+  }
+
   async getUserByLoginOrEmail(
     loginOrEmail: string,
   ): Promise<UserDBModel | null> {
     const query = `
-      SELECT id, login, email, password_hash as "passwordHash", password_salt as "passwordSalt", created_at as "createdAt"
+      SELECT id, login, email, "passwordHash", "passwordSalt", "createdAt"
         FROM public.users
        WHERE login = $1 OR email = $1
     `;

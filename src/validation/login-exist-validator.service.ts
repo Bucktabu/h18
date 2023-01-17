@@ -12,7 +12,7 @@ export class LoginExistValidator implements ValidatorConstraintInterface {
   constructor(protected queryUsersRepository: PgQueryUsersRepository) {}
 
   async validate(login) {
-    const user = await this.queryUsersRepository.getUserByLoginOrEmail(login);
+    const user = await this.queryUsersRepository.isLoginOrEmailExistForValidation(login);
 
     if (user) {
       return false;

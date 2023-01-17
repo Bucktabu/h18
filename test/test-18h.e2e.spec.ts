@@ -35,8 +35,8 @@ describe('e2e tests', () => {
 
   describe('sa/users', () => {
 
-    it('Drop all data.', () => {
-      request(server)
+    it('Drop all data.', async () => {
+      await request(server)
           .delete('/testing/all-data')
           .expect(204)
     })

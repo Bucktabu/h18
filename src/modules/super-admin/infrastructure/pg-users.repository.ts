@@ -12,26 +12,26 @@ export class PgUsersRepository {
       INSERT INTO public.users
              (id, login, email, "passwordSalt", "passwordHash", "createdAt")
       VALUES ($1, $2, $3, $4, $5, $6)
-             RETURNING (id, login, email, "createdAt");
+             RETURNING id, login, email, "createdAt"; 
     `;
-    const result = await this.dataSource.query(query, [
-      newUser.id,
-      newUser.login,
-      newUser.email,
-      newUser.passwordSalt,
-      newUser.passwordHash,
-      newUser.createdAt,
-    ]);
 
-    const userArr = result[0].row.slice(1, -1).split(',');
-    const user = {
-      id: userArr[0],
-      login: userArr[1],
-      email: userArr[2],
-      createdAt: userArr[3],
-    };
+    try {
+      const result = await this.dataSource.query(query, [
+        newUser.id,
+        newUser.login,
+        newUser.email,
+        newUser.passwordSalt,
+        newUser.passwordHash,
+        newUser.createdAt,
+      ]);
 
-    return user;
+
+      return result[0];
+    } catch (e) {
+      console.log('PgUsersRepository => createUser => e =>',e);
+      return null
+    }
+
   }
 
   async updateUserPassword(
