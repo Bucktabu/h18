@@ -4,7 +4,7 @@ import { AppModule } from '../src/app.module';
 import request from 'supertest';
 import { banUserDto, preparedUser, superUser } from './helper/prepeared-data';
 import { isEmail, isUUID } from 'class-validator';
-import { createErrorMessage } from './helper/helpers';
+import { getErrorMessage } from './helper/helpers';
 import { createApp } from '../src/helpers/create-app';
 import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
 import { EmailManagerMock } from './mock/emailAdapter.mock';

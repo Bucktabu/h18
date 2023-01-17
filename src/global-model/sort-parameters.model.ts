@@ -1,12 +1,12 @@
 export enum SortParametersModel {
   Id = 'id',
   Name = 'name',
-  YoutubeUrl = 'youtube_url',
-  CreatedAt = 'created_at',
+  YoutubeUrl = 'youtubeUrl',
+  CreatedAt = 'createdAt',
   Title = 'title',
   Content = 'content',
-  BlogId = 'blog_id',
-  // BlogName = 'blog_name',
+  BlogId = 'blogId',
+  // BlogName = 'blogName',
   Login = 'login',
   Email = 'email',
 }

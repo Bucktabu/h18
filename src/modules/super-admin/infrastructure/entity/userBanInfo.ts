@@ -4,11 +4,11 @@ import { Users } from "./users";
 
 @Entity()
 export class UserBanInfo {
-  @Column({ default: false }) ban_status: boolean;
+  @Column({ default: false }) banStatus: boolean;
 
-  @Column({ default: null }) ban_date: string | null;
+  @Column({ default: null }) banDate: string | null;
 
-  @Column({ default: null }) ban_reason: string | null;
+  @Column({ default: null }) banReason: string | null;
 
   @OneToOne(() => Users, u => u.banInfo)
   @JoinColumn()

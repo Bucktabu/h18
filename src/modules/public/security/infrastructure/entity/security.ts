@@ -1,13 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { Users } from "../../../../super-admin/infrastructure/entity/users";
 
 @Entity()
 export class Security {
-  @PrimaryColumn('uuid') device_id: string;
+  @PrimaryColumn('uuid') deviceId: string;
 
-  @Column() device_title: string;
+  @Column() deviceTitle: string;
 
-  @Column() ip_address: string;
+  @Column() ipAddress: string;
 
   @Column() iat: string;
 
@@ -16,5 +16,5 @@ export class Security {
   @ManyToOne(() => Users, u => u.security)
   @JoinColumn()
   user: Users
-  @PrimaryColumn() userId: string;
+  @Column() userId: string;
 }

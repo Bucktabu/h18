@@ -10,7 +10,7 @@ export class PgBanInfoRepository {
 
   async getBanInfo(userId: string): Promise<BanInfoModel | null> {
     const query = `
-      SELECT user_id as "userId", ban_status as "isBanned", ban_date as "banDate", ban_reason as "banReason"
+      SELECT "userId", "banStatus" as "isBanned", "banDate", "banReason"
         FROM public.user_ban_info
        WHERE user_id = $1;
     `;
@@ -52,7 +52,7 @@ export class PgBanInfoRepository {
 
     await this.dataSource.query(`
         INSERT INTO public.user_ban_info
-               (user_id, ban_status, ban_reason, ban_date)
+               ("userId", "banStatus", "banReason", "banDate")
         VALUES (${filter})
     `);
 
@@ -62,7 +62,7 @@ export class PgBanInfoRepository {
   async createUserBanForBlogStatus(userId: string, blogId: string, banReason: string, banDate: string): Promise<boolean> {
     const query = `
       INSERT INTO public.banned_users_for_blog
-             ("blogId", "userId", ban_reason, ban_date)
+             ("blogId", "userId", "banReason", "banDate")
       VALUES ($1, $2, $3, $4)   
               RETURNING ("blogId")
     `
@@ -77,7 +77,7 @@ export class PgBanInfoRepository {
   async createBlogBanStatus(blogId: string, banDate: string): Promise<boolean> {
     const query = `
       INSERT INTO public.banned_blog
-             ("blogId", ban_date)
+             ("blogId", "banDate")
       VALUES ($1, $2)
              RETURNING ("blogId")
     `
@@ -99,7 +99,7 @@ export class PgBanInfoRepository {
     const result = await this.dataSource.query(`
        UPDATE public.user_ban_info
           SET ${filter}
-        WHERE user_id = '${userId}';
+        WHERE "userId" = '${userId}';
     `);
 
     if (result[1] !== 1) {
@@ -113,7 +113,7 @@ export class PgBanInfoRepository {
     const query = `
       DELETE 
         FROM public.user_ban_info
-       WHERE user_id = $1;
+       WHERE "userId" = $1;
     `;
 
     const result = await this.dataSource.query(query, [userId]);
@@ -166,9 +166,9 @@ export class PgBanInfoRepository {
     banReason: string | null,
     banDate: Date | null,
   ): string {
-    let filter = `ban_status = '${banStatus}', ban_date = null, ban_reason = null`;
+    let filter = `"banStatus" = '${banStatus}', "banDate" = null, "banReason" = null`;
     if (banReason !== null) {
-      return (filter = `ban_status = '${banStatus}', ban_date = '${banDate}', ban_reason = '${banReason}'`);
+      return (filter = `"banStatus" = '${banStatus}', "banDate" = '${banDate}', "banReason" = '${banReason}'`);
     }
     return filter;
   }

@@ -28,19 +28,16 @@ import { PgQuerySecurityRepository } from './modules/public/security/infrastruct
 import { CreateUserUseCase } from './modules/super-admin/use-cases/create-user.use-case';
 import { PgQueryUsersRepository } from './modules/super-admin/infrastructure/pg-query-users.repository';
 import { EmailResendingValidator } from './validation/email-resending.validator';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { settings } from './settings';
 import { Security } from "./modules/public/security/infrastructure/entity/security";
 import { TokenBlackList } from "./modules/public/auth/infrastructure/entity/tokenBlackList";
 import { Blogs } from "./modules/public/blogs/infrastructure/entity/blogs.entity";
-// import {
-//   BannedUsersForBlog,
-// } from "./modules/super-admin/infrastructure/entity/banned-users-for-blog.entity";
-//import {Comments} from "./modules/public/comments/infrastructure/entity/comments.entity";
 import {Posts} from "./modules/public/posts/infrastructure/entity/posts.entity";
-// import {BannedBlog} from "./modules/super-admin/infrastructure/entity/banned_blog.entity";
-// import {CommentReactions} from "./modules/public/likes/infrastructure/entity/comment-reactions.entity";
-// import {PostReactions} from "./modules/public/likes/infrastructure/entity/post-reactions.entity";
+import {BannedBlog} from "./modules/super-admin/infrastructure/entity/banned_blog.entity";
+import {BannedUsersForBlog} from "./modules/super-admin/infrastructure/entity/banned-users-for-blog.entity";
+import {CommentReactions} from "./modules/public/likes/infrastructure/entity/comment-reactions.entity";
+import {PostReactions} from "./modules/public/likes/infrastructure/entity/post-reactions.entity";
+import {Comments} from "./modules/public/comments/infrastructure/entity/comments.entity";
+
 
 const controllers = [
   AuthController,
@@ -51,17 +48,17 @@ const controllers = [
 
  const entity = [
    Blogs,
-   //BannedBlog,
-   //BannedUsersForBlog,
-   //Comments,
-   //CommentReactions,
+   BannedBlog,
+   BannedUsersForBlog,
+   Comments,
+   CommentReactions,
    EmailConfirmation,
    Posts,
-   //PostReactions,
+   PostReactions,
    TokenBlackList,
    Security,
-   UserBanInfo,
    Users,
+   UserBanInfo,
  ];
 
 const repositories = [

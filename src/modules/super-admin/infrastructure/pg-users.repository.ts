@@ -10,9 +10,9 @@ export class PgUsersRepository {
   async createUser(newUser: UserDBModel): Promise<CreatedUserModel | null> {
     const query = `
       INSERT INTO public.users
-             (id, login, email, password_salt, password_hash, created_at)
+             (id, login, email, "passwordSalt", "passwordHash", "createdAt")
       VALUES ($1, $2, $3, $4, $5, $6)
-             RETURNING (id, login, email, created_at);
+             RETURNING (id, login, email, "createdAt");
     `;
     const result = await this.dataSource.query(query, [
       newUser.id,
@@ -41,7 +41,7 @@ export class PgUsersRepository {
   ): Promise<boolean> {
     const query = `
       UPDATE public.users
-         SET password_salt = '${passwordSalt}', password_hash = '${passwordHash}'
+         SET "passwordSalt" = '${passwordSalt}', "passwordHash" = '${passwordHash}'
        WHERE id = $1;
     `;
     const result = await this.dataSource.query(query, [userId]);

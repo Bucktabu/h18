@@ -25,9 +25,9 @@ export class PgEmailConfirmationRepository {
     code: string,
   ): Promise<EmailConfirmationModel | null> {
     const query = `
-      SELECT user_id as "userId", confirmation_code as "confirmationCode", expiration_date as "expirationDate", is_confirmed as "isConfirmed"
+      SELECT "userId", "confirmationCode", "expirationDate", "isConfirmed"
         FROM public.email_confirmation
-       WHERE confirmation_code = '${code}';
+       WHERE "confirmationCode" = '${code}';
     `;
     const result = await this.dataSource.query(query);
     return result[0];
@@ -35,16 +35,16 @@ export class PgEmailConfirmationRepository {
 
   async checkConfirmation(userId: string): Promise<boolean | null> {
     const query = `
-      SELECT is_confirmed
+      SELECT "isConfirmed"
         FROM public.email_confirmation
-       WHERE user_id = $1;
+       WHERE "userId" = $1;
     `;
     const result = await this.dataSource.query(query, [userId]);
 
     if (!result.length) {
       return null;
     }
-    return result[0].is_confirmed;
+    return result[0]["isConfirmed"];
   }
 
   async createEmailConfirmation(
@@ -53,7 +53,7 @@ export class PgEmailConfirmationRepository {
     const filter = this.getCreateFilter(emailConfirmation);
     const query = `
       INSERT INTO public.email_confirmation 
-             (user_id, confirmation_code, expiration_date, is_confirmed)
+             ("userId", "confirmationCode", "expirationDate", "isConfirmed")
       VALUES (${filter})
     `;
     await this.dataSource.query(query);
@@ -61,13 +61,13 @@ export class PgEmailConfirmationRepository {
     return emailConfirmation;
   }
 
-  async updateConfirmationInfo(confirmation_code: string): Promise<boolean> {
+  async updateConfirmationInfo(confirmationCode: string): Promise<boolean> {
     const query = `
       UPDATE public.email_confirmation
-         SET is_confirmed = true
-       WHERE confirmation_code = $1;
+         SET "isConfirmed" = true
+       WHERE "confirmationCode" = $1;
     `;
-    const result = await this.dataSource.query(query, [confirmation_code]);
+    const result = await this.dataSource.query(query, [confirmationCode]);
 
     if (result[1] !== 1) {
       return false;
@@ -87,9 +87,9 @@ export class PgEmailConfirmationRepository {
     const query = `
       UPDATE public.email_confirmation
          SET ${filter}
-       WHERE user_id = '${userId}';
+       WHERE "userId" = '${userId}';
     `;
-    const result = await this.dataSource.query(query); //TODO here
+    const result = await this.dataSource.query(query);
 
     if (result[1] !== 1) {
       return false;
@@ -100,7 +100,7 @@ export class PgEmailConfirmationRepository {
   async deleteEmailConfirmationById(userId: string): Promise<boolean> {
     const query = `
       DELETE FROM public.email_confirmation
-       WHERE user_id = $1;
+       WHERE "userId" = $1;
     `;
 
     const result = await this.dataSource.query(query, [userId]);

@@ -1,9 +1,10 @@
 import supertest from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { preparedUser, superUser } from './prepeared-data';
-import { UserViewModel } from '../../src/modules/super-admin/api/dto/userView.model';
+
 import { isUUID } from 'class-validator';
-import { UserDto } from '../../src/modules/super-admin/api/dto/userDto';
+import {UserViewModel} from "../../src/modules/super-admin/api/dto/user.view.model";
+
 
 export const createNewUser = async (
   request: typeof supertest,
@@ -38,7 +39,7 @@ export const createNewUser = async (
   return user;
 };
 
-export const createErrorMessage = (fields) => {
+export const getErrorMessage = (fields) => {
   const errorsMessages = [];
   for (let i = 0, length = fields.length; i < length; i++) {
     errorsMessages.push({

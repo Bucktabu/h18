@@ -7,12 +7,12 @@ import { UserBanInfo } from "./userBanInfo";
 import { Security } from "../../../public/security/infrastructure/entity/security";
 import { EmailConfirmation } from "./email-confirmation.entity";
 import { Blogs } from "../../../public/blogs/infrastructure/entity/blogs.entity";
-// import {
-//   BannedUsersForBlog,
-// } from "./banned-users-for-blog.entity";
-// import {Comments} from "../../../public/comments/infrastructure/entity/comments.entity";
-// import {CommentReactions} from "../../../public/likes/infrastructure/entity/comment-reactions.entity";
-// import {PostReactions} from "../../../public/likes/infrastructure/entity/post-reactions.entity";
+import {
+  BannedUsersForBlog,
+} from "./banned-users-for-blog.entity";
+import {Comments} from "../../../public/comments/infrastructure/entity/comments.entity";
+import {CommentReactions} from "../../../public/likes/infrastructure/entity/comment-reactions.entity";
+import {PostReactions} from "../../../public/likes/infrastructure/entity/post-reactions.entity";
 
 @Entity()
 export class Users {
@@ -22,11 +22,11 @@ export class Users {
 
   @Column() email: string;
 
-  @Column() password_salt: string;
+  @Column() passwordSalt: string;
 
-  @Column() password_hash: string;
+  @Column() passwordHash: string;
 
-  @Column() created_at: string;
+  @Column() createdAt: string;
 
   @OneToOne(() => UserBanInfo, bi => bi.user)
   banInfo: UserBanInfo
@@ -40,15 +40,15 @@ export class Users {
   @OneToMany(() => Blogs, b => b.blogger)
   blogs: Blogs[]
 
-  // @OneToMany(() => BannedUsersForBlog, bu => bu.user)
-  // bannedForBlog: BannedUsersForBlog[]
-  //
-  // @OneToMany(() => Comments, c => c.user)
-  // comments: Comments[]
-  //
-  // @OneToMany(() => CommentReactions, r => r.user)
-  // cReactions: CommentReactions[]
-  //
-  // @OneToMany(() => CommentReactions, r => r.user)
-  // pReactions: PostReactions[]
+  @OneToMany(() => BannedUsersForBlog, bu => bu.user)
+  bannedForBlog: BannedUsersForBlog[]
+
+  @OneToMany(() => Comments, c => c.user)
+  comments: Comments[]
+
+  @OneToMany(() => CommentReactions, r => r.user)
+  cReactions: CommentReactions[]
+
+  @OneToMany(() => CommentReactions, r => r.user)
+  pReactions: PostReactions[]
 }

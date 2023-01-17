@@ -10,19 +10,6 @@ export class QueryParametersDto {
 
   @IsEnum(SortParametersModel)
   @IsOptional()
-  @Transform(({ value }) => {
-    if (!value) return;
-    switch (value) {
-      case 'youtubeUrl':
-        return (value = SortParametersModel.YoutubeUrl);
-      case 'blogId':
-        return (value = SortParametersModel.BlogId);
-      case 'createdAt':
-        return (value = SortParametersModel.CreatedAt);
-      default:
-        return value;
-    }
-  })
   sortBy: string = SortParametersModel.CreatedAt;
 
   @IsEnum(SortDirections)

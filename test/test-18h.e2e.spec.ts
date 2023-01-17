@@ -6,6 +6,7 @@ import { preparedUser, superUser } from './helper/prepeared-data';
 import { createApp } from '../src/helpers/create-app';
 import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
 import { EmailManagerMock } from './mock/emailAdapter.mock';
+import {getErrorMessage} from "./helper/helpers";
 
 jest.setTimeout(30000);
 
@@ -32,122 +33,42 @@ describe('e2e tests', () => {
     await app.close();
   });
 
-  // describe('GET -> "/sa/users": should return status 200;' +
-  //   'content: users array with pagination; used' +
-  //   'additional methods: POST -> /sa/users;', () => {
-  //
-  //   it('Drop all data.', () => {
-  //     request(server)
-  //         .delete('/testing/all-data')
-  //         .expect(204)
-  //   })
-  //
-  //   it('Create 9 users', async () => {
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "loSer",
-  //         password: "qwerty1",
-  //         email: "email2p@gg.om"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "log01",
-  //         password: "qwerty1",
-  //         email: "emai@gg.com"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "log02",
-  //         password: "qwerty1",
-  //         email: "email2p@g.com"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "user03",
-  //         password: "qwerty1",
-  //         email: "email1p@gg.cou"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "user05",
-  //         password: "qwerty1",
-  //         email: "email1p@gg.coi"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "usr-1-01",
-  //         password: "qwerty1",
-  //         email: "email3@gg.com"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "uer15",
-  //         password: "qwerty1",
-  //         email: "emarrr1@gg.com"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "user01",
-  //         password: "qwerty1",
-  //         email: "email1p@gg.cm"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //
-  //     await request(server)
-  //       .post(`/sa/users`)
-  //       .send({
-  //         login: "user02",
-  //         password: "qwerty1",
-  //         email: "email1p@gg.com"
-  //       })
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(201)
-  //   })
-  //
-  //   it('Get users with query', async () => {
-  //     const response = await request(server)
-  //       .get('/sa/users?pageSize=15&pageNumber=1&searchLoginTerm=seR&searchEmailTerm=.com&sortDirection=asc&sortBy=login')
-  //       .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-  //       .expect(200)
-  //
-  //     const items = response.body.items
-  //     const usersLogin = items.map(i => i.login)
-  //     const expectUsersLogin = ['loSer', 'log01', 'log02', 'uer15', 'user01', 'user02', 'user03', 'user05', 'usr-1-01']
-  //
-  //     expect(expectUsersLogin).toEqual(usersLogin)
-  //   })
-  //
-  // })
+  describe('sa/users', () => {
+
+    it('Drop all data.', () => {
+      request(server)
+          .delete('/testing/all-data')
+          .expect(204)
+    })
+
+    it('Unauthorized sa try create user', async () => {
+      await request(server)
+        .post(`/sa/users`)
+        .send(preparedUser.valid)
+        .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
+        .expect(401)
+    })
+
+      it('Sa try create user with short input data', async () => {
+          const response = await request(server)
+              .post(`/sa/users`)
+              .send(preparedUser.short)
+              .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+              .expect(400)
+
+          expect(response.body).toEqual(getErrorMessage(['login', 'password', 'email']))
+      })
+
+      it('Sa try create user with long input data', async () => {
+          const response = await request(server)
+              .post(`/sa/users`)
+              .send(preparedUser.long)
+              .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+              .expect(400)
+
+          expect(response.body).toEqual(getErrorMessage(['login', 'password', 'email']))
+      })
+  })
 
   describe(
     'DELETE -> /security/devices/:deviceId: should' +
