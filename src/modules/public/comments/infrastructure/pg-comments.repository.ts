@@ -16,12 +16,12 @@ export class PgCommentsRepository {
   ): Promise<CommentViewModel | null> {
     const query = `
       INSERT INTO public.comments
-             (id, content, created_at, "postId", "userId")
+             (id, content, "createdAt", "postId", "userId")
       VALUES ($1, $2, $3, $4, $5)
-             RETURNING (id, content, userId, created_at AS "createdAt",
-                        (SELECT login AS "userLogin"
-                           FROM public.users
-                          WHERE users.id = '${newComment.userId}'));       
+             RETURNING id, content, userId, "createdAt",
+                       (SELECT login AS "userLogin"
+                          FROM public.users
+                         WHERE users.id = '${newComment.userId}');       
     `
     const result = await this.dataSource.query(query, [
       newComment.id,
@@ -31,24 +31,7 @@ export class PgCommentsRepository {
       newComment.userId,
     ]);
 
-    try {
-      const commentArr = result[0].row.slice(1, -1).split(',');
-
-      return {
-        id: commentArr[0],
-        content: commentArr[1],
-        userId: commentArr[2],
-        userLogin: commentArr[4],
-        createdAt: commentArr[3],
-        likesInfo: {
-          likesCount: 0,
-          dislikesCount: 0,
-          myStatus: 'None'
-        }
-      }
-    } catch (e) {
-      return null
-    }
+    return result[0]
   }
 
   // async updateComment(commentId: string, comment: string): Promise<boolean> {

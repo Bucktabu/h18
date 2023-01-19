@@ -12,9 +12,9 @@ export class Blogs {
 
   @Column() description: string;
 
-  @Column() website_url: string;
+  @Column() websiteUrl: string;
 
-  @Column() created_at: string;
+  @Column() createdAt: string;
 
   @ManyToOne(() => Users, u => u.blogs)
   @JoinColumn()

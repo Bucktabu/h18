@@ -39,7 +39,6 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() dto: UserDto): Promise<UserViewModelWithBanInfo> {
-    console.log('user Controller');
     return this.createUserUseCase.execute(dto);
   }
 

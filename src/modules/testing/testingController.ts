@@ -10,11 +10,17 @@ export class TestingController {
   @HttpCode(204)
   async deleteAll() {
     await this.dataSource.query(`
-      DELETE FROM users;
+      DELETE FROM post_reactions,  
+      DELETE FROM security,      
+      DELETE FROM banned_blog,
+      DELETE FROM banned_users_for_blog,
+      DELETE FROM comments,
+      DELETE FROM comment_reactions,
       DELETE FROM user_ban_info;
       DELETE FROM security;
       DELETE FROM email_confirmation;
       DELETE FROM token_black_list;
+      DELETE FROM users;
     `);
   }
 

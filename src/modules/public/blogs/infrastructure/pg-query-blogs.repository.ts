@@ -6,6 +6,8 @@ import {giveSkipNumber, paginationContentPage} from "../../../../helper.function
 import {ContentPageModel} from "../../../../global-model/contentPage.model";
 import { dbBlogWithAdditionalInfo} from "./entity/blog-db.model";
 import {toBlogWithAdditionalInfoModel} from "../../../../data-mapper/to-blog-with-additional-info.model";
+import {BlogViewModel} from "../api/dto/blogView.model";
+import {query} from "express";
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -15,7 +17,7 @@ export class PgQueryBlogsRepository {
     async getBlogs(queryDto: QueryParametersDto, userId?: string): Promise<ContentPageModel> {
         const filter = this.getFilter(userId)
         const query = `
-            SELECT id, title AS name, description, website_url AS "websiteUrl", created_at AS "createdAt"
+            SELECT id, title AS name, description, "websiteUrl", "createdAt"
               FROM public.blogs
                    ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
@@ -46,10 +48,10 @@ export class PgQueryBlogsRepository {
         const filter = this.searchNameFilter(queryDto)
 
         const blogsQuery = `
-            SELECT b.id, b.title AS name, b.description, b.website_url AS "websiteUrl", b.created_at AS "createdAt"
+            SELECT b.id, b.title AS name, b.description, b."websiteUrl", b."createdAt"
                    u.id AS "userId", u.login AS "userLogin",
-                   (SELECT ban_status AS "isBanned" FROM public.banned_blog WHERE "blogId" = b.id),
-                   (SELECT ban_date AS "banDate" FROM public.banned_blog WHERE "blogId" = b.id) 
+                   (SELECT "isBanned" FROM public.banned_blog WHERE "blogId" = b.id),
+                   (SELECT "banDate" FROM public.banned_blog WHERE "blogId" = b.id) 
               FROM public.blogs
               LEFT JOIN public.users u
                 ON b."bloggerId" = u.id
@@ -59,7 +61,7 @@ export class PgQueryBlogsRepository {
                 queryDto.pageNumber,
                 queryDto.pageSize,
              )};
-        `// TODO if i don't create a column in ban_info table
+        `
         const blogsDB: dbBlogWithAdditionalInfo[] = await this.dataSource.query(blogsQuery, [queryDto.pageSize])
 
         const blogs = blogsDB.map(b => toBlogWithAdditionalInfoModel(b))
@@ -81,8 +83,26 @@ export class PgQueryBlogsRepository {
         );
     }
 
-    async getBlogById(blogId: string) {
-        return {bloggerId: 1}
+    async getBloggerId(blogId: string): Promise<BlogViewModel> {
+        const query = `
+            SELECT id, title AS name, description, "websiteUrl", "createdAt"
+              FROM public.blogs
+             WHERE id = $1
+        `
+        const result = await this.dataSource.query(query, [blogId])
+
+        return result[0]
+    }
+
+    async blogExist(blogId: string): Promise<string> {
+        const query = `
+            SELECT "bloggerId"
+              FROM public.blogs
+             WHERE id = $1
+        `
+        const result = await this.dataSource.query(query, [blogId])
+
+        return result[0].bloggerId
     }
 
     private getFilter(userId: string | null): string {

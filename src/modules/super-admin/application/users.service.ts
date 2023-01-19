@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserDBModel } from '../infrastructure/entity/userDB.model';
+import {CreatedUserModel, UserDBModel} from '../infrastructure/entity/userDB.model';
 import { BanUserDTO } from '../api/dto/ban-user.dto';
 import { PgUsersRepository } from '../infrastructure/pg-users.repository';
 import { PgEmailConfirmationRepository } from '../infrastructure/pg-email-confirmation.repository';
@@ -8,6 +8,7 @@ import { _generateHash } from '../../../helper.functions';
 import { BanInfoModel } from '../infrastructure/entity/banInfo.model';
 import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
 import { UserDto } from '../api/dto/user.dto';
+import {UserViewModelWithBanInfo} from "../api/dto/user.view.model";
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
     dto: UserDto,
     emailConfirmation: EmailConfirmationModel,
     userId: string,
-  ) {
+  ): Promise<CreatedUserModel> {
     const hash = await _generateHash(dto.password);
 
     const user = new UserDBModel(
@@ -36,12 +37,13 @@ export class UsersService {
     const banInfo = new BanInfoModel(userId, false, null, null, null);
 
     const createdUser = await this.usersRepository.createUser(user);
-    const createdBanInfo = await this.banInfoRepository.createBanInfo(banInfo);
+
+    await this.banInfoRepository.createBanInfo(banInfo);
     await this.emailConfirmationRepository.createEmailConfirmation(
       emailConfirmation,
     );
 
-    return { createdUser, createdBanInfo };
+    return createdUser;
   }
 
   async updateUserPassword(
@@ -74,9 +76,9 @@ export class UsersService {
   }
 
   async deleteUserById(userId: string): Promise<boolean> {
-    const userDeleted = await this.usersRepository.deleteUserById(userId);
     await this.banInfoRepository.deleteUserBanInfoById(userId);
     await this.emailConfirmationRepository.deleteEmailConfirmationById(userId);
+    const userDeleted = await this.usersRepository.deleteUserById(userId); // TODO mb just need cascade delete
 
     if (!userDeleted) {
       return false;

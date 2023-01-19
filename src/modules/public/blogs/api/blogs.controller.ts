@@ -30,7 +30,7 @@ export class BlogsController {
 
   @Get(':id')
   async getBlogById(@Param('id') blogId: string) {
-    const blog = await this.queryBlogsRepository.getBlogById(blogId);
+    const blog = await this.queryBlogsRepository.getBloggerId(blogId);
 
     if (!blog) {
       throw new NotFoundException();
@@ -45,7 +45,7 @@ export class BlogsController {
     @Param('id') blogId: string,
     @Req() req: Request,
   ) {
-    const post = await this.queryBlogsRepository.getBlogById(blogId);
+    const post = await this.queryBlogsRepository.getBloggerId(blogId);
 
     if (!post) {
       throw new NotFoundException();

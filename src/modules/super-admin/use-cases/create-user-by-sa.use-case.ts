@@ -19,14 +19,13 @@ export class CreateUserBySaUseCase {
       true,
     );
 
-    const userAndBanInfo = await this.usersService.createUser(
+    const createdUser = await this.usersService.createUser(
       dto,
       emailConfirmation,
       userId,
     );
     const viewUser = toCreateUserViewModel(
-      userAndBanInfo.createdUser,
-      userAndBanInfo.createdBanInfo,
+      createdUser,
     );
 
     return viewUser;

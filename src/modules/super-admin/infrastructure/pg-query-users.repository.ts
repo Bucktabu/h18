@@ -40,7 +40,7 @@ export class PgQueryUsersRepository {
 
   async getUserById(userId: string): Promise<UserDBModel | null> {
     const query = `
-      SELECT id, login, email, password_hash as "passwordHash", password_salt as "passwordSalt", created_at as "createdAt"
+      SELECT id, login, email, "passwordHash", "passwordSalt", "createdAt"
         FROM public.users
        WHERE id = $1;
     `;
@@ -54,11 +54,11 @@ export class PgQueryUsersRepository {
     const filter = this.userFilter(queryDto);
 
     const usersQuery = `
-      SELECT b.ban_date as "banDate", b.ban_reason as "banReason",
+      SELECT b."banDate", b."banReason",
              u.id, u.login
         FROM public.banned_users_for_blog b
         LEFT JOIN public.users u  
-          ON b.userId = u.id
+          ON b."userId" = u.id
        WHERE ${filter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
@@ -76,7 +76,7 @@ export class PgQueryUsersRepository {
       SELECT COUNT(b.blogId)
         FROM public.banned_users_for_blog b
         LEFT JOIN public.users u  
-          ON b.userId = u.id
+          ON b."userId" = u.id
        WHERE ${filter}
     `;
     const totalCount = await this.dataSource.query(totalCountQuery);
@@ -93,11 +93,11 @@ export class PgQueryUsersRepository {
     const filter = this.getFilter(queryDto);
 
     const usersQuery = `
-      SELECT u.id, u.login, u.email, u.created_at as "createdAt",
-             b.ban_status as "isBanned", b.ban_date as "banDate", b.ban_reason as "banReason"
+      SELECT u.id, u.login, u.email, u."createdAt",
+             b."banStatus" AS "isBanned", b."banDate", b."banReason"
         FROM public.users u
         LEFT JOIN public.user_ban_info b
-          ON u.id = b.user_id
+          ON u.id = b."userId"
        WHERE ${filter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
@@ -116,7 +116,7 @@ export class PgQueryUsersRepository {
       SELECT COUNT(u.id)
         FROM public.users u
         LEFT JOIN public.user_ban_info b
-          ON u.id = b.user_id
+          ON u.id = b."userId"
        WHERE ${filter}
     `;
     const totalCount = await this.dataSource.query(totalCountQuery);
@@ -144,10 +144,10 @@ export class PgQueryUsersRepository {
   private banFilter(query: QueryParametersDto): string {
     const { banStatus } = query;
     if (banStatus === BanStatusModel.Banned) {
-      return `b.ban_status = true`;
+      return `b."banStatus" = true`;
     }
     if (banStatus === BanStatusModel.NotBanned) {
-      return `b.ban_status = false`;
+      return `b."banStatus" = false`;
     }
     return '';
   }

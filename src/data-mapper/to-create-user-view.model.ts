@@ -7,17 +7,16 @@ import { UserViewModelWithBanInfo } from '../modules/super-admin/api/dto/user.vi
 
 export const toCreateUserViewModel = (
   user: CreatedUserModel,
-  banInfo: BanInfoModel,
 ): UserViewModelWithBanInfo => {
   return {
     id: user.id,
     login: user.login,
     email: user.email,
-    createdAt: new Date(user.createdAt).toISOString(),
+    createdAt: user.createdAt,
     banInfo: {
-      isBanned: banInfo.isBanned,
-      banDate: banInfo.banDate,
-      banReason: banInfo.banReason,
+      isBanned: false,
+      banDate: null,
+      banReason: null,
     },
   };
 };
@@ -27,7 +26,7 @@ export const toUserViewModel = (user: UserWithBanInfo) => {
     id: user.id,
     login: user.login,
     email: user.email,
-    createdAt: new Date(user.createdAt).toISOString(),
+    createdAt: user.createdAt,
     banInfo: {
       isBanned: user.isBanned,
       banDate: user.banDate,

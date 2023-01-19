@@ -21,7 +21,7 @@ export class PgQueryCommentsRepository {
         const myStatusFilter = this.myStatusFilter(userId)
 
         const query = `
-            SELECT c.id, c.content, c.created_at AS "createdAt",
+            SELECT c.id, c.content, c."createdAt",
                    (SELECT SUM("commentId") AS "likesCount"
                       FROM public.comment_reactions cr
                      WHERE cr."commentId" = c.id AND status = "Like"),
@@ -71,7 +71,7 @@ export class PgQueryCommentsRepository {
         const myStatusFilter = this.myStatusFilter(userId)
 
         const query = `
-            SELECT id, content, "userId", created_at AS "createdAt", "userId",
+            SELECT id, content, "userId", "createdAt", "userId",
                    ((SELECT login AS "userLogin" 
                       FROM public.user u
                      WHERE u.id = c."userId"),

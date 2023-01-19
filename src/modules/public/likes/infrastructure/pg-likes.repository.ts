@@ -77,7 +77,7 @@ export class PgLikesRepository {
   async updatePostReaction(userId: string, postId: string, likeStatus: string, addedAt: string): Promise<boolean> {
     const query = `
       UPDATE public.post_reactions
-         SET status = $1, added_at = $2
+         SET status = $1, "addedAt" = $2
        WHERE "userId" = $3 AND "postId" = $4
     `
     const result = await this.dataSource.query(query, [likeStatus, addedAt, userId, postId])

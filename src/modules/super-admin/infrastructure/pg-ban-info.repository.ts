@@ -3,6 +3,7 @@ import { BanInfoModel } from './entity/banInfo.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import {BanUserDto} from "../../blogger/api/dto/ban-user.dto";
+import {query} from "express";
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -48,13 +49,13 @@ export class PgBanInfoRepository {
   }
 
   async createBanInfo(banInfo: BanInfoModel): Promise<BanInfoModel> {
-    const filter = this.getCreateFilter(banInfo);
+    //const filter = this.getCreateFilter(banInfo);
 
     await this.dataSource.query(`
         INSERT INTO public.user_ban_info
                ("userId", "banStatus", "banReason", "banDate")
-        VALUES (${filter})
-    `);
+        VALUES ('${banInfo.parentId}', '${banInfo.isBanned}', null, null)
+    `)
 
     return banInfo;
   }
@@ -154,12 +155,12 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  private getCreateFilter(banInfo: BanInfoModel): string {
-    if (banInfo.banReason !== null) {
-      return `'${banInfo.parentId}', '${banInfo.isBanned}', '${banInfo.banReason}', '${banInfo.banDate}'`;
-    }
-    return `'${banInfo.parentId}', '${banInfo.isBanned}', null, null, null`;
-  }
+  // private getCreateFilter(banInfo: BanInfoModel): string {
+  //   if (banInfo.banReason !== null) {
+  //     return `'${banInfo.parentId}', '${banInfo.isBanned}', '${banInfo.banReason}', '${banInfo.banDate}'`;
+  //   }
+  //   return `'${banInfo.parentId}', '${banInfo.isBanned}', null, null`;
+  // }
 
   private getUpdateFilter(
     banStatus: boolean,

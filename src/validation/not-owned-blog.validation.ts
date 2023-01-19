@@ -9,9 +9,9 @@ export class NotOwnedBlogValidation implements PipeTransform {
   async transform(context: ExecutionContext, metadata) {
     const req = context.switchToHttp().getRequest();
 
-    const blog = await this.blogRepository.getBlogById(req.params.id);
+    const bloggerId = await this.blogRepository.getBloggerId(req.params.id);
 
-    if (blog.bloggerId !== null) {
+    if (bloggerId !== null) {
       return false;
     }
 

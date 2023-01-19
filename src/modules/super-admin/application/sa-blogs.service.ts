@@ -17,7 +17,7 @@ export class SaBlogsService {
         blogId: string,
         isBanned: boolean,
     ): Promise<boolean | null> {
-        const blog = await this.queryBlogsRepository.getBlogById(blogId)
+        const blog = await this.queryBlogsRepository.getBloggerId(blogId)
 
         if (!blog) {
             return null

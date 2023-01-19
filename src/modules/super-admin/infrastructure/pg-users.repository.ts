@@ -15,7 +15,6 @@ export class PgUsersRepository {
              RETURNING id, login, email, "createdAt"; 
     `;
 
-    try {
       const result = await this.dataSource.query(query, [
         newUser.id,
         newUser.login,
@@ -25,13 +24,7 @@ export class PgUsersRepository {
         newUser.createdAt,
       ]);
 
-
-      return result[0];
-    } catch (e) {
-      console.log('PgUsersRepository => createUser => e =>',e);
-      return null
-    }
-
+      return result[0]
   }
 
   async updateUserPassword(
@@ -53,8 +46,13 @@ export class PgUsersRepository {
   }
 
   async deleteUserById(userId: string): Promise<boolean> {
+    // const query = `
+    //   DELETE FROM public.users
+    //    WHERE id = $1;
+    // `;
+
     const query = `
-      DELETE FROM public.users
+      DELETE FROM public.users u
        WHERE id = $1;
     `;
     const result = await this.dataSource.query(query, [userId]);
