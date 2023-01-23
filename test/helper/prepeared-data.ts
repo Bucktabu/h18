@@ -25,11 +25,19 @@ export const preparedUser = {
     password: 'Length-21_GwUy2x2LASw',
     email: 'somemail@gmail.c',
   },
+  login: {
+    loginOrEmail: 'MyLogin',
+    password: 'password',
+  },
 };
 
 export const banUserDto = {
   valid: {
     isBanned: true,
+    banReason: 'Length-20_stringstri',
+  },
+  validUnBun: {
+    isBanned: false,
     banReason: 'Length-20_stringstri',
   },
   notValid: {

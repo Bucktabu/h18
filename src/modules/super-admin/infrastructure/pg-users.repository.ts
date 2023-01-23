@@ -15,16 +15,16 @@ export class PgUsersRepository {
              RETURNING id, login, email, "createdAt"; 
     `;
 
-      const result = await this.dataSource.query(query, [
-        newUser.id,
-        newUser.login,
-        newUser.email,
-        newUser.passwordSalt,
-        newUser.passwordHash,
-        newUser.createdAt,
-      ]);
+    const result = await this.dataSource.query(query, [
+      newUser.id,
+      newUser.login,
+      newUser.email,
+      newUser.passwordSalt,
+      newUser.passwordHash,
+      newUser.createdAt,
+    ]);
 
-      return result[0]
+    return result[0];
   }
 
   async updateUserPassword(

@@ -6,7 +6,7 @@ import { preparedUser, superUser } from './helper/prepeared-data';
 import { createApp } from '../src/helpers/create-app';
 import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
 import { EmailManagerMock } from './mock/emailAdapter.mock';
-import {getErrorMessage} from "./helper/helpers";
+import { getErrorMessage } from './helper/helpers';
 
 jest.setTimeout(30000);
 
@@ -34,41 +34,48 @@ describe('e2e tests', () => {
   });
 
   describe('sa/users', () => {
-
     it('Drop all data.', async () => {
-      await request(server)
-          .delete('/testing/all-data')
-          .expect(204)
-    })
+      await request(server).delete('/testing/all-data').expect(204);
+    });
 
     it('Unauthorized sa try create user', async () => {
       await request(server)
         .post(`/sa/users`)
         .send(preparedUser.valid)
-        .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
-        .expect(401)
-    })
+        .auth(superUser.notValid.login, superUser.notValid.password, {
+          type: 'basic',
+        })
+        .expect(401);
+    });
 
-      it('Sa try create user with short input data', async () => {
-          const response = await request(server)
-              .post(`/sa/users`)
-              .send(preparedUser.short)
-              .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-              .expect(400)
+    it('Sa try create user with short input data', async () => {
+      const response = await request(server)
+        .post(`/sa/users`)
+        .send(preparedUser.short)
+        .auth(superUser.valid.login, superUser.valid.password, {
+          type: 'basic',
+        })
+        .expect(400);
 
-          expect(response.body).toEqual(getErrorMessage(['login', 'password', 'email']))
-      })
+      expect(response.body).toEqual(
+        getErrorMessage(['login', 'password', 'email']),
+      );
+    });
 
-      it('Sa try create user with long input data', async () => {
-          const response = await request(server)
-              .post(`/sa/users`)
-              .send(preparedUser.long)
-              .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-              .expect(400)
+    it('Sa try create user with long input data', async () => {
+      const response = await request(server)
+        .post(`/sa/users`)
+        .send(preparedUser.long)
+        .auth(superUser.valid.login, superUser.valid.password, {
+          type: 'basic',
+        })
+        .expect(400);
 
-          expect(response.body).toEqual(getErrorMessage(['login', 'password', 'email']))
-      })
-  })
+      expect(response.body).toEqual(
+        getErrorMessage(['login', 'password', 'email']),
+      );
+    });
+  });
 
   describe(
     'DELETE -> /security/devices/:deviceId: should' +

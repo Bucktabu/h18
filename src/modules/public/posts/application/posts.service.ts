@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import {PgBanInfoRepository} from "../../../super-admin/infrastructure/pg-ban-info.repository";
-import {PgLikesRepository} from "../../likes/infrastructure/pg-likes.repository";
-import {ReactionModel} from "../../../../global-model/reaction.model";
-import {PostDto} from "../../../blogger/api/dto/post.dto";
-import {PostViewModel} from "../api/dto/postsView.model";
-import {PostDBModel} from "../infrastructure/entity/post-db.model";
+import { PgBanInfoRepository } from '../../../super-admin/infrastructure/pg-ban-info.repository';
+import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
+import { ReactionModel } from '../../../../global-model/reaction.model';
+import { PostDto } from '../../../blogger/api/dto/post.dto';
+import { PostViewModel } from '../api/dto/postsView.model';
+import { PostDBModel } from '../infrastructure/entity/post-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import {PgPostsRepository} from "../infrastructure/pg-posts-repository.service";
+import { PgPostsRepository } from '../infrastructure/pg-posts-repository.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     protected banInfoRepository: PgBanInfoRepository,
     protected likesRepository: PgLikesRepository,
-    protected postsRepository: PgPostsRepository
+    protected postsRepository: PgPostsRepository,
   ) {}
 
   async checkUserBanStatus(userId: string, postId: string): Promise<boolean> {
@@ -21,16 +21,16 @@ export class PostsService {
   }
 
   async createPost(
-      dto: PostDto,
-      blogId: string,
+    dto: PostDto,
+    blogId: string,
   ): Promise<PostViewModel | null> {
     const newPost = new PostDBModel(
-        uuidv4(),
-        dto.title,
-        dto.shortDescription,
-        dto.content,
-        new Date().toISOString(),
-        blogId
+      uuidv4(),
+      dto.title,
+      dto.shortDescription,
+      dto.content,
+      new Date().toISOString(),
+      blogId,
     );
 
     return await this.postsRepository.createPost(newPost);
@@ -38,12 +38,17 @@ export class PostsService {
 
   async updatePostReaction(userId, postId, likeStatus): Promise<boolean> {
     if (likeStatus === ReactionModel.None) {
-      return await this.likesRepository.deleteReaction(userId, postId)
+      return await this.likesRepository.deleteReaction(userId, postId);
     }
 
-    const addedAt = new Date().toISOString()
+    const addedAt = new Date().toISOString();
 
-    return await this.likesRepository.updatePostReaction(userId, postId, likeStatus, addedAt)
+    return await this.likesRepository.updatePostReaction(
+      userId,
+      postId,
+      likeStatus,
+      addedAt,
+    );
   }
 
   async updatePost(postId: string, dto: PostDto): Promise<boolean> {

@@ -24,9 +24,7 @@ export class CreateUserBySaUseCase {
       emailConfirmation,
       userId,
     );
-    const viewUser = toCreateUserViewModel(
-      createdUser,
-    );
+    const viewUser = toCreateUserViewModel(createdUser);
 
     return viewUser;
   }

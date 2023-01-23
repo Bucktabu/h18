@@ -1,4 +1,4 @@
-import {BlogDBModel} from "../modules/public/blogs/infrastructure/entity/blog-db.model";
+import { BlogDBModel } from '../modules/public/blogs/infrastructure/entity/blog-db.model';
 
 export const toBlogViewModel = (blogDB: BlogDBModel) => {
   return {

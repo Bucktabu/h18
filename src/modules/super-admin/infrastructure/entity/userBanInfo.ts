@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-import { Users } from "./users";
-
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Users } from './users';
 
 @Entity()
 export class UserBanInfo {
@@ -10,7 +9,7 @@ export class UserBanInfo {
 
   @Column({ default: null }) banReason: string | null;
 
-  @OneToOne(() => Users, u => u.banInfo)
+  @OneToOne(() => Users, (u) => u.banInfo)
   @JoinColumn()
   user: Users;
   @PrimaryColumn() userId: string;

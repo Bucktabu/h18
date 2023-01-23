@@ -1,27 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { BlogViewModel } from '../api/dto/blogView.model';
-import {BlogDto} from "../../../blogger/api/dto/blog.dto";
-import {BlogDBModel} from "../infrastructure/entity/blog-db.model";
+import { BlogDto } from '../../../blogger/api/dto/blog.dto';
+import { BlogDBModel } from '../infrastructure/entity/blog-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import {PgBlogsRepository} from "../infrastructure/pg-blogs.repository";
+import { PgBlogsRepository } from '../infrastructure/pg-blogs.repository';
 
 @Injectable()
 export class BlogsService {
-  constructor(
-    protected blogsRepository: PgBlogsRepository,
-  ) {}
+  constructor(protected blogsRepository: PgBlogsRepository) {}
 
   async createBlog(
-      userId: string,
-      inputModel: BlogDto,
+    userId: string,
+    inputModel: BlogDto,
   ): Promise<BlogViewModel | null> {
     const newBlog = new BlogDBModel(
-        uuidv4(),
-        inputModel.name,
-        inputModel.description,
-        inputModel.websiteUrl,
-        new Date().toISOString(),
-        userId
+      uuidv4(),
+      inputModel.name,
+      inputModel.description,
+      inputModel.websiteUrl,
+      new Date().toISOString(),
+      userId,
     );
 
     return await this.blogsRepository.createBlog(newBlog);

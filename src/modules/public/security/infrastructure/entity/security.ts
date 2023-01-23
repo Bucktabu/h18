@@ -1,5 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { Users } from "../../../../super-admin/infrastructure/entity/users";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Users } from '../../../../super-admin/infrastructure/entity/users';
 
 @Entity()
 export class Security {
@@ -13,8 +13,8 @@ export class Security {
 
   @Column() exp: string;
 
-  @ManyToOne(() => Users, u => u.security)
+  @ManyToOne(() => Users, (u) => u.security)
   @JoinColumn()
-  user: Users
+  user: Users;
   @Column() userId: string;
 }

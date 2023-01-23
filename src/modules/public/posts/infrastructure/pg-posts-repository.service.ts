@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PostDBModel } from './entity/post-db.model';
 import { PostDto } from '../../../blogger/api/dto/post.dto';
-import {InjectDataSource} from "@nestjs/typeorm";
-import {DataSource} from "typeorm";
-import {PostViewModel} from "../api/dto/postsView.model";
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { PostViewModel } from '../api/dto/postsView.model';
 
 @Injectable()
 export class PgPostsRepository {
@@ -22,12 +22,12 @@ export class PgPostsRepository {
       newPost.shortDescription,
       newPost.content,
       newPost.createdAt,
-      newPost.blogId
+      newPost.blogId,
     ]);
 
     const postArr = result[0].row.slice(1, -1).split(',');
 
-    return  {
+    return {
       id: postArr[0],
       title: postArr[1],
       shortDescription: postArr[2],
@@ -40,7 +40,7 @@ export class PgPostsRepository {
         dislikesCount: 0,
         newestLikes: [],
       },
-    }
+    };
   }
 
   async updatePost(postId: string, dto: PostDto): Promise<boolean> {
@@ -48,8 +48,13 @@ export class PgPostsRepository {
       UPDATE public.posts
          SET title = $1, shortDescription = $2, content = $3
        WHERE id = $4  
-    `
-    const result = await this.dataSource.query(query, [dto.title, dto.shortDescription, dto.content, postId])
+    `;
+    const result = await this.dataSource.query(query, [
+      dto.title,
+      dto.shortDescription,
+      dto.content,
+      postId,
+    ]);
 
     if (result[1] !== 1) {
       return false;

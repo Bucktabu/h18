@@ -10,13 +10,13 @@ export class BlogDBModel {
 }
 
 export class dbBlogWithAdditionalInfo {
-  id: string
-  name: string
-  description: string
-  websiteUrl: string
-  createdAt: string
-  userId: string
-  userLogin: string
-  isBanned: boolean
-  banDate: string
+  id: string;
+  name: string;
+  description: string;
+  websiteUrl: string;
+  createdAt: string;
+  userId: string;
+  userLogin: string;
+  isBanned: boolean;
+  banDate: string;
 }

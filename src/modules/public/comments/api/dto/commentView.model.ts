@@ -14,22 +14,22 @@ export class CommentViewModel {
 }
 
 export class CommentWithAdditionalInfo {
-    id: string
-    content: string
-    createdAt: string
-    likesInfo: {
-        likesCount: number
-        dislikesCount: number
-        muStatus: string
-    }
-    commentatorInfo: {
-        userId: string
-        userLogin: string
-    }
-    postInfo: {
-        id: string
-        title: string
-        blogId: string
-        blogName: string
-    }
+  id: string;
+  content: string;
+  createdAt: string;
+  likesInfo: {
+    likesCount: number;
+    dislikesCount: number;
+    muStatus: string;
+  };
+  commentatorInfo: {
+    userId: string;
+    userLogin: string;
+  };
+  postInfo: {
+    id: string;
+    title: string;
+    blogId: string;
+    blogName: string;
+  };
 }

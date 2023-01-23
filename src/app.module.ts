@@ -28,55 +28,89 @@ import { PgQuerySecurityRepository } from './modules/public/security/infrastruct
 import { CreateUserUseCase } from './modules/super-admin/use-cases/create-user.use-case';
 import { PgQueryUsersRepository } from './modules/super-admin/infrastructure/pg-query-users.repository';
 import { EmailResendingValidator } from './validation/email-resending.validator';
-import { Security } from "./modules/public/security/infrastructure/entity/security";
-import { TokenBlackList } from "./modules/public/auth/infrastructure/entity/tokenBlackList";
-import { Blogs } from "./modules/public/blogs/infrastructure/entity/blogs.entity";
-import {Posts} from "./modules/public/posts/infrastructure/entity/posts.entity";
-import {BannedBlog} from "./modules/super-admin/infrastructure/entity/banned_blog.entity";
-import {BannedUsersForBlog} from "./modules/super-admin/infrastructure/entity/banned-users-for-blog.entity";
-import {CommentReactions} from "./modules/public/likes/infrastructure/entity/comment-reactions.entity";
-import {PostReactions} from "./modules/public/likes/infrastructure/entity/post-reactions.entity";
-import {Comments} from "./modules/public/comments/infrastructure/entity/comments.entity";
-
+import { Security } from './modules/public/security/infrastructure/entity/security';
+import { TokenBlackList } from './modules/public/auth/infrastructure/entity/tokenBlackList';
+import { Blogs } from './modules/public/blogs/infrastructure/entity/blogs.entity';
+import { Posts } from './modules/public/posts/infrastructure/entity/posts.entity';
+import { BannedBlog } from './modules/super-admin/infrastructure/entity/banned_blog.entity';
+import { BannedUsersForBlog } from './modules/super-admin/infrastructure/entity/banned-users-for-blog.entity';
+import { CommentReactions } from './modules/public/likes/infrastructure/entity/comment-reactions.entity';
+import { PostReactions } from './modules/public/likes/infrastructure/entity/post-reactions.entity';
+import { Comments } from './modules/public/comments/infrastructure/entity/comments.entity';
+import { BloggerBlogsController } from "./modules/blogger/api/blogger-blogs.controller";
+import { BloggerUsersController } from "./modules/blogger/api/blogger-users.controller";
+import { BloggerBlogService } from "./modules/blogger/application/blogger-blogs.service";
+import { BlogsController } from "./modules/public/blogs/api/blogs.controller";
+import { BlogsService } from "./modules/public/blogs/application/blogs.service";
+import { PgBlogsRepository } from "./modules/public/blogs/infrastructure/pg-blogs.repository";
+import { PgQueryBlogsRepository } from "./modules/public/blogs/infrastructure/pg-query-blogs.repository";
+import { CommentsService } from "./modules/public/comments/application/comments.service";
+import { PgCommentsRepository } from "./modules/public/comments/infrastructure/pg-comments.repository";
+import { PgQueryCommentsRepository } from "./modules/public/comments/infrastructure/pg-query-comments.repository";
+import { PgLikesRepository } from "./modules/public/likes/infrastructure/pg-likes.repository";
+import { PostsController } from "./modules/public/posts/api/posts.controller";
+import { PostsService } from "./modules/public/posts/application/posts.service";
+import { PgPostsRepository } from "./modules/public/posts/infrastructure/pg-posts-repository.service";
+import { PgQueryPostsRepository } from "./modules/public/posts/infrastructure/pg-query-posts.repository";
+import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller";
+import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 
 const controllers = [
   AuthController,
+  BlogsController,
+  BloggerBlogsController,
+  BloggerUsersController,
+  SaBlogsController,
   SecurityController,
   TestingController,
   UsersController,
 ];
 
- const entity = [
-   Blogs,
-   BannedBlog,
-   BannedUsersForBlog,
-   Comments,
-   CommentReactions,
-   EmailConfirmation,
-   Posts,
-   PostReactions,
-   TokenBlackList,
-   Security,
-   Users,
-   UserBanInfo,
- ];
+const entity = [
+  Blogs,
+  BannedBlog,
+  BannedUsersForBlog,
+  Comments,
+  CommentReactions,
+  EmailConfirmation,
+  Posts,
+  PostReactions,
+  TokenBlackList,
+  Security,
+  Users,
+  UserBanInfo,
+];
 
 const repositories = [
   PgBanInfoRepository,
+  PgBlogsRepository,
+  PgQueryBlogsRepository,
+  PgCommentsRepository,
+  PgQueryCommentsRepository,
   PgEmailConfirmationRepository,
+  PgLikesRepository,
   PgJwtRepository,
+  PostsController,
+  PgQueryPostsRepository,
+  PgPostsRepository,
   PgSecurityRepository,
   PgQuerySecurityRepository,
   PgUsersRepository,
   PgQueryUsersRepository,
+
 ];
 
 const services = [
   AuthService,
+  BlogsService,
+  BloggerBlogService,
+  CommentsService,
   EmailAdapters,
   EmailManager,
   EmailConfirmationService,
   JwtService,
+  PostsService,
+  SaBlogsService,
   SecurityService,
   UsersService,
 ];

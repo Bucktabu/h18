@@ -44,7 +44,7 @@ export class PgEmailConfirmationRepository {
     if (!result.length) {
       return null;
     }
-    return result[0]["isConfirmed"];
+    return result[0]['isConfirmed'];
   }
 
   async createEmailConfirmation(

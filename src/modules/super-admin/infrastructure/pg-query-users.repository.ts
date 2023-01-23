@@ -11,14 +11,14 @@ import { BanStatusModel } from '../../../global-model/ban-status.model';
 import { toUserViewModel } from '../../../data-mapper/to-create-user-view.model';
 import { ContentPageModel } from '../../../global-model/contentPage.model';
 import { SortParametersModel } from '../../../global-model/sort-parameters.model';
-import {toBannedUsersModel} from "../../../data-mapper/to-banned-users.model";
-import {DbBannedUsersModel} from "./entity/db-banned-users.model";
+import { toBannedUsersModel } from '../../../data-mapper/to-banned-users.model';
+import { DbBannedUsersModel } from './entity/db-banned-users.model';
 
 @Injectable()
 export class PgQueryUsersRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async isLoginOrEmailExistForValidation (loginOrEmail: string) {
+  async isLoginOrEmailExistForValidation(loginOrEmail: string) {
     const query = `SELECT id FROM public.users WHERE login = $1 OR email = $1`;
     const result = await this.dataSource.query(query, [loginOrEmail]);
 
@@ -50,7 +50,10 @@ export class PgQueryUsersRepository {
     return result[0];
   }
 
-  async getBannedUsers(blogId: string, queryDto:QueryParametersDto): Promise<ContentPageModel> {
+  async getBannedUsers(
+    blogId: string,
+    queryDto: QueryParametersDto,
+  ): Promise<ContentPageModel> {
     const filter = this.userFilter(queryDto);
 
     const usersQuery = `
@@ -59,18 +62,19 @@ export class PgQueryUsersRepository {
         FROM public.banned_users_for_blog b
         LEFT JOIN public.users u  
           ON b."userId" = u.id
-       WHERE ${filter}
+       ${filter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
          queryDto.pageNumber,
          queryDto.pageSize,
        )};
-    `
-    const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(usersQuery, [
-      queryDto.pageSize,
-    ]);
+    `;
+    const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(
+      usersQuery,
+      [queryDto.pageSize],
+    );
 
-    const bannedUsers = bannedUsersDB.map(u => toBannedUsersModel(u))
+    const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
 
     const totalCountQuery = `
       SELECT COUNT(b.blogId)
@@ -82,10 +86,10 @@ export class PgQueryUsersRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-        bannedUsers,
-        Number(totalCount[0].count),
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      bannedUsers,
+      Number(totalCount[0].count),
     );
   }
 
@@ -98,14 +102,13 @@ export class PgQueryUsersRepository {
         FROM public.users u
         LEFT JOIN public.user_ban_info b
           ON u.id = b."userId"
-       WHERE ${filter}
+       ${filter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
          queryDto.pageNumber,
          queryDto.pageSize,
        )};
     `;
-
     const usersDB = await this.dataSource.query(usersQuery, [
       queryDto.pageSize,
     ]);
@@ -117,7 +120,7 @@ export class PgQueryUsersRepository {
         FROM public.users u
         LEFT JOIN public.user_ban_info b
           ON u.id = b."userId"
-       WHERE ${filter}
+       ${filter}
     `;
     const totalCount = await this.dataSource.query(totalCountQuery);
 
@@ -134,10 +137,10 @@ export class PgQueryUsersRepository {
     const userFilter = this.userFilter(query);
 
     if (banFilter && userFilter) {
-      return `${banFilter} AND ${userFilter}`;
+      return `WHERE ${banFilter} AND ${userFilter}`;
     }
-    if (banFilter) return `${banFilter}`;
-    if (userFilter) return `${userFilter}`;
+    if (banFilter) return `WHERE ${banFilter}`;
+    if (userFilter) return `WHERE ${userFilter}`;
     return '';
   }
 
@@ -162,7 +165,7 @@ export class PgQueryUsersRepository {
     if (searchLoginTerm && searchEmailTerm) {
       return `${login} OR ${email}`;
     }
-    if (login) return login;
+    if (searchLoginTerm) return login;
     if (searchEmailTerm) return email;
     return '';
   }

@@ -3,8 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { preparedUser, superUser } from './prepeared-data';
 
 import { isUUID } from 'class-validator';
-import {UserViewModel} from "../../src/modules/super-admin/api/dto/user.view.model";
-
+import { UserViewModel } from '../../src/modules/super-admin/api/dto/user.view.model';
 
 export const createNewUser = async (
   request: typeof supertest,

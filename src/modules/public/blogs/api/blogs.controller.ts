@@ -10,14 +10,14 @@ import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../../posts/application/posts.service';
 import { Request } from 'express';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import {PgQueryBlogsRepository} from "../infrastructure/pg-query-blogs.repository";
-import {PgQueryPostsRepository} from "../../posts/infrastructure/pg-query-posts.repository";
+import { PgQueryBlogsRepository } from '../infrastructure/pg-query-blogs.repository';
+import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     protected queryBlogsRepository: PgQueryBlogsRepository,
-    protected queryPostsRepository: PgQueryPostsRepository
+    protected queryPostsRepository: PgQueryPostsRepository,
   ) {}
 
   @Get()
@@ -30,7 +30,7 @@ export class BlogsController {
 
   @Get(':id')
   async getBlogById(@Param('id') blogId: string) {
-    const blog = await this.queryBlogsRepository.getBloggerId(blogId);
+    const blog = await this.queryBlogsRepository.getBlog(blogId);
 
     if (!blog) {
       throw new NotFoundException();
@@ -45,12 +45,16 @@ export class BlogsController {
     @Param('id') blogId: string,
     @Req() req: Request,
   ) {
-    const post = await this.queryBlogsRepository.getBloggerId(blogId);
+    const post = await this.queryBlogsRepository.getBlog(blogId);
 
     if (!post) {
       throw new NotFoundException();
     }
 
-    return this.queryPostsRepository.getPosts(query, blogId, req.headers.authorization);
+    return this.queryPostsRepository.getPosts(
+      query,
+      blogId,
+      req.headers.authorization,
+    );
   }
 }

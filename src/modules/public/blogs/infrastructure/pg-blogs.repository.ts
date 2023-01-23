@@ -2,15 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { BlogDto } from '../../../blogger/api/dto/blog.dto';
 import { BanStatusModel } from '../../../../global-model/ban-status.model';
 import { BindBlogDto } from '../../../super-admin/api/dto/bind-blog.dto';
-import {InjectDataSource} from "@nestjs/typeorm";
-import {DataSource} from "typeorm";
-import {BlogDBModel} from "./entity/blog-db.model";
-import {BlogViewModel} from "../api/dto/blogView.model";
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { BlogDBModel } from './entity/blog-db.model';
+import { BlogViewModel } from '../api/dto/blogView.model';
 
 @Injectable()
 export class PgBlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
     const query = `
@@ -18,17 +17,17 @@ export class PgBlogsRepository {
              (id, title, description, "websiteUrl", "createdAt", "bloggerId")
       VAlUES ($1, $2, $3, $4, $5, $6)  
              RETURNING id, title, description, "websiteUrl", "createdAt"
-    `
+    `;
     const result = await this.dataSource.query(query, [
       newBlog.id,
       newBlog.name,
       newBlog.description,
       newBlog.websiteUrl,
       newBlog.createdAt,
-      newBlog.userId
+      newBlog.userId,
     ]);
 
-    return result[0]
+    return result[0];
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {
@@ -36,8 +35,11 @@ export class PgBlogsRepository {
       UPDATE public.blogs
          SET "bloggerId" = $1
        WHERE id = $2
-    `
-    const result = await this.dataSource.query(query, [params.userId, params.id])
+    `;
+    const result = await this.dataSource.query(query, [
+      params.userId,
+      params.id,
+    ]);
 
     if (result[1] !== 1) {
       return false;
@@ -50,8 +52,13 @@ export class PgBlogsRepository {
       UPDATE public.blogs
          SET title = $1, description = $2, "websiteUrl" = $3
        WHERE id = $4
-    `
-    const result = await this.dataSource.query(query, [dto.name, dto.description, dto.websiteUrl, id])
+    `;
+    const result = await this.dataSource.query(query, [
+      dto.name,
+      dto.description,
+      dto.websiteUrl,
+      id,
+    ]);
 
     if (result[1] !== 1) {
       return false;

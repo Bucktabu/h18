@@ -4,7 +4,7 @@ import { CommentBDModel } from '../infrastructure/entity/commentDB.model';
 import { CommentViewModel } from '../api/dto/commentView.model';
 import { v4 as uuidv4 } from 'uuid';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
-import {PgQueryPostsRepository} from "../../posts/infrastructure/pg-query-posts.repository";
+import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
 
 @Injectable()
 export class CommentsService {

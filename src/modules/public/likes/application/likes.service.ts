@@ -1,11 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {PgLikesRepository} from "../infrastructure/pg-likes.repository";
+import { PgLikesRepository } from '../infrastructure/pg-likes.repository';
 
 @Injectable()
 export class LikesService {
-  constructor(
-    protected likesRepository: PgLikesRepository,
-  ) {}
+  constructor(protected likesRepository: PgLikesRepository) {}
 
   // async getReactionAndReactionCount(id: string, userId: string) {
   //   let reaction = 'None';

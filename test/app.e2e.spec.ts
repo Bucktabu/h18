@@ -109,7 +109,7 @@ describe('e2e tests', () => {
   //
   //     expect.setState({ user1: response.body })
   //   })
-  //
+
   //   it('Shouldn`t create new user. 400 - Existed login and email.', async () => {
   //     const response = await request(server)
   //       .post('/sa/users')

@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import {CreatedUserModel, UserDBModel} from '../infrastructure/entity/userDB.model';
+import {
+  CreatedUserModel,
+  UserDBModel,
+} from '../infrastructure/entity/userDB.model';
 import { BanUserDTO } from '../api/dto/ban-user.dto';
 import { PgUsersRepository } from '../infrastructure/pg-users.repository';
 import { PgEmailConfirmationRepository } from '../infrastructure/pg-email-confirmation.repository';
@@ -8,7 +11,7 @@ import { _generateHash } from '../../../helper.functions';
 import { BanInfoModel } from '../infrastructure/entity/banInfo.model';
 import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
 import { UserDto } from '../api/dto/user.dto';
-import {UserViewModelWithBanInfo} from "../api/dto/user.view.model";
+import { UserViewModelWithBanInfo } from '../api/dto/user.view.model';
 
 @Injectable()
 export class UsersService {
@@ -37,7 +40,6 @@ export class UsersService {
     const banInfo = new BanInfoModel(userId, false, null, null, null);
 
     const createdUser = await this.usersRepository.createUser(user);
-
     await this.banInfoRepository.createBanInfo(banInfo);
     await this.emailConfirmationRepository.createEmailConfirmation(
       emailConfirmation,
