@@ -16,7 +16,7 @@ import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned
 export class Blogs {
   @PrimaryColumn('uuid') id: string;
 
-  @Column() title: string;
+  @Column() name: string;
 
   @Column() description: string;
 

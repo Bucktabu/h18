@@ -24,16 +24,16 @@ export class PgQueryPostsRepository {
     const blogIdFilter = this.getBlogIdFilter(blogId);
 
     const query = `
-            SELECT id, title, short_description AS "shortDescription", content, created_at AS "createdAt", "blogId",
-                   (SELECT title AS "blogName" FROM public.blogs WHERE id.blogs = "blogId".posts),
-                   (SELECT SUM("postID") AS "likesCount"
+            SELECT id, title, "shortDescription", content, "createdAt", "blogId",
+                   (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+                   (SELECT COUNT("postId")
                       FROM public.post_reactions
-                     WHERE "postId".post_reactions = id.posts AND status = "Like"),
-                   (SELECT SUM("postID") AS "dislikesCount"
+                     WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount"
+                   (SELECT COUNT("postId")
                       FROM public.post_reactions
-                     WHERE "postId".post_reactions = id.posts AND status = "Dislike"),
-                   (SELECT added_at AS "addedAt", "userId",
-                           (SELECT id AS "userId", login, added_at AS "addedAt"
+                     WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
+                   (SELECT "addedAt", "userId",
+                           (SELECT id AS "userId", login, "addedAt"
                               FROM public.users
                              WHERE id.users = "usersId".post_reactions)) AS "newestLikes"
                       FROM public.post_reactions
@@ -50,13 +50,28 @@ export class PgQueryPostsRepository {
     const postsDB: DbPostModel[] = await this.dataSource.query(query, [
       queryDto.pageNumber,
     ]);
-
+    // SELECT id,
+    //     (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+    // (SELECT COUNT("postId")
+    // FROM public.post_reactions
+    // WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
+    //     (SELECT COUNT("postId")
+    // FROM public.post_reactions
+    // WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount",
+    //     (SELECT "addedAt", "userId",
+    //     (SELECT id AS "userId", login, "addedAt"
+    // FROM public.users
+    // WHERE users.id = post_reactions."userId")
+    // FROM public.post_reactions
+    // WHERE post_reactions.postId = posts.id) AS "newestLikes"
+    // FROM public.posts
+    // WHERE "blogId" = '7b528e6e-49d5-4d61-9e52-2a80717bad07'
     const posts = postsDB.map((p) => toPostsViewModel(p));
 
     const totalCountQuery = `
           SELECT COUNT(id)
             FROM public.posts
-           WHERE "blogId" = $1 AND (SELECT is_banned FROM public.blogs WHERE id = $1) = false
+           WHERE "blogId" = $1 AND (SELECT "isBanned" FROM public.blogs WHERE id = $1) = false
         `;
     const totalCount = await this.dataSource.query(totalCountQuery, [blogId]);
 
@@ -75,14 +90,14 @@ export class PgQueryPostsRepository {
     const myStatusFilter = this.myStatusFilter(userId);
 
     const query = `
-            SELECT id, title, short_description AS "shortDescription", content, created_at AS "createdAt", "blogId",
-                   (SELECT title AS "blogName" FROM public.blogs WHERE id.blogs = "blogId".posts),
-                   (SELECT SUM("postID") AS "likesCount" FROM public.post_reactions WHERE "postId".post_reactions = id.posts AND status = "Like"),
-                   (SELECT SUM("postID") AS "dislikesCount" FROM public.post_reactions WHERE "postId".post_reactions = id.posts AND status = "Dislike"),
-                   (SELECT added_at AS "addedAt", "userId",
-                           (SELECT id AS "userId", login, added_at AS "addedAt" FROM public.users WHERE id.users = "usersId".post_reactions)) AS "newestLikes"
-                      FROM public.post_reactions
-                     WHERE postId.post_reactions = id.posts)
+            SELECT id, title, "shortDescription", content, "createdAt", "blogId",
+                   (SELECT title AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+                   (SELECT SUM("postID") AS "likesCount" FROM public.post_reactions WHERE post_reactions."postId" = posts.id AND status = "Like"),
+                   (SELECT SUM("postID") AS "dislikesCount" FROM public.post_reactions WHERE post_reactions."postId" = posts.id AND status = "Dislike"),
+                   (SELECT "addedAt", "userId",
+                           (SELECT id AS "userId", login, "addedAt" FROM public.users WHERE users.id = pr."usersId")) AS "newestLikes"
+                      FROM public.post_reactions pr
+                     WHERE pr."postId" = posts.id)
                    ${myStatusFilter}
               FROM public.posts
              WHERE id = $1

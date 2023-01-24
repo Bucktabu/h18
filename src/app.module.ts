@@ -50,7 +50,7 @@ import { PgQueryCommentsRepository } from "./modules/public/comments/infrastruct
 import { PgLikesRepository } from "./modules/public/likes/infrastructure/pg-likes.repository";
 import { PostsController } from "./modules/public/posts/api/posts.controller";
 import { PostsService } from "./modules/public/posts/application/posts.service";
-import { PgPostsRepository } from "./modules/public/posts/infrastructure/pg-posts-repository.service";
+import { PgPostsRepository } from "./modules/public/posts/infrastructure/pg-posts.repository";
 import { PgQueryPostsRepository } from "./modules/public/posts/infrastructure/pg-query-posts.repository";
 import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller";
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";

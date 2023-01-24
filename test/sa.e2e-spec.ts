@@ -16,10 +16,7 @@ describe('e2e tests', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      // .overrideProvider(EmailManager)
-      // .useValue(new EmailManagerMock())
-      .compile();
+    }).compile();
 
     const rawApp = await moduleFixture.createNestApplication();
     app = createApp(rawApp);

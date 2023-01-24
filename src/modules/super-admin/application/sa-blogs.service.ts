@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BindBlogDto } from '../api/dto/bind-blog.dto';
 import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-blogs.repository';
 import { PgBanInfoRepository } from '../infrastructure/pg-ban-info.repository';
-import { PgPostsRepository } from '../../public/posts/infrastructure/pg-posts-repository.service';
+import { PgPostsRepository } from '../../public/posts/infrastructure/pg-posts.repository';
 import { PgQueryBlogsRepository } from '../../public/blogs/infrastructure/pg-query-blogs.repository';
 
 @Injectable()

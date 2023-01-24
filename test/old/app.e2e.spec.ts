@@ -1,13 +1,13 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../../src/app.module';
 import request from 'supertest';
-import { banUserDto, preparedUser, superUser } from './helper/prepeared-data';
+import { banUserDto, preparedUser, superUser } from '../helper/prepeared-data';
 import { isEmail, isUUID } from 'class-validator';
-import { getErrorMessage } from './helper/helpers';
-import { createApp } from '../src/helpers/create-app';
-import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
-import { EmailManagerMock } from './mock/emailAdapter.mock';
+import { getErrorMessage } from '../helper/helpers';
+import { createApp } from '../../src/helpers/create-app';
+import { EmailManager } from '../../src/modules/public/auth/email-transfer/email.manager';
+import { EmailManagerMock } from '../mock/emailAdapter.mock';
 
 jest.setTimeout(30000);
 

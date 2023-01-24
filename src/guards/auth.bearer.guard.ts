@@ -19,14 +19,12 @@ export class AuthBearerGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     if (!req.headers.authorization) {
-      console.log('1');
       throw new UnauthorizedException();
     }
 
     const accessToken = req.headers.authorization.split(' ')[1];
-    console.log('accessToken');
     const tokenPayload = await this.jwtService.getTokenPayload(accessToken);
-    // console.log(tokenPayload);
+    
     if (!tokenPayload) {
       throw new UnauthorizedException();
     }

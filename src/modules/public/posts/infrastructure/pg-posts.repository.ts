@@ -12,10 +12,11 @@ export class PgPostsRepository {
   async createPost(newPost: PostDBModel): Promise<PostViewModel> {
     const query = `
       INSERT INTO public.posts
-             (id, title, short_description, content, created_at, "blogId")
-      VAlUES ($1, $2, $3, $4, $5, $6, $7)
-             RETURNING (id, title, short_description, content, created_at, "blogId")                
+             (id, title, "shortDescription", content, "createdAt", "blogId")
+      VAlUES ($1, $2, $3, $4, $5, $6)
+             RETURNING id, title, "shortDescription", content, "createdAt", "blogId"                
     `;
+    console.log(query)
     const result = await this.dataSource.query(query, [
       newPost.id,
       newPost.title,
@@ -25,28 +26,13 @@ export class PgPostsRepository {
       newPost.blogId,
     ]);
 
-    const postArr = result[0].row.slice(1, -1).split(',');
-
-    return {
-      id: postArr[0],
-      title: postArr[1],
-      shortDescription: postArr[2],
-      content: postArr[3],
-      blogId: postArr[6],
-      createdAt: postArr[4],
-      extendedLikesInfo: {
-        myStatus: 'None',
-        likesCount: 0,
-        dislikesCount: 0,
-        newestLikes: [],
-      },
-    };
+    return result[0]
   }
 
   async updatePost(postId: string, dto: PostDto): Promise<boolean> {
     const query = `
       UPDATE public.posts
-         SET title = $1, shortDescription = $2, content = $3
+         SET title = $1, "shortDescription" = $2, content = $3
        WHERE id = $4  
     `;
     const result = await this.dataSource.query(query, [

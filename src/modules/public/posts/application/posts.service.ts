@@ -6,7 +6,7 @@ import { PostDto } from '../../../blogger/api/dto/post.dto';
 import { PostViewModel } from '../api/dto/postsView.model';
 import { PostDBModel } from '../infrastructure/entity/post-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import { PgPostsRepository } from '../infrastructure/pg-posts-repository.service';
+import { PgPostsRepository } from '../infrastructure/pg-posts.repository';
 
 @Injectable()
 export class PostsService {

@@ -21,7 +21,7 @@ export class BlogsController {
   ) {}
 
   @Get()
-  getBlogs(
+  async getBlogs(
     @Query()
     query: QueryParametersDto,
   ) {
