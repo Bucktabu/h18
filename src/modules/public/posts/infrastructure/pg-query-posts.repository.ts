@@ -7,9 +7,10 @@ import {
   paginationContentPage,
 } from '../../../../helper.functions';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
-import { toPostsViewModel } from '../../../../data-mapper/to-posts-view.model';
 import { DbPostModel } from './entity/db-post.model';
 import { PostViewModel } from '../api/dto/postsView.model';
+import {settings} from "../../../../settings";
+import {NewestLikesModel} from "../../likes/infrastructure/entity/newestLikes.model";
 
 @Injectable()
 export class PgQueryPostsRepository {
@@ -17,56 +18,37 @@ export class PgQueryPostsRepository {
 
   async getPosts(
     queryDto: QueryParametersDto,
-    blogId?: string | undefined,
+    blogId: string | undefined,
     userId?: string | undefined,
   ): Promise<ContentPageModel> {
-    const myStatusFilter = this.myStatusFilter(userId);
     const blogIdFilter = this.getBlogIdFilter(blogId);
+    const statusFilter = this.myStatusFilter(userId)
 
     const query = `
             SELECT id, title, "shortDescription", content, "createdAt", "blogId",
-                   (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
-                   (SELECT COUNT("postId")
-                      FROM public.post_reactions
-                     WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount"
-                   (SELECT COUNT("postId")
-                      FROM public.post_reactions
-                     WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
-                   (SELECT "addedAt", "userId",
-                           (SELECT id AS "userId", login, "addedAt"
-                              FROM public.users
-                             WHERE id.users = "usersId".post_reactions)) AS "newestLikes"
-                      FROM public.post_reactions
-                     WHERE postId.post_reactions = id.posts)
-                   ${myStatusFilter}
-              FROM public.posts
-             WHERE ${blogIdFilter}
-             ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-             LIMIT $1 OFFSET ${giveSkipNumber(
-               queryDto.pageNumber,
-               queryDto.pageSize,
-             )};      
+                       (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+                       (SELECT COUNT("postId") 
+                          FROM public.post_reactions
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
+                       (SELECT COUNT("postId")
+                          FROM public.post_reactions
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount",
+                       (SELECT "addedAt"
+                          FROM public.post_reactions
+                         WHERE post_reactions."postId" = posts.id)
+                       ${statusFilter}
+                  FROM public.posts
+                 WHERE ${blogIdFilter}
+                 ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+                 LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
+                   queryDto.pageNumber,
+                   queryDto.pageSize,
+                 )};      
         `;
-    const postsDB: DbPostModel[] = await this.dataSource.query(query, [
-      queryDto.pageNumber,
-    ]);
-    // SELECT id,
-    //     (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
-    // (SELECT COUNT("postId")
-    // FROM public.post_reactions
-    // WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
-    //     (SELECT COUNT("postId")
-    // FROM public.post_reactions
-    // WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount",
-    //     (SELECT "addedAt", "userId",
-    //     (SELECT id AS "userId", login, "addedAt"
-    // FROM public.users
-    // WHERE users.id = post_reactions."userId")
-    // FROM public.post_reactions
-    // WHERE post_reactions.postId = posts.id) AS "newestLikes"
-    // FROM public.posts
-    // WHERE "blogId" = '7b528e6e-49d5-4d61-9e52-2a80717bad07'
-    const posts = postsDB.map((p) => toPostsViewModel(p));
+    console.log(query, blogId)
+    const postsDB: DbPostModel[] = await this.dataSource.query(query, [blogId, userId]);
+    console.log(postsDB)
+    const posts = await Promise.all(postsDB.map(async p => await this.addNewestLikes(p))) // TODO можно ли достать одним запрососом
 
     const totalCountQuery = `
           SELECT COUNT(id)
@@ -107,7 +89,7 @@ export class PgQueryPostsRepository {
     if (!postDB.length) {
       return null;
     }
-    return toPostsViewModel(postDB[0]);
+    return await this.addNewestLikes(postDB[0])
   }
 
   async postExist(id: string): Promise<boolean> {
@@ -123,17 +105,56 @@ export class PgQueryPostsRepository {
     return true;
   }
 
+  async newestLikes(blogId: string): Promise<NewestLikesModel[]> {
+    const blogIdFilter = this.getBlogIdFilter(blogId);
+
+    const newestLikesQuery = `
+      SELECT "userId", "addedAt",
+             (SELECT login FROM public.users WHERE users.id = post_reactions."userId")
+        FROM public.post_reactions
+       WHERE ${blogIdFilter}
+       LIMIT ${settings.newestLikes.limit}
+    `
+    return await this.dataSource.query(newestLikesQuery)
+  }
+
+  private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
+    const newestLikes = await this.newestLikes(post.blogId)
+
+    let myStatus = 'None';
+    if (post.myStatus) {
+      myStatus = post.myStatus;;
+    }
+
+    return {
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        myStatus: myStatus,
+        newestLikes: newestLikes,
+      },
+    };
+  }
+
   private myStatusFilter(userId: string | undefined): string {
     if (userId) {
-      return `, (SELECT status AS "myStatus" FROM public.post_reactions WHERE "postId".post_reactions = id.posts AND "userId".post_reactions = '${userId}')`;
+      return `, (SELECT status AS "myStatus" 
+                   FROM public.post_reactions
+                  WHERE post_reactions."postId" = posts.id AND post_reactions."userId" = $1`;
     }
     return '';
   }
 
   private getBlogIdFilter(blogId: string | undefined): string {
     if (blogId) {
-      return `"blogId" = $1 AND (SELECT is_banned FROM public.blogs WHERE id = $1) = false`;
+      return `"blogId" = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')`;
     }
-    return `(SELECT is_banned FROM public.blogs WHERE id = $1) = false`;
+    return `NOT EXISTS (SELECT "isBanned" FROM public.blogs WHERE id = '${blogId}')`;
   }
 }

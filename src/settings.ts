@@ -26,4 +26,7 @@ export const settings = {
     CONNECTION_COUNT_LIMIT: '5',
   },
   environment: 'dev',
+  newestLikes: {
+    limit: '3'
+  }
 };
