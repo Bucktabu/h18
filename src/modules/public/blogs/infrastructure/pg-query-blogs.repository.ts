@@ -91,19 +91,17 @@ export class PgQueryBlogsRepository {
     );
   }
 
-  async getBlog(blogId: string): Promise<BlogViewModelWithBanStatus> {
+  async getBlog(blogId: string): Promise<BlogViewModelWithBanStatus | null> {
     const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt",
-                   (SELECT "blogId" FROM public.banned_blog bb WHERE b.id = bb."blogId") AS "isBanned"
+            SELECT id, name, description, "websiteUrl"
               FROM public.blogs b
-             WHERE id = $1
+             WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')
         `;
-    const result = await this.dataSource.query(query, [blogId]);
+    const result = await this.dataSource.query(query);
 
-    if (!result[0].isBanned) {
-      result[0].isBanned = true
+    if (!result.length) {
+      return null
     }
-    result[0].isBanned = false
 
     return result[0];
   }

@@ -11,7 +11,6 @@ import {
   Req,
   Res,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from '../application/auth.service';

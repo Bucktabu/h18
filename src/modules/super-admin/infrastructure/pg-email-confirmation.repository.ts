@@ -80,6 +80,7 @@ export class PgEmailConfirmationRepository {
     confirmationCode: string,
     expirationDate?: Date,
   ): Promise<boolean> {
+    console.log('updateConfirmationCode')
     const filter = this.getUpdateConfirmationCodeFilter(
       confirmationCode,
       expirationDate,
@@ -89,6 +90,7 @@ export class PgEmailConfirmationRepository {
          SET ${filter}
        WHERE "userId" = '${userId}';
     `;
+    console.log(query)
     const result = await this.dataSource.query(query);
 
     if (result[1] !== 1) {

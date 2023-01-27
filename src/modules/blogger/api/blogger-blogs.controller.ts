@@ -35,7 +35,7 @@ export class BloggerBlogsController {
     protected postsService: PostsService,
     protected queryBlogsRepository: PgQueryBlogsRepository,
     protected queryCommentsRepository: PgQueryCommentsRepository,
-  ) {}
+  ) {console.log('BloggerBlogsController exist')}
 
   @Get()
   getBlogs(

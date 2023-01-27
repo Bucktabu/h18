@@ -3,8 +3,9 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AppModule } from "../src/app.module";
 import { createApp } from "../src/helpers/create-app";
 import request from "supertest";
-import { preparedPost, preparedUser, superUser } from "./helper/prepeared-data";
-import { getPostsByBlogId } from "./helper/expect-models";
+import {preparedPost, preparedUser, superUser} from "./helper/prepeared-data";
+import { v4 as uuidv4 } from 'uuid';
+import {getPostsByBlogId} from "./helper/expect-models";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -106,67 +107,67 @@ describe('e2e tests', () => {
       expect.setState({items3: [blog1.body, blog2.body, blog3.body]})
     })
 
-    // describe('Return blogs with paging', () => {
-    //   it('Get blogs without query', async () => {
-    //     const items = expect.getState().items1
-    //     const response = await request(server)
-    //       .get(`/blogs`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toStrictEqual({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 5,
-    //       items: items
-    //     })
-    //   })
-    //
-    //   it('Get blogs with sorting and paging', async () => {
-    //     const items = expect.getState().items2
-    //     const response = await request(server)
-    //       .get(`/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=3`) // TODO в базе данных вроде другое поле
-    //       .expect(200)
-    //
-    //     expect(response.body).toStrictEqual({
-    //       pagesCount: 2,
-    //       page: 2,
-    //       pageSize: 3,
-    //       totalCount: 5,
-    //       items: items
-    //     })
-    //   })
-    //
-    //   it('Get blogs with sorting and paging', async () => {
-    //     const items = expect.getState().blog5
-    //     const response = await request(server)
-    //       .get(`/blogs?sortBy=websiteUrl&sortDirection=desc&pageSize=3`) // TODO в базе данных вроде другое поле
-    //       .expect(200)
-    //
-    //     expect(response.body).toBe({
-    //       pagesCount: 2,
-    //       page: 1,
-    //       pageSize: 3,
-    //       totalCount: 5,
-    //       items: items
-    //     })
-    //   })
-    //
-    //   it('Get blogs search name term', async () => {
-    //     const items = expect.getState().blog5
-    //     const response = await request(server)
-    //       .get(`/blogs?searchNameTerm=1`) // TODO в базе данных вроде другое поле
-    //       .expect(200)
-    //
-    //     expect(response.body).toStrictEqual({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 1,
-    //       items: [items]
-    //     })
-    //   })
-    // })
+    describe('Return blogs with paging', () => {
+      it('Get blogs without query', async () => {
+        const items = expect.getState().items1
+        const response = await request(server)
+          .get(`/blogs`)
+          .expect(200)
+
+        expect(response.body).toStrictEqual({
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 5,
+          items: items
+        })
+      })
+
+      it('Get blogs with sorting and paging', async () => {
+        const items = expect.getState().items2
+        const response = await request(server)
+          .get(`/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=3`)
+          .expect(200)
+
+        expect(response.body).toStrictEqual({
+          pagesCount: 2,
+          page: 2,
+          pageSize: 3,
+          totalCount: 5,
+          items: items
+        })
+      })
+
+      it('Get blogs with sorting and paging', async () => {
+        const items = expect.getState().blog5
+        const response = await request(server)
+          .get(`/blogs?sortBy=websiteUrl&sortDirection=desc&pageSize=3`)
+          .expect(200)
+
+        expect(response.body).toBe({
+          pagesCount: 2,
+          page: 1,
+          pageSize: 3,
+          totalCount: 5,
+          items: items
+        })
+      })
+
+      it('Get blogs search name term', async () => {
+        const items = expect.getState().blog5
+        const response = await request(server)
+          .get(`/blogs?searchNameTerm=1`)
+          .expect(200)
+
+        expect(response.body).toStrictEqual({
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 1,
+          items: [items]
+        })
+      })
+    })
 
     describe('Return all posts for specified blog', () => {
       it('Create posts', async () => {
@@ -195,7 +196,7 @@ describe('e2e tests', () => {
           .send({
             title: 'PostName2',
             shortDescription: 'SomeOneShortDescription2',
-            content: 'SomeOneContent1'
+            content: 'SomeOneContent2'
           })
           .set({Authorization: `Bearer ${token.accessToken}`})
           .expect(201)
@@ -214,39 +215,40 @@ describe('e2e tests', () => {
       })
 
       it('Return all post without query', async () => {
-        const blog1 = expect.getState().blog1
+        const blog = expect.getState().blog1
+        const item = expect.getState().items1
 
         const response = await request(server)
-          .get(`/blogs/${blog1.id}/posts`)
+          .get(`/blogs/${blog.id}/posts`)
           .expect(200)
 
-        expect(response.body).toBe({
+        expect(response.body).toStrictEqual({
           pagesCount: 1,
           page: 1,
           pageSize: 10,
           totalCount: 3,
           items: [
-            getPostsByBlogId(3, 3, blog1),
-            getPostsByBlogId(2, 3, blog1),
-            getPostsByBlogId(1, 3, blog1),
+            getPostsByBlogId(3, 3, blog),
+            getPostsByBlogId(2, 3, blog),
+            getPostsByBlogId(1, 3, blog)
           ]
         })
       })
 
       it('Return all post with sorting and pagination', async () => {
-        const blog1 = expect.getState().blog1
+        const blog = expect.getState().blog1
 
         const response = await request(server)
-          .get(`/blogs/${blog1.id}/posts?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=2`)
+          .get(`/blogs/${blog.id}/posts?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
           .expect(200)
 
-        expect(response.body).toBe({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
+        expect(response.body).toStrictEqual({
+          pagesCount: 2,
+          page: 2,
+          pageSize: 2,
           totalCount: 3,
           items: [
-            getPostsByBlogId(3, 3, blog1)
+            getPostsByBlogId(3, 3, blog)
           ]
         })
       })
@@ -271,22 +273,29 @@ describe('e2e tests', () => {
       })
     })
 
-    // describe('Return blog by id', () => {
-    //   it('Try find not exist blog', async () => {
-    //     await request(server)
-    //       .get(`/blogs/500`)
-    //       .expect(404)
-    //   })
-    //
-    //   it('Should return blog by id', async () => {
-    //     const blog = expect.getState().blog1
-    //
-    //     const response = await request(server)
-    //       .get(`/blogs/${blog.id}`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toBe(blog)
-    //   })
-    // })
+    describe('Return blog by id', () => {
+      const randomUuid = uuidv4()
+
+      it('Try find not exist blog', async () => {
+        await request(server)
+          .get(`/blogs/${randomUuid}`)
+          .expect(404)
+      })
+
+      it('Should return blog by id', async () => {
+        const blog = expect.getState().blog1
+
+        const response = await request(server)
+          .get(`/blogs/${blog.id}`)
+          .expect(200)
+
+        expect(response.body).toStrictEqual({
+          id: expect.any(String),
+          name: blog.name,
+          description: blog.description,
+          websiteUrl: blog.websiteUrl
+        })
+      })
+    })
   })
 });

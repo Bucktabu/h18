@@ -39,6 +39,7 @@ export class AuthBearerGuard implements CanActivate {
 
     req.user = user;
     req.token = tokenPayload;
+    console.log('Log from bearer guard')
     return true;
   }
 }

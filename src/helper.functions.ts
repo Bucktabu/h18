@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import { UserViewModelWithBanInfo } from './modules/super-admin/api/dto/user.view.model';
 import { BlogViewWithOwnerAndBanInfo } from './modules/super-admin/api/dto/blog-view-with-owner-and-ban.info';
 import { CommentWithAdditionalInfoModel } from './modules/blogger/api/dto/comment-with-additional-info.model';
-import { PostViewModel } from './modules/public/posts/api/dto/postsView.model';
+import {PostForBlogViewModel, PostViewModel} from './modules/public/posts/api/dto/postsView.model';
 import { BlogViewModel } from './modules/public/blogs/api/dto/blogView.model';
 import { ViewBannedUser } from './modules/blogger/api/dto/view-banned-users.model';
 import {
@@ -39,6 +39,7 @@ export const paginationContentPage = (
     | BlogViewWithOwnerAndBanInfo[]
     | CommentWithAdditionalInfo[]
     | PostViewModel[]
+    | PostForBlogViewModel[]
     | UserViewModelWithBanInfo[]
     | CommentViewModel[]
     | ViewBanInfoModel[],
