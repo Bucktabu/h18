@@ -16,7 +16,6 @@ export class PgPostsRepository {
       VAlUES ($1, $2, $3, $4, $5, $6)
              RETURNING id, title, "shortDescription", content, "createdAt", "blogId"                
     `;
-    console.log(query, 'query')
     const result = await this.dataSource.query(query, [
       newPost.id,
       newPost.title,
@@ -25,7 +24,6 @@ export class PgPostsRepository {
       newPost.createdAt,
       newPost.blogId,
     ]);
-    console.log(result[0], 'res')
     return result[0]
   }
 

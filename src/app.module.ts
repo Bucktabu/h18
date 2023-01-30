@@ -60,6 +60,7 @@ const controllers = [
   BlogsController,
   BloggerBlogsController,
   BloggerUsersController,
+  PostsController,
   SaBlogsController,
   SecurityController,
   TestingController,

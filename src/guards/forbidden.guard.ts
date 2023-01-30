@@ -13,7 +13,6 @@ export class ForbiddenGuard implements CanActivate {
   constructor(protected blogsRepository: PgQueryBlogsRepository) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('Log from forbidden guard')
     const req = context.switchToHttp().getRequest();
 
     let blogId = req.params.id;

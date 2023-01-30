@@ -268,7 +268,7 @@ describe('e2e tests', () => {
         .post('/auth/registration-email-resending')
         .send({email: 'unregistered@gmail.com'})
         .expect(400)
-// TODO trabl2
+
       const errorsMessages = getErrorMessage(['email'])
       expect(response.body).toStrictEqual({ errorsMessages })
     })

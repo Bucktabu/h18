@@ -38,21 +38,20 @@ export class PgQueryPostsRepository {
                          WHERE post_reactions."postId" = posts.id)
                        ${statusFilter}
                   FROM public.posts
-                 WHERE ${blogIdFilter}
+                 ${blogIdFilter}
                  ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                  LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
                    queryDto.pageNumber,
                    queryDto.pageSize,
                  )};      
         `;
-    const postsDB: DbPostModel[] = await this.dataSource.query(query, [blogId, userId]);
-    console.log(postsDB)
-    const posts = await Promise.all(postsDB.map(async p => await this.addNewestLikes(p))) // TODO можно ли достать одним запрососом
+    const postsDB: DbPostModel[] = await this.dataSource.query(query);
+    const posts = await Promise.all(postsDB.map(async p => await this.addNewestLikes(p)))
 
     const totalCountQuery = `
           SELECT COUNT(id)
             FROM public.posts
-           WHERE ${blogIdFilter}
+          ${blogIdFilter}
         `;
     const totalCount = await this.dataSource.query(totalCountQuery);
 
@@ -98,7 +97,7 @@ export class PgQueryPostsRepository {
       SELECT id, title, "shortDescription", content, "blogId",
              (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId")
         FROM public.posts     
-       WHERE ${blogIdFilter}
+       ${blogIdFilter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                  LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
                    queryDto.pageNumber,
@@ -135,21 +134,19 @@ export class PgQueryPostsRepository {
     return true;
   }
 
-  async newestLikes(blogId: string): Promise<NewestLikesModel[]> {
-    const blogIdFilter = this.getBlogIdFilter(blogId);
-
+  async newestLikes(postId: string): Promise<NewestLikesModel[]> {
     const newestLikesQuery = `
       SELECT "userId", "addedAt",
              (SELECT login FROM public.users WHERE users.id = post_reactions."userId")
         FROM public.post_reactions
-       WHERE ${blogIdFilter}
+       WHERE "postId" = $1
        LIMIT ${settings.newestLikes.limit}
     `
-    return await this.dataSource.query(newestLikesQuery)
+    return await this.dataSource.query(newestLikesQuery, [postId])
   }
 
   private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
-    const newestLikes = await this.newestLikes(post.blogId)
+    const newestLikes = await this.newestLikes(post.id)
 
     let myStatus = 'None';
     if (post.myStatus) {
@@ -164,8 +161,8 @@ export class PgQueryPostsRepository {
       blogId: post.blogId,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: post.likesCount,
-        dislikesCount: post.dislikesCount,
+        likesCount: Number(post.likesCount),
+        dislikesCount: Number(post.dislikesCount),
         myStatus: myStatus,
         newestLikes: newestLikes,
       },
@@ -183,8 +180,8 @@ export class PgQueryPostsRepository {
 
   private getBlogIdFilter(blogId: string | undefined): string {
     if (blogId) {
-      return `"blogId" = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')`;
+      return `WHERE "blogId" = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')`;
     }
-    return `NOT EXISTS (SELECT "isBanned" FROM public.blogs WHERE id = '${blogId}')`;
+    return ``;
   }
 }

@@ -5,7 +5,7 @@ import { createApp } from "../src/helpers/create-app";
 import request from "supertest";
 import {preparedPost, preparedUser, superUser} from "./helper/prepeared-data";
 import { v4 as uuidv4 } from 'uuid';
-import {getPostsByBlogId} from "./helper/expect-models";
+import {getPostsByBlogId} from "./helper/expect-post-models";
 
 describe('e2e tests', () => {
   const second = 1000;

@@ -35,7 +35,7 @@ export class BloggerBlogsController {
     protected postsService: PostsService,
     protected queryBlogsRepository: PgQueryBlogsRepository,
     protected queryCommentsRepository: PgQueryCommentsRepository,
-  ) {console.log('BloggerBlogsController exist')}
+  ) {}
 
   @Get()
   getBlogs(
@@ -72,7 +72,6 @@ export class BloggerBlogsController {
     @Body() dto: PostDto,
     @Param('blogId') blogId: string,
   ) {
-    console.log('Create post function');
     const createdPost = await this.postsService.createPost(dto, blogId);
     return createdPost;
   }

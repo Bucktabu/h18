@@ -38,7 +38,7 @@ export class PostsController {
 
   @Get()
   async getPosts(@Query() query: QueryParametersDto, @Req() req: Request) {
-    let userId = undefined;
+    let userId;
     if (req.headers.authorization) {
       const tokenPayload = await this.jwtService.getTokenPayload(
         req.headers.authorization,
