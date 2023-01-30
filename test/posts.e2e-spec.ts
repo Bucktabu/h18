@@ -76,16 +76,19 @@ describe('e2e tests', () => {
     })
 
     it('Create posts', async () => {
-      const token = expect.getState().token
-      const blog1 = expect.getState().blog1
-      const blog2 = expect.getState().blog5
+      const { token, blog1 , blog2} = expect.getState()
+
+      console.log(blog2, 'blog2');
+      console.log(token, 'token');
 
       await request(server)
         .post(`/blogger/blogs/${blog2.id}/posts`)
         .send(preparedPost.valid)
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        // .set({Authorization: `Bearer ${token.accessToken}`})
+        .auth(token.accessToken, {type: 'bearer'})
         .expect(201)
 
+      console.log(blog1, 'blog1');
       const post1 = await request(server)
         .post(`/blogger/blogs/${blog1.id}/posts`)
         .send({
@@ -93,7 +96,7 @@ describe('e2e tests', () => {
           shortDescription: 'SomeOneShortDescription1',
           content: 'SomeOneContent3'
         })
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
       const post2 = await request(server)
@@ -103,7 +106,7 @@ describe('e2e tests', () => {
           shortDescription: 'SomeOneShortDescription2',
           content: 'SomeOneContent1'
         })
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
       const post3 = await request(server)
@@ -113,7 +116,7 @@ describe('e2e tests', () => {
           shortDescription: 'SomeOneShortDescription3',
           content: 'SomeOneContent1'
         })
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
       expect.setState({items1: [post3.body, post2.body, post3.body]})
@@ -129,10 +132,25 @@ describe('e2e tests', () => {
       const post0 = await request(server)
         .post(`/blogger/blogs/${blog2.id}/posts`)
         .send(preparedPost.valid)
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
         console.log(post0, 'post from test')
+
+      // const posts = []
+      //
+      // for (let i = 1; i <= 3; i++){
+      //   const post = await request(server)
+      //     .post(`/blogger/blogs/${blog1.id}/posts`)
+      //     .send({
+      //       title: `PostName${i}`,
+      //       shortDescription: `SomeOneShortDescription${i}`,
+      //       content: `SomeOneContent${4 - i}`
+      //     })
+      //     .set({Authorization: `Bearer ${token.accessToken}`})
+      //     .expect(201)
+      //   posts.push(post.body)
+      // }
 
       const post1 = await request(server)
         .post(`/blogger/blogs/${blog1.id}/posts`)
@@ -141,7 +159,7 @@ describe('e2e tests', () => {
           shortDescription: 'SomeOneShortDescription1',
           content: 'SomeOneContent3'
         })
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
       const post2 = await request(server)
@@ -151,7 +169,7 @@ describe('e2e tests', () => {
           shortDescription: 'SomeOneShortDescription2',
           content: 'SomeOneContent1'
         })
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
       const post3 = await request(server)
@@ -161,7 +179,7 @@ describe('e2e tests', () => {
           shortDescription: 'SomeOneShortDescription3',
           content: 'SomeOneContent1'
         })
-        .set({Authorization: `Bearer ${token.body.accessToken}`})
+        .set({Authorization: `Bearer ${token.accessToken}`})
         .expect(201)
 
       expect.setState({post0: post0.body})

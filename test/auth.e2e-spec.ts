@@ -248,24 +248,24 @@ describe('e2e tests', () => {
 
     it('Shouldn`t resending confirmation code. 400 - Incorrect input data', () => {
       request(server)
-        .post('auth/registration-email-resending')
+        .post('/auth/registration-email-resending')
         .send({email: 'notmailgmail.com'})
         .expect(400)
 
       request(server)
-        .post('auth/registration-email-resending')
+        .post('/auth/registration-email-resending')
         .send({email: 'notmail@g.com'})
         .expect(400)
 
       request(server)
-        .post('auth/registration-email-resending')
+        .post('/auth/registration-email-resending')
         .send({email: 'notmail@gmail.c'})
         .expect(400)
     })
 
     it('Shouldn`t resending confirmation code. 400 - Unregistered mail.', async () => {
       const response = await request(server)
-        .post('auth/registration-email-resending')
+        .post('/auth/registration-email-resending')
         .send({email: 'unregistered@gmail.com'})
         .expect(400)
 // TODO trabl2
@@ -275,7 +275,7 @@ describe('e2e tests', () => {
 
     it('Should resending confirmation code. 204 - Input data is accepted.Email with confirmation code will be send.', () => {
       request(server)
-        .post('auth/registration-email-resending')
+        .post('/auth/registration-email-resending')
         .send(preparedUser.valid.email)
         .expect(204)
     })

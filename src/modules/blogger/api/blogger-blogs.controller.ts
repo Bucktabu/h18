@@ -72,6 +72,7 @@ export class BloggerBlogsController {
     @Body() dto: PostDto,
     @Param('blogId') blogId: string,
   ) {
+    console.log('Create post function');
     const createdPost = await this.postsService.createPost(dto, blogId);
     return createdPost;
   }
