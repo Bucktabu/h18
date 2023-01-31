@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { CommentBDModel } from './entity/commentDB.model';
 import {
   giveSkipNumber,
   paginationContentPage,
 } from '../../../../helper.functions';
-import { DbCommentModel } from './entity/db_comment.model';
+import { DbCommentWithUserAndLikesInfoModel } from './entity/db_comment.model';
 import { toCommentsViewModel } from '../../../../data-mapper/to_comments_view.model';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 
@@ -23,11 +22,11 @@ export class PgQueryCommentsRepository {
     const myStatusFilter = this.myStatusFilter(userId);
 
     const query = `
-            SELECT c.id, c.content, c."createdAt",
-                   (SELECT SUM("commentId") AS "likesCount"
+            SELECT id, content, "createdAt",
+                   (SELECT COUNT("commentId") AS "likesCount"
                       FROM public.comment_reactions cr
                      WHERE cr."commentId" = c.id AND status = "Like"),
-                   (SELECT SUM("commentId") AS "dislikesCount"
+                   (SELECT COUNT("commentId") AS "dislikesCount"
                       FROM public.comment_reactions cr
                      WHERE cr."commentId" = c.id AND status = "Dislike"),
                    (SELECT id AS "userId", login AS "userLogin"
@@ -48,8 +47,8 @@ export class PgQueryCommentsRepository {
                queryDto.pageNumber,
                queryDto.pageSize,
              )};         
-        `; // use IN
-    const commentDB: DbCommentModel[] = await this.dataSource.query(query, [
+        `;
+    const commentDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query, [
       blogId,
       queryDto.pageNumber,
     ]);
@@ -80,34 +79,39 @@ export class PgQueryCommentsRepository {
     const myStatusFilter = this.myStatusFilter(userId);
 
     const query = `
-            SELECT id, content, "userId", "createdAt", "userId",
-                   ((SELECT login AS "userLogin" 
-                      FROM public.user u
-                     WHERE u.id = c."userId"), 
-                   (SELECT SUM("commentId") AS "likesCount"
-                      FROM public.comment_reactions cr
-                     WHERE cr."commentId" = c.id AND status = "Like"),
-                   (SELECT SUM("commentId") AS "dislikesCount"
-                      FROM public.comment_reactions cr
-                     WHERE cr."commentId" = c.id AND status = "Dislike")
-                   ${myStatusFilter}) AS "likesInfo"
-              FROM public.comments c
-             WHERE c."postId" = $1
+              SELECT id, content, "createdAt",
+                     (SELECT COUNT("commentId") AS "likesCount"
+                        FROM public.comment_reactions
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like'),
+                     (SELECT COUNT("commentId") AS "dislikesCount"
+                        FROM public.comment_reactions
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike'),
+                     (SELECT id AS "userId"
+                        FROM public.users
+                       WHERE users.id = comments."userId"),
+                     (SELECT login AS "userLogin"
+                        FROM public.users
+                       WHERE users.id = comments."userId")
+                   ${myStatusFilter} 
+              FROM public.comments
+             WHERE comments."postId" = $1
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $2 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
                queryDto.pageSize,
              )};   
         `;
-    const comments = await this.dataSource.query(query, [
+    const commentsDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query, [
       postId,
       queryDto.pageNumber,
     ]);
 
+    const comments = commentsDB.map(c => toCommentsViewModel(c))
+
     const totalCountQuery = `
           SELECT COUNT(id)
-            FROM public.posts
-           WHERE c."postId" = $1
+            FROM public.comments
+           WHERE comments."postId" = $1
         `;
     const totalCount = await this.dataSource.query(totalCountQuery, [postId]);
 

@@ -70,19 +70,22 @@ export class PgQueryPostsRepository {
     const myStatusFilter = this.myStatusFilter(userId);
 
     const query = `
-            SELECT id, title, "shortDescription", content, "createdAt", "blogId",
-                   (SELECT title AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
-                   (SELECT SUM("postID") AS "likesCount" FROM public.post_reactions WHERE post_reactions."postId" = posts.id AND status = "Like"),
-                   (SELECT SUM("postID") AS "dislikesCount" FROM public.post_reactions WHERE post_reactions."postId" = posts.id AND status = "Dislike"),
-                   (SELECT "addedAt", "userId",
-                           (SELECT id AS "userId", login, "addedAt" FROM public.users WHERE users.id = pr."usersId")) AS "newestLikes"
-                      FROM public.post_reactions pr
-                     WHERE pr."postId" = posts.id)
-                   ${myStatusFilter}
-              FROM public.posts
-             WHERE id = $1
+         SELECT id, title, "shortDescription", content, "createdAt", "blogId",
+                       (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+                       (SELECT COUNT("postId") 
+                          FROM public.post_reactions
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
+                       (SELECT COUNT("postId")
+                          FROM public.post_reactions
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount",
+                       (SELECT "addedAt"
+                          FROM public.post_reactions
+                         WHERE post_reactions."postId" = posts.id)
+                       ${myStatusFilter}
+                  FROM public.posts
+                 WHERE id = '${id}'
         `;
-    const postDB: DbPostModel[] = await this.dataSource.query(query, [id]);
+    const postDB: DbPostModel[] = await this.dataSource.query(query);
 
     if (!postDB.length) {
       return null;
@@ -124,9 +127,9 @@ export class PgQueryPostsRepository {
   async postExist(id: string): Promise<boolean> {
     const query = `
             SELECT id FROM public.posts
-             WHERE id = $1 AND is_banned = false
+             WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
         `;
-    const result = await this.dataSource.query(query, [id]);
+    const result = await this.dataSource.query(query);
 
     if (!result.length) {
       return false;
@@ -159,6 +162,7 @@ export class PgQueryPostsRepository {
       shortDescription: post.shortDescription,
       content: post.content,
       blogId: post.blogId,
+      blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
         likesCount: Number(post.likesCount),

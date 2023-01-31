@@ -1,15 +1,14 @@
-import { DbCommentModel } from '../modules/public/comments/infrastructure/entity/db_comment.model';
+import {CreatedComment, DbCommentWithUserAndLikesInfoModel} from '../modules/public/comments/infrastructure/entity/db_comment.model';
 import {
-  CommentViewModel,
-  CommentWithAdditionalInfo,
+  CommentViewModel, CreatedCommentViewModel,
 } from '../modules/public/comments/api/dto/commentView.model';
 
 export const toCommentsViewModel = (
-  comment: DbCommentModel,
-): CommentWithAdditionalInfo => {
-  let myStatus = comment.myStatus;
+  comment: DbCommentWithUserAndLikesInfoModel,
+): CommentViewModel => {
+  let myStatus = 'None';
   if (!comment.myStatus) {
-    myStatus = 'None';
+    myStatus = comment.myStatus;
   }
 
   return {
@@ -17,11 +16,30 @@ export const toCommentsViewModel = (
     content: comment.content,
     createdAt: comment.createdAt,
     likesInfo: {
-      likesCount: comment.likesCount,
-      dislikesCount: comment.dislikesCount,
-      muStatus: myStatus,
+      likesCount: Number(comment.likesCount),
+      dislikesCount: Number(comment.dislikesCount),
+      myStatus: myStatus,
     },
-    commentatorInfo: comment.commentatorInfo,
-    postInfo: comment.postInfo,
+    commentatorInfo: {
+      userId: comment.userId,
+      userLogin: comment.userLogin
+    },
   };
 };
+
+export const createdCommentViewModel = (comment: CreatedComment): CreatedCommentViewModel => {
+  return {
+    id: comment.id,
+    content: comment.content,
+    createdAt: comment.createdAt,
+    likesInfo: {
+      likesCount: 0,
+      dislikesCount: 0,
+      myStatus: 'None',
+    },
+    commentatorInfo: {
+      userId: comment.userId,
+      userLogin: comment.userLogin
+    },
+  }
+}

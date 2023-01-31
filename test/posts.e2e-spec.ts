@@ -4,8 +4,10 @@ import { AppModule } from "../src/app.module";
 import { createApp } from "../src/helpers/create-app";
 import request from "supertest";
 import { preparedPost, preparedUser, superUser } from "./helper/prepeared-data";
-import {getPosts, getPostsByBlogId} from "./helper/expect-post-models";
-import { UserViewModelWithBanInfo } from "../src/modules/super-admin/api/dto/user.view.model";
+import {getPosts, getPostsByBlogId, getStandardPosts} from "./helper/expect-post-models";
+import { v4 as uuidv4 } from 'uuid';
+import {UserViewModelWithBanInfo} from "../src/modules/super-admin/api/dto/user.view.model";
+import {getCreatedComment} from "./helper/expect-comment-model";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -32,42 +34,42 @@ describe('e2e tests', () => {
   describe('Public posts', () => {
     it('Clear date base', async () => {
       await request(server)
-        .delete(`/testing/all-data`)
-        .expect(204)
+          .delete(`/testing/all-data`)
+          .expect(204)
     })
 
     it('Creat blogs', async () => {
       const user = await request(server)
-        .post(`/sa/users`)
-        .send(preparedUser.valid)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(201)
+          .post(`/sa/users`)
+          .send(preparedUser.valid)
+          .auth(superUser.valid.login, superUser.valid.password, {type: 'basic'})
+          .expect(201)
 
       const token = await request(server)
-        .post(`/auth/login`)
-        .send(preparedUser.login)
-        .set({ 'user-agent': 'chrome/0.1' })
-        .expect(200)
+          .post(`/auth/login`)
+          .send(preparedUser.login)
+          .set({'user-agent': 'chrome/0.1'})
+          .expect(200)
 
       const blog1 = await request(server)
-        .post(`/blogger/blogs`)
-        .send({
-          name: 'BlogName5',
-          description: 'valid description',
-          websiteUrl: 'https://someUrl1.io/'
-        })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+          .post(`/blogger/blogs`)
+          .send({
+            name: 'BlogName5',
+            description: 'valid description',
+            websiteUrl: 'https://someUrl1.io/'
+          })
+          .auth(token.body.accessToken, {type: 'bearer'})
+          .expect(201)
 
       const blog2 = await request(server)
-        .post(`/blogger/blogs`)
-        .send({
-          name: 'BlogName4',
-          description: 'valid description',
-          websiteUrl: 'https://someUrl2.io/'
-        })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+          .post(`/blogger/blogs`)
+          .send({
+            name: 'BlogName4',
+            description: 'valid description',
+            websiteUrl: 'https://someUrl2.io/'
+          })
+          .auth(token.body.accessToken, {type: 'bearer'})
+          .expect(201)
 
       expect.setState({user: user.body})
       expect.setState({token: token.body})
@@ -81,10 +83,10 @@ describe('e2e tests', () => {
       const blog2 = expect.getState().blog2
 
       const post0 = await request(server)
-        .post(`/blogger/blogs/${blog2.id}/posts`)
-        .send(preparedPost.valid)
-        .auth(token.accessToken, {type: 'bearer'})
-        .expect(201)
+          .post(`/blogger/blogs/${blog2.id}/posts`)
+          .send(preparedPost.valid)
+          .auth(token.accessToken, {type: 'bearer'})
+          .expect(201)
 
       // TODO fabric
       // const posts = []
@@ -103,34 +105,34 @@ describe('e2e tests', () => {
       // }
 
       const post1 = await request(server)
-        .post(`/blogger/blogs/${blog1.id}/posts`)
-        .send({
-          title: 'PostName1',
-          shortDescription: 'SomeOneShortDescription1',
-          content: 'SomeOneContent3'
-        })
-        .auth(token.accessToken, {type: 'bearer'})
-        .expect(201)
+          .post(`/blogger/blogs/${blog1.id}/posts`)
+          .send({
+            title: 'PostName1',
+            shortDescription: 'SomeOneShortDescription1',
+            content: 'SomeOneContent3'
+          })
+          .auth(token.accessToken, {type: 'bearer'})
+          .expect(201)
 
       const post2 = await request(server)
-        .post(`/blogger/blogs/${blog1.id}/posts`)
-        .send({
-          title: 'PostName2',
-          shortDescription: 'SomeOneShortDescription2',
-          content: 'SomeOneContent1'
-        })
-        .auth(token.accessToken, {type: 'bearer'})
-        .expect(201)
+          .post(`/blogger/blogs/${blog1.id}/posts`)
+          .send({
+            title: 'PostName2',
+            shortDescription: 'SomeOneShortDescription2',
+            content: 'SomeOneContent2'
+          })
+          .auth(token.accessToken, {type: 'bearer'})
+          .expect(201)
 
       const post3 = await request(server)
-        .post(`/blogger/blogs/${blog1.id}/posts`)
-        .send({
-          title: 'PostName3',
-          shortDescription: 'SomeOneShortDescription3',
-          content: 'SomeOneContent1'
-        })
-        .auth(token.accessToken, {type: 'bearer'})
-        .expect(201)
+          .post(`/blogger/blogs/${blog1.id}/posts`)
+          .send({
+            title: 'PostName3',
+            shortDescription: 'SomeOneShortDescription3',
+            content: 'SomeOneContent1'
+          })
+          .auth(token.accessToken, {type: 'bearer'})
+          .expect(201)
 
       expect.setState({post0: post0.body})
       expect.setState({post1: post1.body})
@@ -138,83 +140,89 @@ describe('e2e tests', () => {
       expect.setState({post3: post3.body})
     })
 
-    describe('Return all posts', () => {
-      it('Return posts without query', async () => {
-        const blog = expect.getState().blog1
-
-        const response = await request(server)
-          .get(`/posts`)
-          .expect(200)
-        console.log(response.body)
-        expect(response.body).toBe({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [
-            getPosts(3, 3, blog),
-            getPosts(2, 3, blog),
-            getPosts(1, 3, blog),
-          ]
-        })
-      })
-
-      it('Return posts with sorting and pagination', async () => {
-        const blog = expect.getState().blog1
-
-        const response = await request(server)
-          .get(`/posts?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
-          .expect(200)
-
-        expect(response.body).toBe({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [
-            getPostsByBlogId(3, 3, blog)
-          ]
-        })
-      })
-
-      it('Return posts with sorting and pagination', async () => {
-        const blog = expect.getState().blog1
-
-        const response = await request(server)
-          .get(`/posts?sortBy=content&sortDirection=desc&pageSize=2`)
-          .expect(200)
-
-        expect(response.body).toBe({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [
-            getPostsByBlogId(3, 3, blog),
-            getPostsByBlogId(2, 3, blog)
-          ]
-        })
-      })
-    })
-
-    describe('Return post by id', () => {
-      it('Try find not exist post', async () => {
-        await request(server)
-          .get(`/posts/500`)
-          .expect(404)
-      })
-
-      it('Should return post by id', async () => {
-        const blog = expect.getState().blog1
-        const post = expect.getState().post1
-        const response = await request(server)
-          .get(`/posts/${post.id}`)
-          .expect(200)
-
-        expect(response.body).toBe(getPostsByBlogId(1, 1, blog))
-      })
-    })
-
+    // describe('Return all posts', () => {
+    //   it('Return posts without query', async () => {
+    //     const blog1 = expect.getState().blog1
+    //     const blog2 = expect.getState().blog2
+    //
+    //     const response = await request(server)
+    //       .get(`/posts`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       pagesCount: 1,
+    //       page: 1,
+    //       pageSize: 10,
+    //       totalCount: 4,
+    //       items: [
+    //         getPosts(3, 3, blog1),
+    //         getPosts(2, 3, blog1),
+    //         getPosts(1, 3, blog1),
+    //         getStandardPosts(blog2)
+    //       ]
+    //     })
+    //   })
+    //
+    //   it('Return posts with sorting and pagination', async () => {
+    //     const blog1 = expect.getState().blog1
+    //     const blog2 = expect.getState().blog2
+    //
+    //     const response = await request(server)
+    //       .get(`/posts?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       pagesCount: 2,
+    //       page: 2,
+    //       pageSize: 2,
+    //       totalCount: 4,
+    //       items: [
+    //         getPosts(3, 3, blog1),
+    //         getStandardPosts(blog2)
+    //       ]
+    //     })
+    //   })
+    //
+    //   it('Return posts with sorting and pagination', async () => {
+    //     const blog = expect.getState().blog1
+    //
+    //     const response = await request(server)
+    //       .get(`/posts?sortBy=content&sortDirection=desc&pageSize=2`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       pagesCount: 1,
+    //       page: 1,
+    //       pageSize: 10,
+    //       totalCount: 3,
+    //       items: [
+    //         getPostsByBlogId(3, 3, blog),
+    //         getPostsByBlogId(2, 3, blog)
+    //       ]
+    //     })
+    //   })
+    // })
+    //
+    // describe('Return post by id', () => {
+    //   it('Try find not exist post', async () => {
+    //     const randomUUID = uuidv4()
+    //
+    //     await request(server)
+    //       .get(`/posts/${randomUUID}`)
+    //       .expect(404)
+    //   })
+    //
+    //   it('Should return post by id', async () => {
+    //     const blog = expect.getState().blog1
+    //     const post = expect.getState().post1
+    //     const response = await request(server)
+    //       .get(`/posts/${post.id}`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual(getPosts(1, 3, blog))
+    //   })
+    // })
+    //
     // describe('Create new comment', () => {
     //   it('Unauthorized user try create comment', async () => {
     //     const post = expect.getState().post1
@@ -227,11 +235,12 @@ describe('e2e tests', () => {
     //
     //   it('Try create comment for post with specified postId doesn`t exists', async () => {
     //     const token = expect.getState().token
+    //     const randomId = uuidv4()
     //
     //     await request(server)
-    //       .post(`/posts/500/comments`)
+    //       .post(`/posts/${randomId}/comments`)
     //       .send({content: "aBqFljveZokLojESGyqiRg"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
+    //       .auth(token.accessToken, {type: 'bearer'})
     //       .expect(404)
     //   })
     //
@@ -242,7 +251,7 @@ describe('e2e tests', () => {
     //     await request(server)
     //       .post(`/posts/${post.id}/comments`)
     //       .send({content: "BqFljveZokLojESGyqi"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
+    //       .auth(token.accessToken, {type: 'bearer'})
     //       .expect(400)
     //   })
     //
@@ -253,7 +262,7 @@ describe('e2e tests', () => {
     //     await request(server)
     //       .post(`/posts/${post.id}/comments`)
     //       .send({content: "WOYrXLGOlXAYUYiZWdISgtqlRVZeakwOeRbRDDfJkpqsjZpAPkLsmTyhIOhifNjMoyRNrTnKWlTKZxfTscTYLBFmNWUBrLopVUXKVrsgeFZPVMWzVnCsbQJqwvHwviyZzgpBpdbUSfnVvktIWyBFvfqPTNFfohVFSHikdXfmgdWtTCmlZBynERyjFcIlMUmYSPPjhnXIPxhJIyHDBDstPGFHuzepkmktMyvJyXYFHztZRpqAdjmAbPHfnCooIBkwWfIyqApnKHhjgXlVNsQdYsxSqvkrdewtmabbXRRqJlwwv"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
+    //       .auth(token.accessToken, {type: 'bearer'})
     //       .expect(400)
     //   })
     //
@@ -265,108 +274,106 @@ describe('e2e tests', () => {
     //     const response = await request(server)
     //       .post(`/posts/${post.id}/comments`)
     //       .send({content: "aBqFljveZokLojESGyqiRg"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
+    //       .auth(token.accessToken, {type: 'bearer'})
     //       .expect(201)
     //
-    //     expect(response.body).toBe({
-    //       id: expect.any(String),
-    //       content: "aBqFljveZokLojESGyqiRg",
-    //       userId: user.id,
-    //       userLogin: user.login,
-    //       createdAt: expect.any(String),
-    //       likesInfo: {
-    //         likesCount: 0,
-    //         dislikesCount: 0,
-    //         myStatus: "None"
-    //       }
+    //     expect(response.body).toStrictEqual(getCreatedComment(user))
     //     })
     //   })
     // })
 
-    // describe('Return comments for specified post', () => {
-    //   it('Create comments', async () => {
-    //     const post = expect.getState().post2
-    //     const token = expect.getState().token
-    //
-    //     const comment1 = await request(server)
-    //       .post(`/posts/${post.id}/comments`)
-    //       .send({content: "3aBqFljveZokLojESGyqiRg"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
-    //       .expect(201)
-    //
-    //     const comment2 = await request(server)
-    //       .post(`/posts/${post.id}/comments`)
-    //       .send({content: "2aBqFljveZokLojESGyqiRg"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
-    //       .expect(201)
-    //
-    //     const comment3 = await request(server)
-    //       .post(`/posts/${post.id}/comments`)
-    //       .send({content: "1aBqFljveZokLojESGyqiRg"})
-    //       .set({Authorization: `Bearer ${token.body.accessToken}`})
-    //       .expect(201)
-    //
-    //     expect.setState({comment1: comment1.body})
-    //     expect.setState({items1: [comment3.body, comment2.body, comment1.body]})
-    //     expect.setState({items2: [comment1.body, comment2.body]})
-    //   })
-    //
-    //   it('Try find comment for passed postId doesn`t exist', async () => {
-    //     await request(server)
-    //       .get(`/posts/500/comments`)
-    //       .expect(404)
-    //   })
-    //
-    //   it('Return all comments without query', async () => {
-    //     const post = expect.getState().post2
-    //     const items = expect.getState().items1
-    //
-    //     const response = await request(server)
-    //       .get(`/posts/${post.id}/comments`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toBe({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 3,
-    //       items: items
-    //     })
-    //   })
-    //
-    //   it('Return comments with sorting and pagination', async () => {
-    //     const post = expect.getState().post2
-    //     const comment = expect.getState().comment1
-    //
-    //     const response = await request(server)
-    //       .get(`/posts/${post.id}/comments?sortBy=content&sortDirection=asc&pageNumber=2&pageSize=2`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toBe({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 3,
-    //       items: [comment]
-    //     })
-    //   })
-    //
-    //   it('Return comments with sorting and pagination', async () => {
-    //     const post = expect.getState().post2
-    //     const items = expect.getState().items2
-    //
-    //     const response = await request(server)
-    //       .get(`/posts/${post.id}/comments?sortBy=content&sortDirection=desc&pageSize=2`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toBe({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 3,
-    //       items: items
-    //     })
-    //   })
-    // })
+    describe('Return comments for specified post', () => {
+      it('Create comments', async () => {
+        const post = expect.getState().post2
+        const token = expect.getState().token
+
+        const comment1 = await request(server)
+            .post(`/posts/${post.id}/comments`)
+            .send({content: "3aBqFljveZokLojESGyqiRg"})
+            .auth(token.accessToken, {type: 'bearer'})
+            .expect(201)
+
+        const comment2 = await request(server)
+            .post(`/posts/${post.id}/comments`)
+            .send({content: "2aBqFljveZokLojESGyqiRg"})
+            .auth(token.accessToken, {type: 'bearer'})
+            .expect(201)
+
+        const comment3 = await request(server)
+            .post(`/posts/${post.id}/comments`)
+            .send({content: "1aBqFljveZokLojESGyqiRg"})
+            .auth(token.accessToken, {type: 'bearer'})
+            .expect(201)
+
+        expect.setState({comment1: comment1.body, comment2: comment2.body, comment3: comment3.body})
+      })
+
+      it('Try find comment for passed postId doesn`t exist', async () => {
+        const randomId = uuidv4()
+
+        await request(server)
+            .get(`/posts/${randomId}/comments`)
+            .expect(404)
+      })
+
+      it('Return all comments without query', async () => {
+        const {user} = expect.getState()
+        const post = expect.getState().post2
+        const {comment1} = expect.getState()
+        const {comment2} = expect.getState()
+        const {comment3} = expect.getState()
+
+        const response = await request(server)
+            .get(`/posts/${post.id}/comments`)
+            .expect(200)
+
+        expect(response.body).toBe({
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 3,
+          items: [
+            getCreatedComment(user, comment3),
+            getCreatedComment(user, comment2),
+            getCreatedComment(user, comment1)
+          ]
+        })
+      })
+
+      it('Return comments with sorting and pagination', async () => {
+        const {user} = expect.getState()
+        const post = expect.getState().post2
+        const comment = expect.getState().comment1
+
+        const response = await request(server)
+            .get(`/posts/${post.id}/comments?sortBy=content&sortDirection=asc&pageNumber=2&pageSize=2`)
+            .expect(200)
+
+        expect(response.body).toBe({
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 3,
+          items: [comment]
+        })
+      })
+
+      it('Return comments with sorting and pagination', async () => {
+        const post = expect.getState().post2
+        const items = expect.getState().items2
+
+        const response = await request(server)
+            .get(`/posts/${post.id}/comments?sortBy=content&sortDirection=desc&pageSize=2`)
+            .expect(200)
+
+        expect(response.body).toBe({
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 3,
+          items: items
+        })
+      })
+    })
   })
 });

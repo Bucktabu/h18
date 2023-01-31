@@ -54,6 +54,7 @@ import { PgPostsRepository } from "./modules/public/posts/infrastructure/pg-post
 import { PgQueryPostsRepository } from "./modules/public/posts/infrastructure/pg-query-posts.repository";
 import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller";
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
+import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 
 const controllers = [
   AuthController,
@@ -70,6 +71,7 @@ const controllers = [
 const entity = [
   Blogs,
   BannedBlog,
+  BannedPost,
   BannedUsersForBlog,
   Comments,
   CommentReactions,

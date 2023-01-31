@@ -1,4 +1,15 @@
-export class DbCommentModel {
+export class DbCommentWithUserAndLikesInfoModel {
+  id: string;
+  content: string;
+  createdAt: string;
+  likesCount: number;
+  dislikesCount: number;
+  userId: string;
+  userLogin: string;
+  myStatus?: string;
+}
+
+export class DbCommentInfoModel {
   id: string;
   content: string;
   createdAt: string;
@@ -16,3 +27,13 @@ export class DbCommentModel {
   };
   myStatus: string;
 }
+
+export class CreatedComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  userId: string;
+  userLogin: string;
+}
+
+

@@ -5,6 +5,7 @@ import { giveSkipNumber } from '../../../../helper.functions';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentViewModel } from '../api/dto/commentView.model';
+import {CreatedComment} from "./entity/db_comment.model";
 
 @Injectable()
 export class PgCommentsRepository {
@@ -12,7 +13,7 @@ export class PgCommentsRepository {
 
   async createComment(
     newComment: CommentBDModel,
-  ): Promise<CommentViewModel | null> {
+  ): Promise<CreatedComment | null> {
     const query = `
       INSERT INTO public.comments
              (id, content, "createdAt", "postId", "userId")
@@ -22,7 +23,7 @@ export class PgCommentsRepository {
                           FROM public.users
                          WHERE users.id = '${newComment.userId}');       
     `;
-    const result = await this.dataSource.query(query, [
+    const result: CreatedComment[] = await this.dataSource.query(query, [
       newComment.id,
       newComment.content,
       newComment.createdAt,

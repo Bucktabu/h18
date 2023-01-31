@@ -13,6 +13,7 @@ export const toPostsViewModel = (post: DbPostModel): PostViewModel => {
     shortDescription: post.shortDescription,
     content: post.content,
     blogId: post.blogId,
+    blogName: post.blogName,
     createdAt: post.createdAt,
     extendedLikesInfo: {
       likesCount: post.likesCount,

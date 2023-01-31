@@ -3,12 +3,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
+  OneToMany, OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { Blogs } from '../../../blogs/infrastructure/entity/blogs.entity';
 import { Comments } from '../../../comments/infrastructure/entity/comments.entity';
 import { PostReactions } from '../../../likes/infrastructure/entity/post-reactions.entity';
+import {BannedPost} from "../../../../super-admin/infrastructure/entity/banned-post.entity";
 
 @Entity()
 export class Posts {
@@ -32,4 +33,7 @@ export class Posts {
 
   @OneToMany(() => PostReactions, (pr) => pr.post)
   reactions: PostReactions;
+
+  @OneToOne(() => BannedPost, bp => bp.post)
+  banStatus: BannedPost
 }

@@ -19,7 +19,7 @@ export class Comments {
 
   @Column() createdAt: string;
 
-  @OneToOne(() => Posts, (p) => p.comments)
+  @ManyToOne(() => Posts, (p) => p.comments)
   @JoinColumn()
   post: Posts;
   @Column() postId: string;
