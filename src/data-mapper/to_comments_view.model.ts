@@ -7,7 +7,7 @@ export const toCommentsViewModel = (
   comment: DbCommentWithUserAndLikesInfoModel,
 ): CommentViewModel => {
   let myStatus = 'None';
-  if (!comment.myStatus) {
+  if (!!comment.myStatus) { // TODO "!!" — является проверкой как определена ли переменная и является истиной, а "!!!" — как определена переменная и является ложью.
     myStatus = comment.myStatus;
   }
 

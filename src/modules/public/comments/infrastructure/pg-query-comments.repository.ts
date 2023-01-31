@@ -103,7 +103,7 @@ export class PgQueryCommentsRepository {
         `;
     const commentsDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query, [
       postId,
-      queryDto.pageNumber,
+      queryDto.pageSize,
     ]);
 
     const comments = commentsDB.map(c => toCommentsViewModel(c))
