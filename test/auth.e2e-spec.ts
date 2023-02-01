@@ -2,8 +2,14 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
-import {banUserDto, preparedPassword, preparedSecurity, preparedUser, superUser} from './helper/prepeared-data';
-import { isEmail, isUUID } from 'class-validator';
+import {
+  banUserDto,
+  preparedPassword,
+  preparedSecurity,
+  preparedUser,
+  prepareLogin,
+  superUser
+} from "./helper/prepeared-data";
 import { getErrorMessage } from './helper/helpers';
 import { createApp } from '../src/helpers/create-app';
 import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
@@ -234,7 +240,7 @@ describe('e2e tests', () => {
       })
     })
 
-    describe('Confirm password recovery (without 429)', () => {
+    describe('Update password (without 429)', () => {
       it('Shouldn`t confirm password recovery if incorrect input data', async () => {
         const errorsMessages = getErrorMessage(['newPassword', 'recoveryCode'])
         const randomCode = randomUUID()
@@ -284,24 +290,78 @@ describe('e2e tests', () => {
       })
 
       it('Confirm password recovery', async () => {
+        const {user} = expect.getState()
 
+        const oldPassword = await request(server)
+          .get(`/testing/user-password/${user.id}`)
+          .expect(200)
+
+        await request(server)
+          .post(`/auth/password-recovery`)
+          .send(preparedSecurity.email.valid)
+          .expect(204)
+
+        const code = await request(server)
+          .get(`/testing/confirmation-code/${user.id}`)
+          .expect(200)
+
+        await request(server)
+          .post(`/auth/new-password`)
+          .send({
+            newPassword: preparedPassword.newPass,
+            recoveryCode: code.body.confirmationCode
+          })
+          .expect(204)
+
+        const newPassword = await request(server)
+          .get(`/testing/user-password/${user.id}`)
+          .expect(200)
+
+        expect(oldPassword).not.toEqual(newPassword)
       })
     })
 
     describe('Try login user to the system', () => {
+      it('Shouldn`t login if the password or login is wrong', async () => {
+        await request(server)
+          .post(`/auth/login`)
+          .send(prepareLogin.notExist)
+          .set({ 'user-agent': 'chrome/0.1' })
+          .expect(401)
+      })
 
+      it('Shouldn`t login if the password or login is wrong', async () => {
+        await request(server)
+          .post(`/auth/login`)
+          .send(prepareLogin.notValid)
+          .set({ 'user-agent': 'chrome/0.1' })
+          .expect(400)
+      })
+
+      it('Should login and return token', async () => {
+        const response = await request(server)
+          .post(`/auth/login`)
+          .send(prepareLogin.valid)
+          .set({ 'user-agent': 'chrome/0.1' })
+          .expect(200)
+
+        console.log((response.headers['set-cookie'][0].split(';')[0]).slice(13)); // TODO refresh token
+
+        expect(response.body.accessToken).toBeTruthy()
+        expect(response.headers['set-cookie'][0].split(';')[0]).toBeTruthy()
+      })
     })
 
-    describe('Generate new pair of access and refresh token', () => {
-
-    })
-
-    describe('Get information about current user', () => {
-
-    })
-
-    describe('Logout user from system', () => {
-
-    })
+    // describe('Generate new pair of access and refresh token', () => {
+    //
+    // })
+    //
+    // describe('Get information about current user', () => {
+    //
+    // })
+    //
+    // describe('Logout user from system', () => {
+    //
+    // })
   })
 });

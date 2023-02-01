@@ -110,3 +110,18 @@ export const preparedPassword = {
   long: {password: faker.lorem.paragraph(21)},
   newPass: 'newpassword'
 }
+
+export const prepareLogin = {
+  valid: {
+    loginOrEmail: 'MyLogin',
+    password: 'newpassword'
+  },
+  notValid: {
+    loginOrEmail: 1,
+    password: 1
+  },
+  notExist: {
+    loginOrEmail: 'NotExist',
+    password: 'qwerty'
+  },
+}

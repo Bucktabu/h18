@@ -40,8 +40,7 @@ export class PgQueryCommentsRepository {
                      WHERE posts.id = c.postId) AS "postInfo"
                    ${myStatusFilter}       
               FROM public.comments c
-             WHERE (SELECT id FROM public.blogs b 
-                     WHERE b."postId" = p.id) = $1
+             WHERE (SELECT id FROM public.blogs b gi
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,

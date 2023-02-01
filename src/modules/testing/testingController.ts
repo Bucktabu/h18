@@ -28,6 +28,17 @@ export class TestingController {
     return result[0]
   }
 
+  @Get('user-password/:userId')
+  async getUserPassword(@Param('userId') userId: string) {
+    const result = await this.dataSource.query(`
+      SELECT "passwordHash"
+        FROM public.users
+       WHERE id = '${userId}'
+    `)
+
+    return result[0]
+  }
+
   @Put('set-expiration-date/:userId')
   @HttpCode(204)
   async makeExpired(@Param('userId') userId: string) {
@@ -42,7 +53,7 @@ export class TestingController {
       return false;
     }
     return true;
-  } // TODO add / ... in body
+  }
 
   @Delete('all-data')
   @HttpCode(204)

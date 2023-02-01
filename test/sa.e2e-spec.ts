@@ -328,7 +328,7 @@ describe('e2e tests', () => {
       })
 
       it('SA should ban user', async () => {
-        const user = expect.getState().user
+        const { user } = expect.getState()
         await request(server)
           .put(`/sa/users/${user.id}/ban`)
           .send(banUserDto.valid)
@@ -348,7 +348,7 @@ describe('e2e tests', () => {
       })
 
       it('SA should unban user', async () => {
-        const user = expect.getState().user
+        const { user } = expect.getState()
         await request(server)
           .put(`/sa/users/${user.id}/ban`)
           .send(banUserDto.validUnBun)

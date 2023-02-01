@@ -55,6 +55,7 @@ import { PgQueryPostsRepository } from "./modules/public/posts/infrastructure/pg
 import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller";
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
+import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
 
 const controllers = [
   AuthController,
@@ -124,6 +125,7 @@ const validators = [
   EmailResendingValidator,
   EmailExistValidator,
   LoginExistValidator,
+  PasswordRecoveryValidator
 ];
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];

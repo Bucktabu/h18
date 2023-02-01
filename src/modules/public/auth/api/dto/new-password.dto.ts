@@ -1,5 +1,6 @@
 import { IsString, Length, Validate } from 'class-validator';
 import { ConfirmationCodeValidator } from '../../../../../validation/confirmation-code.validator';
+import { PasswordRecoveryValidator } from "../../../../../validation/password-recovery.validator";
 
 export class NewPasswordDto {
   @IsString()
@@ -7,6 +8,6 @@ export class NewPasswordDto {
   newPassword: string;
 
   @IsString()
-  @Validate(ConfirmationCodeValidator)
+  @Validate(PasswordRecoveryValidator)
   recoveryCode: string;
 }
