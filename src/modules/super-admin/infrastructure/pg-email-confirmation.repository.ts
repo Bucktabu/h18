@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { EmailConfirmationModel } from './entity/emailConfirmation.model';
 import { v4 as uuidv4 } from 'uuid';
+import {log} from "util";
 
 @Injectable()
 export class PgEmailConfirmationRepository {
@@ -30,6 +31,7 @@ export class PgEmailConfirmationRepository {
        WHERE "confirmationCode" = '${code}';
     `;
     const result = await this.dataSource.query(query);
+
     return result[0];
   }
 
@@ -78,20 +80,14 @@ export class PgEmailConfirmationRepository {
   async updateConfirmationCode(
     userId: string,
     confirmationCode: string,
-    expirationDate?: Date,
+    expirationDate: string,
   ): Promise<boolean> {
-    console.log('updateConfirmationCode')
-    const filter = this.getUpdateConfirmationCodeFilter(
-      confirmationCode,
-      expirationDate,
-    );
     const query = `
       UPDATE public.email_confirmation
-         SET ${filter}
-       WHERE "userId" = '${userId}';
+         SET "confirmationCode" = $2, "expirationDate" = $3
+       WHERE "userId" = $1;
     `;
-    console.log(query)
-    const result = await this.dataSource.query(query);
+    const result = await this.dataSource.query(query, [userId, confirmationCode, expirationDate]);
 
     if (result[1] !== 1) {
       return false;
@@ -119,15 +115,5 @@ export class PgEmailConfirmationRepository {
       return (filter = `'${emailConfirmation.id}', '${emailConfirmation.confirmationCode}', '${emailConfirmation.expirationDate}', '${emailConfirmation.isConfirmed}'`);
     }
     return filter;
-  }
-
-  private getUpdateConfirmationCodeFilter(
-    confirmationCode: string,
-    expirationDate?: Date,
-  ): string {
-    if (!expirationDate) {
-      return `confirmation_code = '${confirmationCode}'`;
-    }
-    return `confirmation_code = '${confirmationCode}', expiration_date = '${expirationDate}'`;
   }
 }

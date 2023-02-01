@@ -2,16 +2,18 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
-import { banUserDto, preparedUser, superUser } from './helper/prepeared-data';
+import {banUserDto, preparedPassword, preparedSecurity, preparedUser, superUser} from './helper/prepeared-data';
 import { isEmail, isUUID } from 'class-validator';
 import { getErrorMessage } from './helper/helpers';
 import { createApp } from '../src/helpers/create-app';
 import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
 import { EmailManagerMock } from './mock/emailAdapter.mock';
-
-jest.setTimeout(30000);
+import {randomUUID} from "crypto";
 
 describe('e2e tests', () => {
+  const second = 1000;
+  jest.setTimeout(30 * second);
+
   let app: INestApplication;
   let server;
 
@@ -39,245 +41,267 @@ describe('e2e tests', () => {
         .expect(204)
   })
 
-  describe('Users route tests.', () => {
-    const errorsMessages = getErrorMessage(['login', 'password', 'email']);
-
-    it('Delete all data', () => {
-      request(server)
-        .delete('/testing/all-data')
-        .expect(204)
-      }
-    )
-
-    it('Shouldn`t create new user. 401 - Unauthorized.', () => {
-      request(server)
-        .post('/sa/users')
-        .send(preparedUser.valid)
-        .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
-        .expect(401)
-    })
-
-    it('Shouldn`t create new user. 400 - Short input data.', async () => {
-      const response = await request(server)
-        .post('/sa/users')
-        .send(preparedUser.short)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(400)
-
-      expect(response.body).toStrictEqual({ errorsMessages })
-    })
-
-    it('Shouldn`t create new user. 400 - Long input data.', async () => {
-      const response = await request(server)
-        .post('/sa/users')
-        .send(preparedUser.long)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(400)
-
-      expect(response.body).toStrictEqual({ errorsMessages })
-    })
-
-    it('Should create new user. 201 - Created.', async () => {
-      const response = await request(server)
-        .post('/sa/users')
-        .send(preparedUser.valid)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(201)
-
-      expect(isUUID(response.body.id)).toBeTruthy()
-      expect(isEmail(response.body.email)).toBeTruthy()
-      expect(response.body).toStrictEqual({
-        id: expect.any(String),
-        login: preparedUser.valid.login,
-        email: preparedUser.valid.email,
-        createdAt: expect.stringMatching(
-          /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/
-        ),
-        banInfo: {
-          isBanned: false,
-          banDate: null,
-          banReason: null
-        }
-      })
-
-      expect.setState({ user1: response.body })
-    })
-
-    it('Shouldn`t create new user. 400 - Existed login and email.', async () => {
-      const response = await request(server)
-        .post('/sa/users')
-        .send(preparedUser.long)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(400)
-
-      const errorsMessages = getErrorMessage(['login', 'password', 'email'])
-      expect(response.body).toStrictEqual({ errorsMessages })
-    })
-
-    it('Shouldn`t ban user. 401 - Unauthorized', () => {
-      const user = expect.getState().user1
-
-      request(server)
-        .put(`/sa/users/${user.id}/ban`)
-        .send(
-          {
-            "isBanned": true,
-            "banReason": "stringstringstringst"
-          }
-        )
-        .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
-        .expect(401)
-    })
-
-    it('Shouldn`t ban user. 400 - Incorrect input model', async () => {
-      const user = expect.getState().user1
-
-      const response = await request(server)
-        .put(`/sa/users/${user.id}/ban`)
-        .send(banUserDto.notValid)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(400)
-
-      const errorsMessages = getErrorMessage(['isBanned', 'banReason'])
-
-      expect(response.body).toStrictEqual({ errorsMessages })
-    })
-
-    it('Should ban user. 204 - No content.', async () => {
-      const user = expect.getState().user1
-
-      const res = await request(server)
-        .put(`/sa/users/${user.id}/ban`)
-        .send(banUserDto.valid)
-          .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-          .expect(204)
-    })
-
-    it('Shouldn`t return users. 401 - Unauthorized.', () => {
-      request(server)
-        .get('/sa/users')
-        .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
-        .expect(401)
-    })
-
-    it('Should return user. 200 - Success.', async () => {
-      const response = await request(server)
-        .get('/sa/users')
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(200)
-      console.log(response.body.items, 'dsfsfsf')
-      expect(response.body).toStrictEqual({
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: 1,
-        items: [
-          {
-            id: expect.any(String),
-            login: preparedUser.valid.login,
-            email: preparedUser.valid.email,
-            createdAt: expect.stringMatching(
-              /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/
-            ),
-            banInfo: {
-              isBanned: true,
-              banDate: expect.any(String),
-              banReason: expect.any(String)
-            }
-          }
-        ]
-      })
-    })
-
-    it('Shouldn`t delete user. 401 - Unauthorized.', () => {
-      const user = expect.getState().user1
-
-      request(server)
-        .delete(`/sa/users/${user.id}`)
-        .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
-        .expect(401)
-    })
-
-    it('Should delete user. 204 - No Content.', () => {
-      const user = expect.getState().user1
-
-      request(server)
-        .delete(`/sa/users/${user.id}`)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(204)
-    })
-
-    it('Can`t delete an already deleted user. 404 - Not found.', () => {
-      const user = expect.getState().user1
-
-      request(server)
-        .delete(`/sa/users/${user.id}`)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(404)
-    })
-  })
-
   describe('Auth router testing (without 429)', () => {
-    it('Shouldn`t registration user. 400 - Short input data.', () => {
-      request(server)
-        .post('/auth/registration')
-        .send(preparedUser.short)
-        .expect(400)
+    describe('Registration user in system', () => {
+      it('Shouldn`t registration user. 400 - Short input data.', () => {
+        request(server)
+            .post('/auth/registration')
+            .send(preparedUser.short)
+            .expect(400)
+      })
+
+      it('Shouldn`t registration user. 400 - Long input data.', () => {
+        request(server)
+            .post('/auth/registration')
+            .send(preparedUser.long)
+            .expect(400)
+      })
+
+      it('Shouldn`t registration user. 400 - Existed login and email', () => {
+        request(server)
+            .post('/auth/registration')
+            .send(preparedUser.valid)
+            .expect(400)
+      })
+
+      it('Should registration user. 204 - Input data is accepted. Email with confirmation code will be send to passed email address.', async () => {
+        await request(server)
+            .post('/auth/registration')
+            .send(preparedUser.valid)
+            .expect(204)
+
+        const response = await request(server)
+            .get(`/sa/users`)
+            .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+            .expect(200)
+
+        expect(response.body.items).toHaveLength(1)
+
+        expect.setState({user: response.body.items[0]})
+      })
     })
 
-    it('Shouldn`t registration user. 400 - Long input data.', () => {
-      request(server)
-        .post('/auth/registration')
-        .send(preparedUser.long)
-        .expect(400)
+    describe('Resending confirmation code', () => {
+      it('Shouldn`t resending confirmation code. 400 - Incorrect input data', () => {
+        request(server)
+            .post('/auth/registration-email-resending')
+            .send({email: 'notmailgmail.com'})
+            .expect(400)
+
+        request(server)
+            .post('/auth/registration-email-resending')
+            .send({email: 'notmail@g.com'})
+            .expect(400)
+
+        request(server)
+            .post('/auth/registration-email-resending')
+            .send({email: 'notmail@gmail.c'})
+            .expect(400)
+      })
+
+      it('Shouldn`t resending confirmation code. 400 - Unregistered mail.', async () => {
+        const response = await request(server)
+            .post('/auth/registration-email-resending')
+            .send({email: 'unregistered@gmail.com'})
+            .expect(400)
+
+        const errorsMessages = getErrorMessage(['email'])
+        expect(response.body).toStrictEqual({ errorsMessages })
+      })
+
+      it('Should resending confirmation code. 204 - Input data is accepted.Email with confirmation code will be send.', async () => {
+        const response = await request(server)
+            .get(`/sa/users`)
+            .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+            .expect(200)
+
+        const oldConfirmationCode = await request(server)
+            .get(`/testing/confirmation-code/${response.body.items[0].id}`)
+            .expect(200)
+
+        await request(server)
+            .post('/auth/registration-email-resending')
+            .send({email: preparedUser.valid.email})
+            .expect(204)
+
+        const newConfirmationCode = await request(server)
+            .get(`/testing/is-confirmed/${response.body.items[0].id}`)
+            .expect(200)
+
+        expect(oldConfirmationCode.body).not.toEqual(newConfirmationCode.body)
+
+        expect.setState({confirmationCode: newConfirmationCode})
+      })
     })
 
-    it('Should registration user. 204 - Input data is accepted. Email with confirmation code will be send to passed email address.', () => {
-      request(server)
-        .post('/auth/registration')
-        .send(preparedUser.valid)
-        .expect(204)
+    describe('Confirm registration', () => {
+      it('Shouldn`t confirmed if the confirmation code is incorrect', async () => {
+        const response = await request(server)
+            .get(`/sa/users`)
+            .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+            .expect(200)
+
+        expect.setState({userId: response.body.items[0].id})
+
+        const confirmationCode = await request(server)
+            .get(`/testing/confirmation-code/${response.body.items[0].id}`)
+            .expect(200)
+
+        request(server)
+            .post(`/registration-confirmation`)
+            .send({code: `${confirmationCode.body}-1`})
+            .expect(400)
+      })
+
+      it('Shouldn`t confirmed if the confirmation code is expired', async () => {
+        const { userId } = expect.getState()
+
+        await request(server)
+            .put(`/testing/set-expiration-date/${userId}`)
+            .expect(204)
+
+        const confirmationCode = await request(server)
+            .get(`/testing/confirmation-code/${userId}`)
+            .expect(200)
+
+        request(server)
+            .post(`/registration-confirmation`)
+            .send({code: confirmationCode.body})
+            .expect(400)
+      })
+
+      it('Email was verified. Account was activated', async () => {
+        const { userId } = expect.getState()
+
+        const confirmationCode = await request(server)
+            .get(`/testing/confirmation-code/${userId}`)
+            .expect(200)
+
+        request(server)
+            .post(`/registration-confirmation`)
+            .send({code: confirmationCode.body})
+            .expect(204)
+
+        expect.setState({confirmationCode: confirmationCode})
+      })
+
+      it('Shouldn`t confirmed if the confirmation code is already been applied', async () => {
+        const { confirmationCode } = expect.getState()
+
+        request(server)
+            .post(`/registration-confirmation`)
+            .send({code: confirmationCode.body})
+            .expect(400)
+      })
     })
 
-    it('Shouldn`t registration user. 400 - Existed login and email', () => {
-      request(server)
-        .post('/auth/registration')
-        .send(preparedUser.valid)
-        .expect(400)
+    describe('Password recovery via Email confirmation', () => {
+      it('If the inputModel has invalid email', async () => {
+        await request(server)
+            .post(`/auth/password-recovery`)
+            .send(preparedSecurity.email.notValid)
+            .expect(400)
+      })
+
+      it('Shouldn`t return error even if current email is not registered (for prevent user`s email detection)', async () => {
+        await request(server)
+            .post(`/auth/password-recovery`)
+            .send(preparedSecurity.email.notExist)
+            .expect(204)
+      })
+
+      it('Should update confirmation code', async () => {
+        const user = await request(server)
+            .get('/sa/users')
+            .send(preparedUser.valid)
+            .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+            .expect(200)
+
+        const oldConfirmationCode = await request(server)
+            .get(`/testing/confirmation-code/${user.body.items[0].id}`)
+            .expect(200)
+
+        await request(server)
+            .post(`/auth/password-recovery`)
+            .send(preparedSecurity.email.valid)
+            .expect(204)
+
+        const newConfirmationCode = await request(server)
+            .get(`/testing/confirmation-code/${user.body.items[0].id}`)
+            .expect(200)
+
+        expect(oldConfirmationCode).not.toEqual(newConfirmationCode)
+      })
     })
 
-    it('Shouldn`t resending confirmation code. 400 - Incorrect input data', () => {
-      request(server)
-        .post('/auth/registration-email-resending')
-        .send({email: 'notmailgmail.com'})
-        .expect(400)
+    describe('Confirm password recovery (without 429)', () => {
+      it('Shouldn`t confirm password recovery if incorrect input data', async () => {
+        const errorsMessages = getErrorMessage(['newPassword', 'recoveryCode'])
+        const randomCode = randomUUID()
 
-      request(server)
-        .post('/auth/registration-email-resending')
-        .send({email: 'notmail@g.com'})
-        .expect(400)
+        const response1 = await request(server)
+            .post(`/auth/new-password`)
+            .send({
+              newPassword: preparedPassword.short,
+              recoveryCode: randomCode
+            })
+            .expect(400)
 
-      request(server)
-        .post('/auth/registration-email-resending')
-        .send({email: 'notmail@gmail.c'})
-        .expect(400)
+        expect(response1.body).toEqual({errorsMessages})
+
+        const response2 = await request(server)
+            .post(`/auth/new-password`)
+            .send({
+              newPassword: preparedPassword.long,
+              recoveryCode: randomCode
+            })
+            .expect(400)
+
+        expect(response2.body).toEqual({errorsMessages})
+      })
+
+      it('Shouldn`t confirm password recovery if recovery code expired', async () => {
+        const {user} = expect.getState()
+        const errorsMessages = getErrorMessage(['recoveryCode'])
+
+        await request(server)
+            .put(`/testing/set-expiration-date/${user.id}`)
+            .expect(204)
+
+        const recoveryCode = await request(server)
+            .get(`/testing/confirmation-code/${user.id}`)
+            .expect(200)
+
+        const response = await request(server)
+            .post(`/auth/new-password`)
+            .send({
+              newPassword: preparedPassword.newPass,
+              recoveryCode: recoveryCode.body
+            })
+            .expect(400)
+
+        expect(response.body).toEqual({errorsMessages})
+      })
+
+      it('Confirm password recovery', async () => {
+
+      })
     })
 
-    it('Shouldn`t resending confirmation code. 400 - Unregistered mail.', async () => {
-      const response = await request(server)
-        .post('/auth/registration-email-resending')
-        .send({email: 'unregistered@gmail.com'})
-        .expect(400)
+    describe('Try login user to the system', () => {
 
-      const errorsMessages = getErrorMessage(['email'])
-      expect(response.body).toStrictEqual({ errorsMessages })
     })
 
-    it('Should resending confirmation code. 204 - Input data is accepted.Email with confirmation code will be send.', () => {
-      request(server)
-        .post('/auth/registration-email-resending')
-        .send(preparedUser.valid.email)
-        .expect(204)
+    describe('Generate new pair of access and refresh token', () => {
+
+    })
+
+    describe('Get information about current user', () => {
+
+    })
+
+    describe('Logout user from system', () => {
+
     })
   })
 });

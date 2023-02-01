@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker';
+
 export const superUser = {
   valid: {
     login: 'admin',
@@ -17,12 +19,12 @@ export const preparedUser = {
   },
   short: {
     login: 'sb',
-    password: 'vvyky',
+    password: faker.lorem.paragraph(5),
     email: 'somemailgmail.com',
   },
   long: {
     login: 'Length-11_s',
-    password: 'Length-21_GwUy2x2LASw',
+    password: faker.lorem.paragraph(21),
     email: 'somemail@gmail.c',
   },
   login: {
@@ -34,15 +36,15 @@ export const preparedUser = {
 export const banUserDto = {
   valid: {
     isBanned: true,
-    banReason: 'Length-20_stringstri',
+    banReason: faker.lorem.paragraph(20),
   },
   validUnBun: {
     isBanned: false,
-    banReason: 'Length-20_stringstri',
+    banReason: faker.lorem.paragraph(20),
   },
   notValid: {
     isBanned: 'true',
-    banReason: 'Length-19_stringstr',
+    banReason: faker.lorem.paragraph(19),
   },
 };
 
@@ -64,10 +66,8 @@ export const preparedBlog = {
   },
   long: {
     name: 'Length-16_RJmZKM',
-    description:
-      'Length-501_Zv6FCrIL6WKFyizDZqffLmVhF7j3IdDQouOuO7WWamy5H7FfhGA8aH6FWsKcnBy5QYEvk1vtgIvLmq50mONRGE8vbdpf91EXhZmWXivlFim9srvAQJzes6jPfIzLWXgB7PrSAAclz1Uk2WkIK12fCfUZ90MYVB387mQSh1eCZrotzPjeXev5oE8f9fHPPBpuooSRZmd4z1RPx9jGJs6G1QPfaO1EYRUbD1XonEWBb9cU5YCDSxe5ap2yPoCaNIbjOB6yQfz29XO0cTj46KyQsYCThNE3mmZSbobqpqZeGI0jwrw4SZU9BkzW755w6XRNCljQl64MY60xUgO4dYuR1UAxi5dz9KcMVzRxWVdBUbWLaV7D41ngUnl37ylFdmdGTW8ErpE6ae2IOOWcgyq37L18170MAKafvbolfGNTSVRUYs0eV0j0TrJiuzhROtCPpgDaOxdrzGuwZBwjXAruicca8DGa0dzXm8YSMoG4LI',
-    websiteUrl:
-      'https://it-incubator.io/new/FrO3tox5Efs0KgUp95aA2QbCmH32uQkqMPYQqjeKpaaCtVu3GXzviSqQ6ZrIYDrdOh96ckaiWI6iCbHrGMiTNRoUeR5i3LI3hGqG',
+    description: faker.lorem.paragraph(501),
+    websiteUrl: 'https://it-incubator.io/new/' + faker.lorem.paragraph(100)
   },
 };
 
@@ -95,3 +95,18 @@ export const preparedPost = {
     blogId: '',
   },
 };
+
+export const preparedSecurity = {
+  email: {
+    valid: {email: 'somemail@gmail.com'},
+    notValid: {email: '222^gmail.com'},
+    notExist: {email: 'notexist@mail.com'}
+  }
+}
+
+export const preparedPassword = {
+  valid: 'password',
+  short: {password: faker.lorem.paragraph(5)},
+  long: {password: faker.lorem.paragraph(21)},
+  newPass: 'newpassword'
+}

@@ -31,9 +31,9 @@ export class PgQueryUsersRepository {
     const query = `
       SELECT id, login, email, "passwordHash", "passwordSalt", "createdAt"
         FROM public.users
-       WHERE login = $1 OR email = $1
+       WHERE login = '${loginOrEmail}' OR email = '${loginOrEmail}'
     `;
-    const result = await this.dataSource.query(query, [loginOrEmail]);
+    const result = await this.dataSource.query(query);
 
     return result[0];
   }

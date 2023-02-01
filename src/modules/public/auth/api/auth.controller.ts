@@ -85,14 +85,14 @@ export class AuthController {
       dto.email,
     );
 
-    if (!user) {
+    if (user) {
       const result = await this.authService.sendPasswordRecovery(
         user.id,
         dto.email,
       );
 
       if (!result) {
-        throw new NotImplementedException();
+        throw new Error('Something went wrong.');
       }
     }
 

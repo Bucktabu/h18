@@ -15,10 +15,12 @@ export class AuthService {
 
   async sendPasswordRecovery(userId: string, email: string): Promise<boolean> {
     const newRecoveryCode = uuidv4();
+    const expirationDate = add(new Date(), { hours: 24 }).toISOString();
     const result =
       await this.emailConfirmationRepository.updateConfirmationCode(
         userId,
         newRecoveryCode,
+        expirationDate
       );
 
     if (!result) {
@@ -31,7 +33,7 @@ export class AuthService {
 
   async updateConfirmationCode(userId: string): Promise<string | null> {
     const newConfirmationCode = uuidv4();
-    const newExpirationDate = add(new Date(), { hours: 24 });
+    const newExpirationDate = add(new Date(), { hours: 24 }).toISOString();
     const result =
       await this.emailConfirmationRepository.updateConfirmationCode(
         userId,
