@@ -71,10 +71,13 @@ export class SecurityService {
     const newTokenPayload = await this.jwtService.getTokenPayload(
       token.refreshToken,
     );
+    const iat = new Date(newTokenPayload.iat).toISOString()
+    const exp = new Date(newTokenPayload.exp).toISOString()
+    
     await this.securityRepository.updateCurrentActiveSessions(
       newTokenPayload.deviceId,
-      newTokenPayload.iat,
-      newTokenPayload.exp,
+      iat,
+      exp,
     );
 
     return token;

@@ -12,23 +12,32 @@ export const superUser = {
 };
 
 export const preparedUser = {
-  valid: {
-    login: 'MyLogin',
+  valid1: {
+    login: 'User1',
     password: 'password',
-    email: 'somemail@gmail.com',
+    email: 'somemail1@gmail.com',
+  },
+  valid2: {
+    login: 'User2',
+    password: 'password',
+    email: 'somemail2@gmail.com',
   },
   short: {
-    login: 'sb',
+    login: faker.lorem.paragraph(2),
     password: faker.lorem.paragraph(5),
     email: 'somemailgmail.com',
   },
   long: {
-    login: 'Length-11_s',
+    login: faker.lorem.paragraph(11),
     password: faker.lorem.paragraph(21),
     email: 'somemail@gmail.c',
   },
-  login: {
-    loginOrEmail: 'MyLogin',
+  login1: {
+    loginOrEmail: 'User1',
+    password: 'password',
+  },
+  login2: {
+    loginOrEmail: 'User2',
     password: 'password',
   },
 };

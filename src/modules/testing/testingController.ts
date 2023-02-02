@@ -1,10 +1,12 @@
-import {Controller, Delete, Get, HttpCode, Param, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, HttpCode, Param, Put} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import {JwtService} from "../public/auth/application/jwt.service";
 
 @Controller('testing')
 export class TestingController {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource,
+              private jwtService: JwtService) {}
 
   @Get('confirmation-code/:userId')
   async getConfirmationCode(@Param('userId') userId: string) {
@@ -37,6 +39,13 @@ export class TestingController {
     `)
 
     return result[0]
+  }
+
+  @Get('expired-token/:token')
+  async getExpiredToken(@Param('token') token: string) {
+    const tokenPayload = await this.jwtService.getTokenPayload(token)
+
+    return await this.jwtService.createJWT(tokenPayload.userId, tokenPayload.deviceId, 0)
   }
 
   @Put('set-expiration-date/:userId')
@@ -74,4 +83,6 @@ export class TestingController {
       DELETE FROM users;
     `);
   }
+
+
 }

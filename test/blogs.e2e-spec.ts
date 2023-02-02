@@ -39,13 +39,13 @@ describe('e2e tests', () => {
     it('Creat blogs', async () => {
       await request(server)
         .post(`/sa/users`)
-        .send(preparedUser.valid)
+        .send(preparedUser.valid1)
         .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
         .expect(201)
 
       const token = await request(server)
         .post(`/auth/login`)
-        .send(preparedUser.login)
+        .send(preparedUser.login1)
         .set({ 'user-agent': 'chrome/0.1' })
         .expect(200)
 

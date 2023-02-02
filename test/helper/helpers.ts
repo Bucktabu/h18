@@ -13,7 +13,7 @@ export const createNewUser = async (
   const response = await request(app.getHttpServer())
     .post('/sa/users')
     .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-    .send(preparedUser.valid);
+    .send(preparedUser.valid1);
 
   expect(response).toBeDefined();
   expect(response.status).toBe(201);
@@ -21,8 +21,8 @@ export const createNewUser = async (
   const user: UserViewModel = response.body;
   expect(user).toEqual({
     id: expect.any(String),
-    login: preparedUser.valid.login,
-    email: preparedUser.valid.email,
+    login1: preparedUser.valid1.login,
+    email: preparedUser.valid1.email,
     createdAt: expect.stringMatching(
       /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
     ),

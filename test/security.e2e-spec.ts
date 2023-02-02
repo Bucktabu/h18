@@ -42,8 +42,25 @@ describe('e2e tests', () => {
         it('Create devises', async () => {
             await request(server)
                 .post('/auth/registration')
-                .send(preparedUser.valid)
+                .send(preparedUser.valid1)
                 .expect(204)
+
+            await request(server)
+                .post('/auth/login')
+                .send(preparedUser.login1)
+                .set({ 'user-agent': 'chrome/0.1' })
+                .expect(200)
+
+            await request(server)
+                .post('/auth/registration')
+                .send(preparedUser.valid2)
+                .expect(204)
+
+            await request(server)
+                .post('/auth/login')
+                .send(preparedUser.login2)
+                .set({ 'user-agent': 'chrome/0.1' })
+                .expect(200)
         })
 
         describe('Return all devises with active sessions for current user', () => {

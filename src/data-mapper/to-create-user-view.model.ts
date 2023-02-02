@@ -24,7 +24,7 @@ export const toCreateUserViewModel = (
 export const toUserViewModel = (user: UserWithBanInfo) => {
   return {
     id: user.id,
-    login: user.login,
+    login1: user.login,
     email: user.email,
     createdAt: user.createdAt,
     banInfo: {

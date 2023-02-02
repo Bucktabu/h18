@@ -4,12 +4,13 @@ import { settings } from '../../../../settings';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PgJwtRepository } from '../infrastructure/pg-jwt.repository';
 import { TokenBlackList } from '../infrastructure/entity/tokenBlackList';
+import {TokenPayloadModel} from "../../../../global-model/token-payload.model";
 
 @Injectable()
 export class JwtService {
   constructor(protected jwtRepository: PgJwtRepository) {}
 
-  async getTokenPayload(token: string) {
+  async getTokenPayload(token: string): Promise<TokenPayloadModel> {
     try {
       const result: any = await jwt.verify(token, settings.JWT_SECRET);
       return result;

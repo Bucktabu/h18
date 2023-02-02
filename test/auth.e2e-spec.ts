@@ -15,6 +15,8 @@ import { createApp } from '../src/helpers/create-app';
 import { EmailManager } from '../src/modules/public/auth/email-transfer/email.manager';
 import { EmailManagerMock } from './mock/emailAdapter.mock';
 import {randomUUID} from "crypto";
+import {ExpectAuthModel} from "./helper/expect-auth.model";
+import {addAbortSignal} from "stream";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -66,14 +68,14 @@ describe('e2e tests', () => {
       it('Shouldn`t registration user. 400 - Existed login and email', () => {
         request(server)
             .post('/auth/registration')
-            .send(preparedUser.valid)
+            .send(preparedUser.valid1)
             .expect(400)
       })
 
       it('Should registration user. 204 - Input data is accepted. Email with confirmation code will be send to passed email address.', async () => {
         await request(server)
             .post('/auth/registration')
-            .send(preparedUser.valid)
+            .send(preparedUser.valid1)
             .expect(204)
 
         const response = await request(server)
@@ -127,7 +129,7 @@ describe('e2e tests', () => {
 
         await request(server)
             .post('/auth/registration-email-resending')
-            .send({email: preparedUser.valid.email})
+            .send({email: preparedUser.valid1.email})
             .expect(204)
 
         const newConfirmationCode = await request(server)
@@ -219,7 +221,7 @@ describe('e2e tests', () => {
       it('Should update confirmation code', async () => {
         const user = await request(server)
             .get('/sa/users')
-            .send(preparedUser.valid)
+            .send(preparedUser.valid1)
             .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
             .expect(200)
 
@@ -240,7 +242,7 @@ describe('e2e tests', () => {
       })
     })
 
-    describe('Update password (without 429)', () => {
+    describe('Update password', () => {
       it('Shouldn`t confirm password recovery if incorrect input data', async () => {
         const errorsMessages = getErrorMessage(['newPassword', 'recoveryCode'])
         const randomCode = randomUUID()
@@ -345,23 +347,123 @@ describe('e2e tests', () => {
           .set({ 'user-agent': 'chrome/0.1' })
           .expect(200)
 
-        console.log((response.headers['set-cookie'][0].split(';')[0]).slice(13)); // TODO refresh token
+        expect(response.body.accessToken).toBeTruthy()
+        expect(response.headers['set-cookie'][0].split(';')[0]).toBeTruthy()
+
+        expect.setState({accessToken: response.body.accessToken})
+        expect.setState({refreshToken: (response.headers['set-cookie'][0].split(';')[0]).slice(13)})
+      })
+    })
+
+    describe('Generate new pair of access and refresh token', () => {
+      it('Shouldn`t generate new pair token if the JWT refreshToken inside cookie is missing', async () => {
+        request(server)
+            .post('/auth/refresh-token')
+            .expect(401)
+      })
+
+      it('Shouldn`t generate new pair token if the JWT refreshToken inside cookie is expired', async () => {
+        const { refreshToken } = expect.getState()
+
+        const token = await request(server)
+            .get(`/testing/expired-token/${refreshToken}`)
+            .expect(200)
+      // TODO вне зависимости от того протухший токен или нет 401
+        const second = 1000;
+        jest.setTimeout(second)
+
+        request(server)
+            .post('/auth/refresh-token')
+            .set("Cookie", token.body)
+            .expect(401)
+      })
+
+      it('Shouldn`t generate new pair token if the JWT refreshToken inside cookie is incorrect', async () => {
+        const { refreshToken } = expect.getState()
+
+        await request(server)
+            .post('/auth/refresh-token')
+            .set("Cookie", `${refreshToken}-1`)
+            .expect(401)
+      })
+
+      it('Shouldn return new pair of access and refresh token', async () => {
+        const { refreshToken } = expect.getState()
+
+        const response = await request(server)
+            .post('/auth/refresh-token')
+            .set("Cookie", refreshToken)
+            .expect(200)
 
         expect(response.body.accessToken).toBeTruthy()
         expect(response.headers['set-cookie'][0].split(';')[0]).toBeTruthy()
       })
     })
 
-    // describe('Generate new pair of access and refresh token', () => {
-    //
-    // })
-    //
-    // describe('Get information about current user', () => {
-    //
-    // })
-    //
-    // describe('Logout user from system', () => {
-    //
-    // })
+    describe('Get information about current user', () => {
+      it('Shouldn`t return info about user if unauthorized', async () => {
+        await request(server)
+            .get(`/auth/me`)
+            .expect(401)
+      })
+
+      it('Return info about user', async () => {
+        const { accessToken, user } = expect.getState()
+
+        const response = await request(server)
+            .get(`/auth/me`)
+            .auth(accessToken, {type: 'bearer'})
+            .expect(200)
+
+        expect(response.body).toEqual(ExpectAuthModel(user))
+      })
+    })
+
+    describe('Logout user from system', () => {
+      it('Shouldn`t logout if refresh token missing', async () => {
+        await request(server)
+            .post(`/auth/logout`)
+            .expect(401)
+      })
+
+      it('Shouldn`t logout if refresh token is expired', async () => {
+        const {user, token} = expect.getState()
+
+        const expiredToken = await request(server)
+            .put(`/testing/expired-token/${token}`)
+            .expect(204)
+
+        const second = 1000;
+        jest.setTimeout(second)
+
+        await request(server)
+            .post(`/auth/logout`)
+            .set('Cookie', expiredToken.body)
+            .expect(401)
+      })
+
+      it('Shouldn`t logout if refresh token is incorrect', async () => {
+        const {token} = expect.getState()
+
+        await request(server)
+            .post(`/auth/logout`)
+            .set('Cookie', `${token}-1`)
+            .expect(401)
+      })
+
+      it('Should logout from sistem', async () => {
+        const {token} = expect.getState()
+
+        await request(server)
+            .post(`/auth/logout`)
+            .set('Cookie', token)
+            .expect(204)
+
+        await request(server)
+            .post(`/auth/logout`)
+            .set('Cookie', token)
+            .expect(401)
+      })
+    })
   })
 });

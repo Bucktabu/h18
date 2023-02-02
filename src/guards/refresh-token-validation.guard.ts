@@ -19,6 +19,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     if (!req.cookies.refreshToken) {
+      console.log('Отсутствует токен в req.cookies.refreshToken')
       throw new UnauthorizedException();
     }
 
@@ -27,6 +28,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (tokenInBlackList) {
+      console.log('2')
       throw new UnauthorizedException();
     }
 
@@ -35,6 +37,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (!tokenPayload) {
+      console.log('3')
       throw new UnauthorizedException();
     }
 
@@ -43,6 +46,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (!user) {
+      console.log('4')
       throw new UnauthorizedException();
     }
 

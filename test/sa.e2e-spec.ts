@@ -41,7 +41,7 @@ describe('e2e tests', () => {
       it('SA try create new user without autorisation', async () => {
         await request(server)
           .post(`/sa/users`)
-          .send(preparedUser.valid)
+          .send(preparedUser.valid1)
           .auth(superUser.notValid.login, superUser.notValid.password, { type: 'basic' })
           .expect(401)
       })
@@ -69,14 +69,14 @@ describe('e2e tests', () => {
       it('SA should create user', async () => {
         const response = await request(server)
           .post(`/sa/users`)
-          .send(preparedUser.valid)
+          .send(preparedUser.valid1)
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
           .expect(201)
 
         expect(response.body).toEqual({
           id: expect.any(String),
-          login: preparedUser.valid.login,
-          email: preparedUser.valid.email,
+          login1: preparedUser.valid1.login,
+          email: preparedUser.valid1.email,
           createdAt: expect.any(String),
           banInfo: {
             isBanned: false,
@@ -97,7 +97,7 @@ describe('e2e tests', () => {
       it('Create five users and ban even users', async() => {
         const user1 = await request(server)
           .post(`/sa/users`)
-          .send({login: 'User5',
+          .send({login1: 'User5',
             password: 'qwerty',
             email: 'somemail1@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -105,7 +105,7 @@ describe('e2e tests', () => {
 
         const user2 = await request(server)
           .post(`/sa/users`)
-          .send({login: 'User4',
+          .send({login1: 'User4',
             password: 'qwerty',
             email: 'somemail2@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -113,7 +113,7 @@ describe('e2e tests', () => {
 
         const user3 = await request(server)
           .post(`/sa/users`)
-          .send({login: 'User3',
+          .send({login1: 'User3',
             password: 'qwerty',
             email: 'somemail3@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -121,7 +121,7 @@ describe('e2e tests', () => {
 
         const user4 = await request(server)
           .post(`/sa/users`)
-          .send({login: 'User2',
+          .send({login1: 'User2',
             password: 'qwerty',
             email: 'somemail4@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -129,7 +129,7 @@ describe('e2e tests', () => {
 
         const user5 = await request(server)
           .post(`/sa/users`)
-          .send({login: 'User1',
+          .send({login1: 'User1',
             password: 'qwerty',
             email: 'somemail5@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -300,7 +300,7 @@ describe('e2e tests', () => {
       it('Create user', async () => {
         const response = await request(server)
           .post(`/sa/users`)
-          .send(preparedUser.valid)
+          .send(preparedUser.valid1)
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
           .expect(201)
 
@@ -378,7 +378,7 @@ describe('e2e tests', () => {
       it('Create user', async () => {
         const response = await request(server)
           .post(`/sa/users`)
-          .send(preparedUser.valid)
+          .send(preparedUser.valid1)
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
           .expect(201)
 
@@ -420,7 +420,7 @@ describe('e2e tests', () => {
       it('Create user -> login -> create blog', async () => {
         await request(server)
           .post(`/sa/users`)
-          .send(preparedUser.valid)
+          .send(preparedUser.valid1)
           .auth(superUser.valid.login, superUser.valid.password, {
             type: 'basic',
           })
@@ -428,7 +428,7 @@ describe('e2e tests', () => {
 
         const token = await request(server)
           .post(`/auth/login`)
-          .send(preparedUser.login)
+          .send(preparedUser.login1)
           .set({ 'user-agent': 'chrome/0.1' })
           .expect(200);
 
