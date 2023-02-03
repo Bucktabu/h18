@@ -3,7 +3,7 @@ import {UserViewModelWithBanInfo} from "../../src/modules/super-admin/api/dto/us
 export const ExpectAuthModel = (user: UserViewModelWithBanInfo) => {
     return {
         userId: user.id,
-        login1: user.login,
+        login: user.login,
         email: user.email
     }
 }

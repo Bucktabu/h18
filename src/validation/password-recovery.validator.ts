@@ -22,7 +22,7 @@ export class PasswordRecoveryValidator implements ValidatorConstraintInterface {
       return false;
     }
 
-    if (new Date(emailConfirmation.expirationDate) < new Date()) {
+    if (new Date(emailConfirmation.expirationDate) > new Date()) { //TODO изменил знак
       return false;
     }
 

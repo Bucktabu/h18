@@ -36,9 +36,13 @@ export class JwtService {
     deviceId: string,
     timeToExpired: number,
   ): Promise<string> {
-    return jwt.sign({ userId, deviceId }, settings.JWT_SECRET, {
-      expiresIn: `${timeToExpired}s`,
-    });
+    try {
+      return jwt.sign({ userId, deviceId }, settings.JWT_SECRET, {
+        expiresIn: `${timeToExpired}s`,
+      });
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async createToken(

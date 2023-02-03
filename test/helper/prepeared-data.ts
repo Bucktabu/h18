@@ -40,6 +40,10 @@ export const preparedUser = {
     loginOrEmail: 'User2',
     password: 'password',
   },
+  login1withNewPassword: {
+    loginOrEmail: 'User1',
+    password: 'newpassword',
+  },
 };
 
 export const banUserDto = {

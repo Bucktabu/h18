@@ -3,7 +3,7 @@ import { UserDBModel } from '../modules/super-admin/infrastructure/entity/userDB
 export const toAboutMeViewModel = (userDB: UserDBModel) => {
   return {
     email: userDB.email,
-    login1: userDB.login,
+    login: userDB.login,
     userId: userDB.id,
   };
 };

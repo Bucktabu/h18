@@ -29,13 +29,7 @@ export class SecurityService {
   }
 
   async getDeviceById(deviceId: string): Promise<UserDeviceModel | null> {
-    const device = await this.querySecurityRepository.getDeviseById(deviceId);
-
-    if (!device) {
-      return null;
-    }
-
-    return device;
+    return await this.querySecurityRepository.getDeviseById(deviceId);
   }
 
   async createUserDevice(

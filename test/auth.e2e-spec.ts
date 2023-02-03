@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
 import {
-  banUserDto,
   preparedPassword,
   preparedSecurity,
   preparedUser,
@@ -16,7 +15,6 @@ import { EmailManager } from '../src/modules/public/auth/email-transfer/email.ma
 import { EmailManagerMock } from './mock/emailAdapter.mock';
 import {randomUUID} from "crypto";
 import {ExpectAuthModel} from "./helper/expect-auth.model";
-import {addAbortSignal} from "stream";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -343,7 +341,7 @@ describe('e2e tests', () => {
       it('Should login and return token', async () => {
         const response = await request(server)
           .post(`/auth/login`)
-          .send(prepareLogin.valid)
+          .send(preparedUser.login1withNewPassword)
           .set({ 'user-agent': 'chrome/0.1' })
           .expect(200)
 
@@ -368,13 +366,13 @@ describe('e2e tests', () => {
         const token = await request(server)
             .get(`/testing/expired-token/${refreshToken}`)
             .expect(200)
-      // TODO вне зависимости от того протухший токен или нет 401
+
         const second = 1000;
         jest.setTimeout(second)
-
+        console.log('372', token.body)
         request(server)
             .post('/auth/refresh-token')
-            .set("Cookie", token.body)
+            .set("Cookie", `refreshToken=${token.body}`)
             .expect(401)
       })
 
@@ -383,7 +381,7 @@ describe('e2e tests', () => {
 
         await request(server)
             .post('/auth/refresh-token')
-            .set("Cookie", `${refreshToken}-1`)
+            .set("Cookie", `refreshToken=${refreshToken}-1`)
             .expect(401)
       })
 
@@ -392,11 +390,16 @@ describe('e2e tests', () => {
 
         const response = await request(server)
             .post('/auth/refresh-token')
-            .set("Cookie", refreshToken)
+            .set("Cookie", `refreshToken=${refreshToken}`)
             .expect(200)
 
         expect(response.body.accessToken).toBeTruthy()
         expect(response.headers['set-cookie'][0].split(';')[0]).toBeTruthy()
+
+        expect.setState({
+          newAccessToken: response.body.accessToken,
+          newRefreshToken: (response.headers['set-cookie'][0].split(';')[0]).slice(13)
+        })
       })
     })
 
@@ -408,11 +411,11 @@ describe('e2e tests', () => {
       })
 
       it('Return info about user', async () => {
-        const { accessToken, user } = expect.getState()
+        const { newAccessToken, user } = expect.getState()
 
         const response = await request(server)
             .get(`/auth/me`)
-            .auth(accessToken, {type: 'bearer'})
+            .auth(newAccessToken, {type: 'bearer'})
             .expect(200)
 
         expect(response.body).toEqual(ExpectAuthModel(user))
@@ -427,41 +430,41 @@ describe('e2e tests', () => {
       })
 
       it('Shouldn`t logout if refresh token is expired', async () => {
-        const {user, token} = expect.getState()
+        const {refreshToken} = expect.getState()
 
         const expiredToken = await request(server)
-            .put(`/testing/expired-token/${token}`)
-            .expect(204)
+            .get(`/testing/expired-token/${refreshToken}`)
+            .expect(200)
 
         const second = 1000;
         jest.setTimeout(second)
-
+        console.log('436', expiredToken.body)
         await request(server)
             .post(`/auth/logout`)
-            .set('Cookie', expiredToken.body)
+            .set('Cookie', `refreshToken=${expiredToken.body}`)
             .expect(401)
       })
 
       it('Shouldn`t logout if refresh token is incorrect', async () => {
-        const {token} = expect.getState()
+        const {refreshToken} = expect.getState()
 
         await request(server)
             .post(`/auth/logout`)
-            .set('Cookie', `${token}-1`)
+            .set('Cookie', `refreshToken=${refreshToken}-1`)
             .expect(401)
       })
 
       it('Should logout from sistem', async () => {
-        const {token} = expect.getState()
+        const {newRefreshToken} = expect.getState()
 
         await request(server)
             .post(`/auth/logout`)
-            .set('Cookie', token)
+            .set('Cookie', `refreshToken=${newRefreshToken}`)
             .expect(204)
 
         await request(server)
             .post(`/auth/logout`)
-            .set('Cookie', token)
+            .set('Cookie', `refreshToken=${newRefreshToken}`)
             .expect(401)
       })
     })
