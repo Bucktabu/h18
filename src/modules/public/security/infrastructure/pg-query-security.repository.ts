@@ -25,13 +25,10 @@ export class PgQuerySecurityRepository {
     const query = `
       SELECT "userId", "deviceId", "deviceTitle", "ipAddress", iat, exp
         FROM public.security
-       WHERE "userId" = $1;
+       WHERE "deviceId" = $1;
     `;
-    try {
-      const result = await this.dataSource.query(query, [deviceId]);
-      return result[0];
-    } catch (e) {
-      return null;
-    }
+    const result = await this.dataSource.query(query, [deviceId]);
+
+    return result[0];
   }
 }
