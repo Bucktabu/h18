@@ -30,7 +30,7 @@ export class SecurityService {
 
   async getDeviceById(deviceId: string): Promise<UserDeviceModel | null> {
     const device = await this.querySecurityRepository.getDeviseById(deviceId);
-    console.log(device, 'dev')
+
     if(!device) {
       return  null
     }
