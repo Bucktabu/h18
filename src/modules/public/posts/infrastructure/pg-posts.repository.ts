@@ -4,17 +4,19 @@ import { PostDto } from '../../../blogger/api/dto/post.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostViewModel } from '../api/dto/postsView.model';
+import { CreatedPostModel } from "./entity/db-post.model";
 
 @Injectable()
 export class PgPostsRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async createPost(newPost: PostDBModel): Promise<PostViewModel> {
+  async createPost(newPost: PostDBModel): Promise<CreatedPostModel> {
     const query = `
       INSERT INTO public.posts
              (id, title, "shortDescription", content, "createdAt", "blogId")
       VAlUES ($1, $2, $3, $4, $5, $6)
-             RETURNING id, title, "shortDescription", content, "createdAt", "blogId"                
+             RETURNING id, title, "shortDescription", content, "createdAt", "blogId",
+                       (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = $6)                
     `;
     const result = await this.dataSource.query(query, [
       newPost.id,
@@ -24,6 +26,7 @@ export class PgPostsRepository {
       newPost.createdAt,
       newPost.blogId,
     ]);
+
     return result[0]
   }
 

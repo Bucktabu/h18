@@ -14,7 +14,7 @@ export class PgBlogsRepository {
   async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
     const query = `
       INSERT INTO public.blogs
-             (id, name, description, "websiteUrl", "createdAt", "bloggerId")
+             (id, name, description, "websiteUrl", "createdAt", "userId")
       VAlUES ($1, $2, $3, $4, $5, $6)  
              RETURNING id, name, description, "websiteUrl", "createdAt"
     `;
@@ -33,7 +33,7 @@ export class PgBlogsRepository {
   async bindBlog(params: BindBlogDto): Promise<boolean> {
     const query = `
       UPDATE public.blogs
-         SET "bloggerId" = $1
+         SET "userId" = $1
        WHERE id = $2
     `;
     const result = await this.dataSource.query(query, [

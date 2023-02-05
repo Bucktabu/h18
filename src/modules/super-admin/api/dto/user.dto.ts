@@ -4,11 +4,9 @@ import {
   Length,
   MinLength,
   Validate,
-  Validator,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { EmailExistValidator } from '../../../../validation/email-exist-validator.service';
-import { LoginExist } from '../../../../decorator/login-exist.decorator';
 import { LoginExistValidator } from '../../../../validation/login-exist-validator.service';
 
 export class UserDto {

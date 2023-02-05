@@ -1,12 +1,12 @@
 import { IsString } from 'class-validator';
-import { Transform, TransformFnParams } from 'class-transformer';
+import { Transform } from 'class-transformer';
 
 export class AuthDto {
   @IsString()
-  @Transform(({ value }: TransformFnParams) => value?.trim())
+  @Transform(({ value }) => value?.trim())
   loginOrEmail: string;
 
   @IsString()
-  @Transform(({ value }: TransformFnParams) => value?.trim())
+  @Transform(({ value }) => value?.trim())
   password: string;
 }

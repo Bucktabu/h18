@@ -7,6 +7,7 @@ import {
 import { UsersService } from '../modules/super-admin/application/users.service';
 import { JwtService } from '../modules/public/auth/application/jwt.service';
 import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
+import { log } from "util";
 
 @Injectable()
 export class RefreshTokenValidationGuard implements CanActivate {
@@ -19,7 +20,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     if (!req.cookies.refreshToken) {
-      //console.log('Отсутствует токен в req.cookies.refreshToken')
+      // console.log('Отсутствует токен в req.cookies.refreshToken')
       throw new UnauthorizedException();
     }
 
@@ -28,6 +29,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (tokenInBlackList) {
+      // console.log('Токен в чернм списке')
       throw new UnauthorizedException();
     }
 
@@ -36,6 +38,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (!tokenPayload) {
+      // console.log('Токен не рассекретился')
       throw new UnauthorizedException();
     }
 
@@ -44,6 +47,7 @@ export class RefreshTokenValidationGuard implements CanActivate {
     );
 
     if (!user) {
+      // console.log('Пользовотель не нашелся')
       throw new UnauthorizedException();
     }
 

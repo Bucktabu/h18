@@ -44,9 +44,8 @@ export class TestingController {
   @Get('expired-token/:token')
   async getExpiredToken(@Param('token') token: string) {
     const tokenPayload = await this.jwtService.getTokenPayload(token)
-    const expiredToken = await this.jwtService.createJWT(tokenPayload.userId, tokenPayload.deviceId, 0)
-    console.log(expiredToken)
-    return expiredToken
+
+    return { expiredToken: await this.jwtService.createJWT(tokenPayload.userId, tokenPayload.deviceId, 0) }
   }
 
   @Put('set-expiration-date/:userId')

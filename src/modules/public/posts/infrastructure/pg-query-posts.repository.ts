@@ -112,7 +112,7 @@ export class PgQueryPostsRepository {
     const totalCountQuery = `
       SELECT COUNT(id)
             FROM public.posts
-           WHERE ${blogIdFilter}
+           ${blogIdFilter}
     `;
     const totalCount = await this.dataSource.query(totalCountQuery);
 

@@ -1,7 +1,8 @@
-import { IsBoolean, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsString, IsUUID, MinLength } from "class-validator";
 
 export class BanUserDto {
   @IsString()
+  @IsUUID() // TODO не отрабатывает
   blogId: string;
 
   @IsString()

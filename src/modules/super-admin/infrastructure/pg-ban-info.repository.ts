@@ -70,7 +70,7 @@ export class PgBanInfoRepository {
       INSERT INTO public.banned_users_for_blog
              ("blogId", "userId", "banReason", "banDate")
       VALUES ($1, $2, $3, $4)   
-              RETURNING ("blogId")
+              RETURNING "blogId"
     `;
     const result = await this.dataSource.query(query, [
       blogId,

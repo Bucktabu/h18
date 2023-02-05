@@ -29,7 +29,6 @@ export class ForbiddenGuard implements CanActivate {
     }
 
     if (bloggerId !== req.user.id) {
-
       throw new ForbiddenException();
     }
 

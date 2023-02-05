@@ -73,6 +73,7 @@ export class BloggerBlogsController {
     @Param('blogId') blogId: string,
   ) {
     const createdPost = await this.postsService.createPost(dto, blogId);
+
     return createdPost;
   }
 
@@ -106,7 +107,6 @@ export class BloggerBlogsController {
   @Delete(':blogId')
   @HttpCode(204)
   async deleteBlog(@Param('blogId') blogId: string) {
-    console.log(blogId);
     const result = await this.blogsService.deleteBlog(blogId);
 
     if (!result) {

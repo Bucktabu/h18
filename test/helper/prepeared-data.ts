@@ -23,13 +23,13 @@ export const preparedUser = {
     email: 'somemail2@gmail.com',
   },
   short: {
-    login: faker.lorem.paragraph(2),
-    password: faker.lorem.paragraph(5),
+    login: faker.random.alpha(2),
+    password: faker.random.alpha(5),
     email: 'somemailgmail.com',
   },
   long: {
-    login: faker.lorem.paragraph(11),
-    password: faker.lorem.paragraph(21),
+    login: faker.random.alpha(11),
+    password: faker.random.alpha(21),
     email: 'somemail@gmail.c',
   },
   login1: {
@@ -49,15 +49,15 @@ export const preparedUser = {
 export const banUserDto = {
   valid: {
     isBanned: true,
-    banReason: faker.lorem.paragraph(20),
+    banReason: faker.random.alpha(20),
   },
   validUnBun: {
     isBanned: false,
-    banReason: faker.lorem.paragraph(20),
+    banReason: faker.random.alpha(20),
   },
   notValid: {
     isBanned: 'true',
-    banReason: faker.lorem.paragraph(19),
+    banReason: faker.random.alpha(19),
   },
 };
 
@@ -67,7 +67,7 @@ export const preparedBlog = {
     description: 'valid description',
     websiteUrl: 'https://it-incubator.io/',
   },
-  notValid: {
+  newValid: {
     name: 'new valid name',
     description: 'new valid description',
     websiteUrl: 'https://it-incubator.io/new',
@@ -79,8 +79,8 @@ export const preparedBlog = {
   },
   long: {
     name: 'Length-16_RJmZKM',
-    description: faker.lorem.paragraph(501),
-    websiteUrl: 'https://it-incubator.io/new/' + faker.lorem.paragraph(100)
+    description: faker.random.alpha(501),
+    websiteUrl: `https://it-incubator.io/new/${faker.random.alpha(73)}`
   },
 };
 
@@ -90,22 +90,15 @@ export const preparedPost = {
     shortDescription: 'valid shortDescription',
     content: 'valid content',
   },
-  notValid: {
+  newValid: {
     title: 'new valid title',
     shortDescription: 'new valid shortDescription',
     content: 'new valid content',
   },
-  short: {
-    title: '',
-    shortDescription: '',
-    content: '',
-    blogId: '',
-  },
   long: {
-    title: '',
-    shortDescription: '',
-    content: '',
-    blogId: '',
+    title: faker.random.alpha(31),
+    shortDescription: faker.random.alpha(101),
+    content: faker.random.alpha(1001),
   },
 };
 
@@ -119,8 +112,8 @@ export const preparedSecurity = {
 
 export const preparedPassword = {
   valid: 'password',
-  short: {password: faker.lorem.paragraph(5)},
-  long: {password: faker.lorem.paragraph(21)},
+  short: {password: faker.random.alpha(5)},
+  long: {password: faker.random.alpha(21)},
   newPass: 'newpassword'
 }
 

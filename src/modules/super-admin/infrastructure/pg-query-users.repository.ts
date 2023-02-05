@@ -54,7 +54,7 @@ export class PgQueryUsersRepository {
     blogId: string,
     queryDto: QueryParametersDto,
   ): Promise<ContentPageModel> {
-    const filter = this.userFilter(queryDto);
+    const filter = this.getFilter(queryDto);
 
     const usersQuery = `
       SELECT b."banDate", b."banReason",
@@ -77,11 +77,11 @@ export class PgQueryUsersRepository {
     const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
 
     const totalCountQuery = `
-      SELECT COUNT(b.blogId)
+      SELECT COUNT("blogId")
         FROM public.banned_users_for_blog b
         LEFT JOIN public.users u  
           ON b."userId" = u.id
-       WHERE ${filter}
+        ${filter}
     `;
     const totalCount = await this.dataSource.query(totalCountQuery);
 
@@ -170,16 +170,4 @@ export class PgQueryUsersRepository {
     return '';
   }
 
-  // private sortFilter(query: QueryParametersDto): string {
-  //   const {sortBy} = query
-  //
-  //   if (sortBy === SortParametersModel.Login) {
-  //     return `"${sortBy}" COLLATE "C"`
-  //   }
-  //   // if (sortBy === SortParametersModel.CreatedAt) {
-  //   //   return `"${sortBy}" COLLATE "C"`
-  //   // }
-  //
-  //   return `"${sortBy}"`
-  // }
 }

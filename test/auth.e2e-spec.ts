@@ -369,10 +369,10 @@ describe('e2e tests', () => {
 
         const second = 1000;
         jest.setTimeout(second)
-        console.log('372', token.body)
+
         request(server)
             .post('/auth/refresh-token')
-            .set("Cookie", `refreshToken=${token.body}`)
+            .set("Cookie", `refreshToken=${token.body.expiredToken}`)
             .expect(401)
       })
 
@@ -438,10 +438,10 @@ describe('e2e tests', () => {
 
         const second = 1000;
         jest.setTimeout(second)
-        console.log('436', expiredToken.body)
+
         await request(server)
             .post(`/auth/logout`)
-            .set('Cookie', `refreshToken=${expiredToken.body}`)
+            .set('Cookie', `refreshToken=${expiredToken.body.expiredToken}`)
             .expect(401)
       })
 

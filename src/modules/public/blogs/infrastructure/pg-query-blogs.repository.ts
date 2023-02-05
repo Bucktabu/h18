@@ -9,8 +9,7 @@ import {
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
-import { BlogViewModel, BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
-import { query } from 'express';
+import { BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -78,7 +77,7 @@ export class PgQueryBlogsRepository {
           SELECT COUNT(id)
             FROM public.blogs
             LEFT JOIN public.users u
-              ON b."bloggerId" = u.id
+              ON b."userId" = u.id
            WHERE ${filter}
         `;
     const totalCount = await this.dataSource.query(totalCountQuery);
@@ -106,15 +105,19 @@ export class PgQueryBlogsRepository {
     return result[0];
   }
 
-  async blogExist(blogId: string): Promise<string> {
+  async blogExist(blogId: string): Promise<string | null> {
+
     const query = `
-            SELECT "bloggerId"
+            SELECT "userId"
               FROM public.blogs
              WHERE id = $1
         `;
     const result = await this.dataSource.query(query, [blogId]);
 
-    return result[0].bloggerId;
+    if(!result[0]) {
+      return null
+    }
+    return result[0].userId;
   }
 
   private getFilter(userId: string | null, query: QueryParametersDto): string {
