@@ -28,7 +28,7 @@ export class Blogs {
 
   @ManyToOne(() => Users, (u) => u.blogs)
   @JoinColumn()
-  blogger: Users;
+  user: Users;
   @Column() userId: string;
 
   @OneToMany(() => BannedUsersForBlog, (bu) => bu.blog)

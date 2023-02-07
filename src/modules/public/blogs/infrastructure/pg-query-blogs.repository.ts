@@ -55,11 +55,11 @@ export class PgQueryBlogsRepository {
     const blogsQuery = `
             SELECT b.id, b.name, b.description, b."websiteUrl", b."createdAt", b."isMembership",
                    u.id AS "userId", u.login AS "userLogin",
-                   (SELECT "isBanned" FROM public.banned_blog WHERE "blogId" = b.id),
+                   EXISTS (SELECT "blogId" FROM public.banned_blog WHERE "blogId" = b.id) AS "isBanned",
                    (SELECT "banDate" FROM public.banned_blog WHERE "blogId" = b.id) 
-              FROM public.blogs
+              FROM public.blogs b
               LEFT JOIN public.users u
-                ON b."bloggerId" = u.id
+                ON b."userId" = u.id
              WHERE ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
@@ -75,8 +75,8 @@ export class PgQueryBlogsRepository {
     const blogs = blogsDB.map((b) => toBlogWithAdditionalInfoModel(b));
 
     const totalCountQuery = `
-          SELECT COUNT(id)
-            FROM public.blogs
+          SELECT COUNT(b.id)
+            FROM public.blogs b
             LEFT JOIN public.users u
               ON b."userId" = u.id
            WHERE ${filter}
@@ -119,6 +119,17 @@ export class PgQueryBlogsRepository {
       return null
     }
     return result[0].userId;
+  }
+
+  async blogBanned(blogId: string): Promise<boolean | null> {
+    const query = `
+      SELECT id, (EXISTS(SELECT "blogId" FROM public.banned_blog WHERE "blogId" = $1)) AS "isBanned"
+        FROM public.blogs
+       WHERE id = $1; 
+    `;
+    const response = await this.dataSource.query(query, [blogId])
+
+    return response[0].isBanned
   }
 
   private getFilter(userId: string | null, query: QueryParametersDto): string {

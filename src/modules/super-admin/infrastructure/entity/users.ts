@@ -31,7 +31,7 @@ export class Users {
   @OneToOne(() => EmailConfirmation, (ec) => ec.user)
   emailConfirmation: EmailConfirmation;
 
-  @OneToMany(() => Blogs, (b) => b.blogger)
+  @OneToMany(() => Blogs, (b) => b.user)
   blogs: Blogs[];
 
   @OneToMany(() => BannedUsersForBlog, (bu) => bu.user)

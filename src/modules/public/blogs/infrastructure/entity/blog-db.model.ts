@@ -16,6 +16,7 @@ export class dbBlogWithAdditionalInfo {
   description: string;
   websiteUrl: string;
   createdAt: string;
+  isMembership: boolean;
   userId: string;
   userLogin: string;
   isBanned: boolean;

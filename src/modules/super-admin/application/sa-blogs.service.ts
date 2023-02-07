@@ -17,19 +17,21 @@ export class SaBlogsService {
     blogId: string,
     isBanned: boolean,
   ): Promise<boolean | null> {
-    const blog = await this.queryBlogsRepository.getBlog(blogId);
+    const blogBanned = await this.queryBlogsRepository.blogBanned(blogId);
 
-    if (!blog) {
+    if (blogBanned === null) {
       return null;
     }
 
-    if (blog.isBanned === isBanned) {
+    if (blogBanned === isBanned) {
       return true;
     }
-    if (!blog.isBanned) {
+    if (!blogBanned) {
+
       const banDate = new Date().toISOString();
       return await this.banInfoRepository.createBlogBanStatus(blogId, banDate);
     }
+
     return await this.banInfoRepository.deleteBlogBanStatus(blogId);
   }
 

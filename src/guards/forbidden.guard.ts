@@ -18,7 +18,8 @@ export class ForbiddenGuard implements CanActivate {
     let blogId = req.params.id;
     if (req.body.blogId) {
       blogId = req.body.blogId;
-    } else if (req.params.blogId) {
+    }
+    if (req.params.blogId) {
       blogId = req.params.blogId;
     }
 

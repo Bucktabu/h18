@@ -11,7 +11,4 @@ export class BannedBlog {
 
   @Column()
   banDate: string;
-
-  @Column()
-  banReason: string;
 }
