@@ -141,14 +141,35 @@ describe('e2e tests', () => {
                 .expect(204)
         })
 
-        it('GET => /sa/blogs', async () => {
+        it('GET => /sa/blogs, should return 1 blog', async () => {
             const response = await request(server)
                 .get(`/sa/blogs`)
                 .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
                 .expect(200)
 
-            console.log('Banned blog:', response.body.items[0])
             expect(response.body.items).toHaveLength(1)
+        })
+
+        it('PUT -> "/sa/blogs/:id/ban"', async () => {
+            const { blogId } = expect.getState()
+
+            await request(server)
+              .put(`/sa/blogs/${blogId}/ban`)
+              .send({
+                  "isBanned": false
+              })
+              .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+              .expect(404)
+        })
+
+        it('GET => /sa/blogs, should return 0 blog', async () => {
+            const response = await request(server)
+              .get(`/sa/blogs`)
+              .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+              .expect(200)
+
+            console.log('Banned blog:', response.body)
+            expect(response.body.items).toHaveLength(0)
         })
     })
 

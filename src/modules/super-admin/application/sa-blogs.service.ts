@@ -26,6 +26,7 @@ export class SaBlogsService {
     if (blogBanned === isBanned) {
       return true;
     }
+
     if (!blogBanned) {
 
       const banDate = new Date().toISOString();
