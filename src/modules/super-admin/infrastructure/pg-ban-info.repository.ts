@@ -22,30 +22,13 @@ export class PgBanInfoRepository {
 
   async youBanned(userId, blogId): Promise<boolean> {
     const query = `
-      SELECT "blogId"
-        FROM public.banned_users_for_blog
-       WHERE "userId" = $1 AND "blogId" = $2
+      SELECT EXISTS (SELECT "blogId"
+                       FROM public.banned_users_for_blog
+                      WHERE "userId" = $1 AND "blogId" = $2)
     `;
     const result = await this.dataSource.query(query, [userId, blogId]);
 
-    if (!result.length) {
-      return false;
-    }
-    return true;
-  }
-
-  async blogBanned(blogId): Promise<boolean> {
-    const query = `
-      SELECT "blogId" 
-        FROM public.banned_blog
-       WHERE "blogId" = $1
-    `;
-    const result = await this.dataSource.query(query, [blogId]);
-
-    if (!result.length) {
-      return false;
-    }
-    return true;
+    return result[0].exists;
   }
 
   async createBanInfo(banInfo: BanInfoModel): Promise<BanInfoModel> {
@@ -142,7 +125,6 @@ export class PgBanInfoRepository {
         FROM public.banned_users_for_blog
        WHERE "userId" = $1 AND "blogId" = $2;
     `;
-
     const result = await this.dataSource.query(query, [userId, blogId]);
 
     if (result[1] !== 1) {

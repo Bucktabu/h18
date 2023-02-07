@@ -7,7 +7,7 @@ export class BanUserDto {
 
   @IsString()
   @MinLength(20)
-  banReason: string;
+  banReason: string; // по свагеру поле обязательно должно приходить, даже если пользователь разбанивается
 
   @IsBoolean()
   isBanned: boolean;

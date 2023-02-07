@@ -23,3 +23,14 @@ export const createdBlog = (dto: BlogDto) => {
     createdAt: expect.any(String),
   }
 }
+
+export const blogsForCurrentUser = (dto: BlogDto) => {
+  return {
+    id: expect.any(String),
+    name: dto.name,
+    description: dto.description,
+    websiteUrl: dto.websiteUrl,
+    createdAt: expect.any(String),
+    isMembership: expect.any(Boolean),
+  }
+}

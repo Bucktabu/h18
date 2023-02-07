@@ -38,6 +38,7 @@ export class BloggerBlogService {
     }
 
     if (!youBanned) {
+
       const banDate = new Date().toISOString();
       return await this.banInfoRepository.createUserBanForBlogStatus(
         userId,
@@ -46,6 +47,7 @@ export class BloggerBlogService {
         banDate,
       );
     }
+
     return await this.banInfoRepository.deleteUserBanForBlogStatus(
       userId,
       dto.blogId,

@@ -22,7 +22,8 @@ export class PgQueryBlogsRepository {
     const filter = this.getFilter(userId, queryDto);
 
     const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt"
+            SELECT id, name, description, "websiteUrl", "createdAt",
+                   EXISTS(SELECT "userId" FROM public.membership WHERE membership."blogId" = blogs.id) AS "isMembership"
               FROM public.blogs
              WHERE ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
@@ -92,7 +93,8 @@ export class PgQueryBlogsRepository {
 
   async getBlog(blogId: string): Promise<BlogViewModelWithBanStatus | null> {
     const query = `
-            SELECT id, name, description, "websiteUrl"
+            SELECT id, name, description, "websiteUrl", "createdAt"
+                   EXISTS(SELECT "userId" FROM public.membership WHERE membership."blogId" = '${blogId}') AS "isMembership"
               FROM public.blogs b
              WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')
         `;

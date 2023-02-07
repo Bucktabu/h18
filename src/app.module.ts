@@ -33,7 +33,7 @@ import { TokenBlackList } from './modules/public/auth/infrastructure/entity/toke
 import { Blogs } from './modules/public/blogs/infrastructure/entity/blogs.entity';
 import { Posts } from './modules/public/posts/infrastructure/entity/posts.entity';
 import { BannedBlog } from './modules/super-admin/infrastructure/entity/banned_blog.entity';
-import { BannedUsersForBlog } from './modules/super-admin/infrastructure/entity/banned-users-for-blog.entity';
+import { BannedUsersForBlog } from './modules/public/blogs/infrastructure/entity/banned-users-for-blog.entity';
 import { CommentReactions } from './modules/public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from './modules/public/likes/infrastructure/entity/post-reactions.entity';
 import { Comments } from './modules/public/comments/infrastructure/entity/comments.entity';
@@ -56,6 +56,7 @@ import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
+import {Membership} from "./modules/public/blogs/infrastructure/entity/membership.entity";
 
 const controllers = [
   AuthController,
@@ -77,6 +78,7 @@ const entity = [
   Comments,
   CommentReactions,
   EmailConfirmation,
+  Membership,
   Posts,
   PostReactions,
   TokenBlackList,

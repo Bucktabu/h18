@@ -8,9 +8,10 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { Users } from '../../../../super-admin/infrastructure/entity/users';
-import { BannedUsersForBlog } from '../../../../super-admin/infrastructure/entity/banned-users-for-blog.entity';
+import { BannedUsersForBlog } from './banned-users-for-blog.entity';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned_blog.entity';
+import {Membership} from "./membership.entity";
 
 @Entity()
 export class Blogs {
@@ -37,4 +38,7 @@ export class Blogs {
 
   @OneToOne(() => BannedBlog, (bb) => bb.blog)
   isBanned: BannedBlog;
+
+  @OneToMany(() => Membership, (m) => m.blog)
+  membership: Membership;
 }

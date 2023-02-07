@@ -57,7 +57,7 @@ export class BloggerBlogsController {
     @User() user: UserDBModel,
   ): Promise<BlogViewModel> {
     const createdBlog = await this.blogsService.createBlog(user.id, dto);
-    console.log(createdBlog, 'from controller');
+
     if (!createdBlog) {
       throw new Error('Blog was not created');
     }

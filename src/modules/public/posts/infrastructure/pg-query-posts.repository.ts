@@ -107,6 +107,7 @@ export class PgQueryPostsRepository {
                    queryDto.pageSize,
                  )}; 
     `
+    console.log('postQuery', postQuery)
     const posts: PostForBlogViewModel[] = await this.dataSource.query(postQuery)
 
     const totalCountQuery = `
@@ -114,6 +115,7 @@ export class PgQueryPostsRepository {
             FROM public.posts
            ${blogIdFilter}
     `;
+    console.log('totalCountQuery', totalCountQuery)
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(

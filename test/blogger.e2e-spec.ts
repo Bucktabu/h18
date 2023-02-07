@@ -9,7 +9,7 @@ import { preparedBlog, preparedPost, preparedUser, superUser } from "./helper/pr
 import { Factories } from "./helper/factories";
 import { faker } from "@faker-js/faker";
 import { getErrorMessage } from "./helper/helpers";
-import { bannedUser, createdBlog } from "./helper/exect-blogger.model";
+import {bannedUser, blogsForCurrentUser, createdBlog} from "./helper/exect-blogger.model";
 import { randomUUID } from "crypto";
 import { getPosts } from "./helper/expect-post-models";
 
@@ -75,8 +75,7 @@ describe('e2e tests', () => {
         .send(preparedBlog.valid)
         .auth(accessToken, {type: 'bearer'})
         .expect(201)
-      console.log(response.body)
-      expect(response.body.createdAt).toMatch(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/)
+
       expect.setState({blog: response.body})
     })
 
@@ -119,142 +118,165 @@ describe('e2e tests', () => {
       })
     })
 
-    // describe('blogger/users', () => {
-    //   describe('Ban/undban users', () => {
-    //     it('Try ban without authorization', async () => {
-    //       const { user1, blog } = expect.getState()
-    //       await request(server)
-    //         .put(`/blogger/users/${user1.id}/ban`)
-    //         .send({
-    //           isBanned: true,
-    //           banReason: faker.lorem.paragraph(20),
-    //           blogId: blog.id
-    //         })
-    //         .expect(401)
-    //     })
-    //
-    //     it('Shouldn`t ban if the inputModel has incorrect values', async () => {
-    //       const { accessToken, blog, user1 } = expect.getState()
-    //       const errorsMessages = getErrorMessage(['banReason', 'isBanned'])
-    //
-    //       const response = await request(server)
-    //         .put(`/blogger/users/${user1.id}/ban`)
-    //         .send({
-    //           isBanned: 'true',
-    //           banReason: faker.lorem.word(19),
-    //           blogId: blog.id
-    //         })
-    //         .auth(accessToken, {type: 'bearer'})
-    //         .expect(400)
-    //
-    //       expect(response.body).toEqual({ errorsMessages })
-    //     })
-    //
-    //     it('Should ban three users', async () => {
-    //       const { accessToken, blog, user0, user2, user4 } = expect.getState()
-    //
-    //       await request(server)
-    //         .put(`/blogger/users/${user0.id}/ban`)
-    //         .send({
-    //           isBanned: true,
-    //           banReason: faker.lorem.words(5),
-    //           blogId: blog.id
-    //         })
-    //         .auth(accessToken, {type: 'bearer'})
-    //         .expect(204)
-    //
-    //       await request(server)
-    //         .put(`/blogger/users/${user2.id}/ban`)
-    //         .send({
-    //           isBanned: true,
-    //           banReason: faker.lorem.words(5),
-    //           blogId: blog.id
-    //         })
-    //         .auth(accessToken, {type: 'bearer'})
-    //         .expect(204)
-    //
-    //       await request(server)
-    //         .put(`/blogger/users/${user4.id}/ban`)
-    //         .send({
-    //           isBanned: true,
-    //           banReason: faker.lorem.words(5),
-    //           blogId: blog.id
-    //         })
-    //         .auth(accessToken, {type: 'bearer'})
-    //         .expect(204)
-    //
-    //       const response = await request(server)
-    //         .get(`/blogger/users/blog/${blog.id}`)
-    //         .auth(accessToken, {type: 'bearer'})
-    //         .expect(200)
-    //
-    //       expect(response.body.items).toHaveLength(3)
-    //     })
-    //   })
-    //
-    //   describe('Return all banned users for blog', () => {
-    //     it('Try get users without authorized', async () => {
-    //       const { accessToken, blog } = expect.getState()
-    //
-    //       await request(server)
-    //         .get(`/blogger/users/blog/${blog.id}`)
-    //         .expect(401)
-    //     })
-    //   })
-    //
-    //   it('Get user via search login term', async () => {
-    //     const { accessToken, blog, user0 } = expect.getState()
-    //
-    //     const response = await request(server)
-    //       .get(`/blogger/users/blog/${blog.id}?searchLoginTerm=0`)
-    //       .auth(accessToken, {type: 'bearer'})
-    //       .expect(200)
-    //
-    //     expect(response.body).toEqual({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 1,
-    //       items: [bannedUser(user0)]
-    //     })
-    //   })
-    //
-    //   it('Get users with query parameters', async () => {
-    //     const { accessToken, blog, user0, user2 } = expect.getState()
-    //
-    //     const response1 = await request(server)
-    //       .get(`/blogger/users/blog/${blog.id}?sortBy=login&sortDirection=asc&pageNumber=1&pageSize=2`)
-    //       .auth(accessToken, {type: 'bearer'})
-    //       .expect(200)
-    //
-    //     expect(response1.body).toEqual({
-    //       pagesCount: 2,
-    //       page: 1,
-    //       pageSize: 2,
-    //       totalCount: 3,
-    //       items: [
-    //         bannedUser(user0),
-    //         bannedUser(user2)
-    //       ]
-    //     })
-    //
-    //     const response2 = await request(server)
-    //       .get(`/blogger/users/blog/${blog.id}?sortBy=login&sortDirection=desc&pageNumber=2&pageSize=2`)
-    //       .auth(accessToken, {type: 'bearer'})
-    //       .expect(200)
-    //
-    //     expect(response2.body).toEqual({
-    //       pagesCount: 2,
-    //       page: 2,
-    //       pageSize: 2,
-    //       totalCount: 3,
-    //       items: [
-    //         bannedUser(user0)
-    //       ]
-    //     })
-    //   })
-    // })
-    //
+    describe('blogger/users', () => {
+      describe('Ban users', () => {
+        it('Try ban without authorization', async () => {
+          const { user1, blog } = expect.getState()
+          await request(server)
+            .put(`/blogger/users/${user1.id}/ban`)
+            .send({
+              isBanned: true,
+              banReason: faker.lorem.paragraph(20),
+              blogId: blog.id
+            })
+            .expect(401)
+        })
+
+        it('Shouldn`t ban if the inputModel has incorrect values', async () => {
+          const { accessToken, blog, user1 } = expect.getState()
+          const errorsMessages = getErrorMessage(['banReason', 'isBanned'])
+
+          const response = await request(server)
+            .put(`/blogger/users/${user1.id}/ban`)
+            .send({
+              isBanned: 'true',
+              banReason: faker.lorem.word(19),
+              blogId: blog.id
+            })
+            .auth(accessToken, {type: 'bearer'})
+            .expect(400)
+
+          expect(response.body).toEqual({ errorsMessages })
+        })
+
+        it('Should ban three users', async () => {
+          const { accessToken, blog, user0, user2, user4 } = expect.getState()
+
+          await request(server)
+            .put(`/blogger/users/${user0.id}/ban`)
+            .send({
+              isBanned: true,
+              banReason: faker.lorem.words(5),
+              blogId: blog.id
+            })
+            .auth(accessToken, {type: 'bearer'})
+            .expect(204)
+
+          await request(server)
+            .put(`/blogger/users/${user2.id}/ban`)
+            .send({
+              isBanned: true,
+              banReason: faker.lorem.words(5),
+              blogId: blog.id
+            })
+            .auth(accessToken, {type: 'bearer'})
+            .expect(204)
+
+          await request(server)
+            .put(`/blogger/users/${user4.id}/ban`)
+            .send({
+              isBanned: true,
+              banReason: faker.lorem.words(5),
+              blogId: blog.id
+            })
+            .auth(accessToken, {type: 'bearer'})
+            .expect(204)
+
+          const response = await request(server)
+            .get(`/blogger/users/blog/${blog.id}`)
+            .auth(accessToken, {type: 'bearer'})
+            .expect(200)
+
+          expect(response.body.items).toHaveLength(3)
+        })
+      })
+
+      describe('Return all banned users for blog', () => {
+        it('Try get users without authorized', async () => {
+          const { blog } = expect.getState()
+
+          await request(server)
+            .get(`/blogger/users/blog/${blog.id}`)
+            .expect(401)
+        })
+
+        it('Get user via search login term', async () => {
+          const { accessToken, blog, user0 } = expect.getState()
+
+          const response = await request(server)
+              .get(`/blogger/users/blog/${blog.id}?searchLoginTerm=0`)
+              .auth(accessToken, {type: 'bearer'})
+              .expect(200)
+
+          expect(response.body).toEqual({
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 1,
+            items: [bannedUser(user0)]
+          })
+        })
+
+        it('Get users with query parameters', async () => {
+          const { accessToken, blog, user0, user2 } = expect.getState()
+
+          const response1 = await request(server)
+              .get(`/blogger/users/blog/${blog.id}?sortBy=login&sortDirection=asc&pageNumber=1&pageSize=2`)
+              .auth(accessToken, {type: 'bearer'})
+              .expect(200)
+
+          expect(response1.body).toEqual({
+            pagesCount: 2,
+            page: 1,
+            pageSize: 2,
+            totalCount: 3,
+            items: [
+              bannedUser(user0),
+              bannedUser(user2)
+            ]
+          })
+
+          const response2 = await request(server)
+              .get(`/blogger/users/blog/${blog.id}?sortBy=login&sortDirection=desc&pageNumber=2&pageSize=2`)
+              .auth(accessToken, {type: 'bearer'})
+              .expect(200)
+
+          expect(response2.body).toEqual({
+            pagesCount: 2,
+            page: 2,
+            pageSize: 2,
+            totalCount: 3,
+            items: [
+              bannedUser(user0)
+            ]
+          })
+        })
+      })
+
+      describe('Unban users', () => {
+        it('Unban user', async () => {
+          const { accessToken, blog, user0 } = expect.getState()
+
+          await request(server)
+              .put(`/blogger/users/${user0.id}/ban`)
+              .send({
+                isBanned: false,
+                banReason: 'faker.lorem.words(5)',
+                blogId: blog.id
+              })
+              .auth(accessToken, {type: 'bearer'})
+              .expect(204)
+
+          const response = await request(server)
+              .get(`/sa/users?searchLoginTerm=0`)
+              .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+              .expect(200)
+
+          expect(response.body.items[0]).toEqual(user0)
+        })
+      })
+    })
+
     // describe('blogger/blogs', () => {
     //   describe('Return all comments for all post current user`s blog', () => {
     //     it('Drop all data.', async () => {
@@ -385,74 +407,74 @@ describe('e2e tests', () => {
     //     })
     //   })
     //
-      describe('Delete blog by id', () => {
-        it('Drop all data.', async () => {
-          await request(server)
-            .delete('/testing/all-data')
-            .expect(204)
-        })
-
-        it('Create data', async () => {
-          const [accessToken1, accessToken2] = await factories.createAndLoginUsers(2)
-
-          const [blog1] = await factories.createBlogs(accessToken1.accessToken, 1)
-          const [blog2] = await factories.createBlogs(accessToken2.accessToken, 1)
-
-          expect.setState({
-            accessToken: accessToken1.accessToken,
-            blogId1: blog1.id,
-            blogId2: blog2.id
-          })
-        })
-
-        it('Try delete blog that doesn`t belong to current user', async () => {
-          const {accessToken, blogId2} = expect.getState()
-
-          await request(server)
-            .delete(`/blogger/blogs/${blogId2}`)
-            .auth(accessToken, { type: 'bearer' })
-            .expect(403)
-        })
-
-        it('Try delete blog without authorization', async () => {
-          const { blogId1 } = expect.getState()
-
-          await request(server)
-            .delete(`/blogger/blogs/${blogId1}`)
-            .expect(401)
-        })
-
-        it('Try delete blog that doesn`t belong to current user', async () => {
-          const {accessToken, blogId1} = expect.getState()
-
-          await request(server)
-            .delete(`/blogger/blogs/${blogId1}`)
-            .auth(accessToken, { type: 'bearer' })
-            .expect(204)
-
-          const response = await request(server)
-            .get(`/blogger/blogs`)
-            .auth(accessToken, { type: 'bearer' })
-            .expect(200)
-
-          expect(response.body.items).toHaveLength(0)
-        })
-
-        it('Blog with this id not found', async () => {
-          const {accessToken, blogId1} = expect.getState()
-          const randomId = randomUUID()
-
-          await request(server)
-            .delete(`/blogger/blogs/${blogId1}`)
-            .auth(accessToken, { type: 'bearer' })
-            .expect(404)
-
-          await request(server)
-            .delete(`/blogger/blogs/${randomId}`)
-            .auth(accessToken, { type: 'bearer' })
-            .expect(404)
-        })
-      })
+    //   describe('Delete blog by id', () => {
+    //     it('Drop all data.', async () => {
+    //       await request(server)
+    //         .delete('/testing/all-data')
+    //         .expect(204)
+    //     })
+    //
+    //     it('Create data', async () => {
+    //       const [accessToken1, accessToken2] = await factories.createAndLoginUsers(2)
+    //
+    //       const [blog1] = await factories.createBlogs(accessToken1.accessToken, 1)
+    //       const [blog2] = await factories.createBlogs(accessToken2.accessToken, 1)
+    //
+    //       expect.setState({
+    //         accessToken: accessToken1.accessToken,
+    //         blogId1: blog1.id,
+    //         blogId2: blog2.id
+    //       })
+    //     })
+    //
+    //     it('Try delete blog that doesn`t belong to current user', async () => {
+    //       const {accessToken, blogId2} = expect.getState()
+    //
+    //       await request(server)
+    //         .delete(`/blogger/blogs/${blogId2}`)
+    //         .auth(accessToken, { type: 'bearer' })
+    //         .expect(403)
+    //     })
+    //
+    //     it('Try delete blog without authorization', async () => {
+    //       const { blogId1 } = expect.getState()
+    //
+    //       await request(server)
+    //         .delete(`/blogger/blogs/${blogId1}`)
+    //         .expect(401)
+    //     })
+    //
+    //     it('Try delete blog that doesn`t belong to current user', async () => {
+    //       const {accessToken, blogId1} = expect.getState()
+    //
+    //       await request(server)
+    //         .delete(`/blogger/blogs/${blogId1}`)
+    //         .auth(accessToken, { type: 'bearer' })
+    //         .expect(204)
+    //
+    //       const response = await request(server)
+    //         .get(`/blogger/blogs`)
+    //         .auth(accessToken, { type: 'bearer' })
+    //         .expect(200)
+    //
+    //       expect(response.body.items).toHaveLength(0)
+    //     })
+    //
+    //     it('Blog with this id not found', async () => {
+    //       const {accessToken, blogId1} = expect.getState()
+    //       const randomId = randomUUID()
+    //
+    //       await request(server)
+    //         .delete(`/blogger/blogs/${blogId1}`)
+    //         .auth(accessToken, { type: 'bearer' })
+    //         .expect(404)
+    //
+    //       await request(server)
+    //         .delete(`/blogger/blogs/${randomId}`)
+    //         .auth(accessToken, { type: 'bearer' })
+    //         .expect(404)
+    //     })
+    //   })
     //
     //   describe('Create new blog', () => {
     //     it('Drop all data.', async () => {
@@ -510,166 +532,168 @@ describe('e2e tests', () => {
     //     })
     //   })
     //
-      describe('Return all blogs for current user', () => {
-        it('Drop all data.', async () => {
-        await request(server)
-          .delete('/testing/all-data')
-          .expect(204)
-        })
-
-        it('Create data', async () => {
-          const [token, token2] = await factories.createAndLoginUsers(2)
-
-          const [blog0, blog1, blog2] = await factories.createBlogs(token.accessToken, 3)
-          const [blog3] = await factories.createBlogs(token2.accessToken, 1)
-
-          expect.setState({
-            accessToken: token.accessToken,
-            blog0,
-            blog1,
-            blog2
-          })
-        })
-
-        it('Try get blogs without authorization', async () => {
-          await request(server)
-            .get(`/blogger/blogs`)
-            .expect(401)
-        })
-
-        it('Should return blogs with pagination', async () => {
-          const {accessToken, blog0, blog1, blog2} = expect.getState()
-
-          const response1 = await request(server)
-            .get(`/blogger/blogs`)
-            .auth(accessToken, {type: 'bearer'})
-            .expect(200)
-
-          expect(response1.body).toEqual({
-            pagesCount: 1,
-            page: 1,
-            pageSize: 10,
-            totalCount: 3,
-            items: [
-              blog2, blog1, blog0
-            ]
-          })
-
-          const response2 = await request(server)
-            .get(`/blogger/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=2`)
-            .auth(accessToken, {type: 'bearer'})
-            .expect(200)
-
-          expect(response2.body).toEqual({
-            pagesCount: 2,
-            page: 2,
-            pageSize: 2,
-            totalCount: 3,
-            items: [blog2]
-          })
-
-          const response3 = await request(server)
-            .get(`/blogger/blogs?sortBy=name&sortDirection=desc&pageNumber=1&pageSize=2`)
-            .auth(accessToken, {type: 'bearer'})
-            .expect(200)
-
-          expect(response3.body).toEqual({
-            pagesCount: 2,
-            page: 1,
-            pageSize: 2,
-            totalCount: 3,
-            items: [blog2, blog1]
-          })
-        })
-
-        it('Return blog via search name term', async () => {
-          const {accessToken, blog0} = expect.getState()
-
-          const response = await request(server)
-            .get(`/blogger/blogs?searchNameTerm=0`)
-            .auth(accessToken, {type: 'bearer'})
-            .expect(200)
-
-          expect(response.body.items[0]).toEqual(blog0)
-        })
-      })
-
-      describe('Create new post for specific blog', () => {
-        it('Drop all data.', async () => {
-          await request(server)
-            .delete('/testing/all-data')
-            .expect(204)
-        })
-
-        it('Create data', async () => {
-          const [token1, token2] = await factories.createAndLoginUsers(2)
-
-          const [blog1] = await factories.createBlogs(token1.accessToken, 1)
-          const [blog2] = await factories.createBlogs(token2.accessToken, 1)
-
-          expect.setState({
-            accessToken: token1.accessToken,
-            blog: blog1,
-            blogId1: blog1.id,
-            blogId2: blog2.id
-          })
-        })
-
-        it('Shouldn`t create post if specific blog doesn`t exists', async () => {
-          const {accessToken} = expect.getState()
-          const randomId = randomUUID()
-
-          await request(server)
-            .post(`/blogger/blogs/${randomId}/posts`)
-            .send(preparedPost.valid)
-            .auth(accessToken, {type: "bearer"})
-            .expect(404)
-        })
-
-        it('Shouldn`t create post if user try to add post to blog that doesn`t belong to current user', async () => {
-          const {accessToken, blogId2} = expect.getState()
-
-          await request(server)
-            .post(`/blogger/blogs/${blogId2}/posts`)
-            .send(preparedPost.valid)
-            .auth(accessToken, {type: "bearer"})
-            .expect(403)
-        })
-
-        it('Try create post without authorization', async () => {
-          const {blogId1} = expect.getState()
-
-          await request(server)
-            .post(`/blogger/blogs/${blogId1}/posts`)
-            .send(preparedPost.valid)
-            .expect(401)
-        })
-
-        it('Try create post with incorrect input data', async () => {
-          const {accessToken, blogId1} = expect.getState()
-          const errorsMessages = getErrorMessage(['title', 'shortDescription', 'content'])
-
-          const response = await request(server)
-            .post(`/blogger/blogs/${blogId1}/posts`)
-            .send(preparedPost.long)
-            .auth(accessToken, {type: "bearer"})
-            .expect(400)
-
-          expect(response.body).toEqual({ errorsMessages })
-        })
-
-        it('Should create post', async () => {
-          const {accessToken, blog} = expect.getState()
-
-          const response = await request(server)
-            .post(`/blogger/blogs/${blog.id}/posts`)
-            .send(preparedPost.valid)
-            .auth(accessToken, {type: "bearer"})
-            .expect(201)
-          console.log(response.body);
-          expect(response.body).toEqual(getPosts(preparedPost.valid, blog))
-        })
-      })
+    //   describe('Return all blogs for current user', () => {
+    //     it('Drop all data.', async () => {
+    //     await request(server)
+    //       .delete('/testing/all-data')
+    //       .expect(204)
+    //     })
+    //
+    //     it('Create data', async () => {
+    //       const [token, token2] = await factories.createAndLoginUsers(2)
+    //
+    //       const [blog0, blog1, blog2] = await factories.createBlogs(token.accessToken, 3)
+    //       const [blog3] = await factories.createBlogs(token2.accessToken, 1)
+    //
+    //       expect.setState({
+    //         accessToken: token.accessToken,
+    //         blog0,
+    //         blog1,
+    //         blog2
+    //       })
+    //     })
+    //
+    //     it('Try get blogs without authorization', async () => {
+    //       await request(server)
+    //         .get(`/blogger/blogs`)
+    //         .expect(401)
+    //     })
+    //
+    //     it('Should return blogs with pagination', async () => {
+    //       const {accessToken, blog0, blog1, blog2} = expect.getState()
+    //
+    //       const response1 = await request(server)
+    //         .get(`/blogger/blogs`)
+    //         .auth(accessToken, {type: 'bearer'})
+    //         .expect(200)
+    //
+    //       expect(response1.body).toEqual({
+    //         pagesCount: 1,
+    //         page: 1,
+    //         pageSize: 10,
+    //         totalCount: 3,
+    //         items: [
+    //           blogsForCurrentUser(blog2),
+    //           blogsForCurrentUser(blog1),
+    //           blogsForCurrentUser(blog0),
+    //         ]
+    //       })
+    //
+    //       const response2 = await request(server)
+    //         .get(`/blogger/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=2`)
+    //         .auth(accessToken, {type: 'bearer'})
+    //         .expect(200)
+    //
+    //       expect(response2.body).toEqual({
+    //         pagesCount: 2,
+    //         page: 2,
+    //         pageSize: 2,
+    //         totalCount: 3,
+    //         items: [blogsForCurrentUser(blog2),]
+    //       })
+    //
+    //       const response3 = await request(server)
+    //         .get(`/blogger/blogs?sortBy=name&sortDirection=desc&pageNumber=1&pageSize=2`)
+    //         .auth(accessToken, {type: 'bearer'})
+    //         .expect(200)
+    //
+    //       expect(response3.body).toEqual({
+    //         pagesCount: 2,
+    //         page: 1,
+    //         pageSize: 2,
+    //         totalCount: 3,
+    //         items: [blogsForCurrentUser(blog2), blogsForCurrentUser(blog1),]
+    //       })
+    //     })
+    //
+    //     it('Return blog via search name term', async () => {
+    //       const {accessToken, blog0} = expect.getState()
+    //
+    //       const response = await request(server)
+    //         .get(`/blogger/blogs?searchNameTerm=0`)
+    //         .auth(accessToken, {type: 'bearer'})
+    //         .expect(200)
+    //
+    //       expect(response.body.items[0]).toEqual(blogsForCurrentUser(blog0),)
+    //     })
+    //   })
+    //
+    //   describe('Create new post for specific blog', () => {
+    //     it('Drop all data.', async () => {
+    //       await request(server)
+    //         .delete('/testing/all-data')
+    //         .expect(204)
+    //     })
+    //
+    //     it('Create data', async () => {
+    //       const [token1, token2] = await factories.createAndLoginUsers(2)
+    //
+    //       const [blog1] = await factories.createBlogs(token1.accessToken, 1)
+    //       const [blog2] = await factories.createBlogs(token2.accessToken, 1)
+    //
+    //       expect.setState({
+    //         accessToken: token1.accessToken,
+    //         blog: blog1,
+    //         blogId1: blog1.id,
+    //         blogId2: blog2.id
+    //       })
+    //     })
+    //
+    //     it('Shouldn`t create post if specific blog doesn`t exists', async () => {
+    //       const {accessToken} = expect.getState()
+    //       const randomId = randomUUID()
+    //
+    //       await request(server)
+    //         .post(`/blogger/blogs/${randomId}/posts`)
+    //         .send(preparedPost.valid)
+    //         .auth(accessToken, {type: "bearer"})
+    //         .expect(404)
+    //     })
+    //
+    //     it('Shouldn`t create post if user try to add post to blog that doesn`t belong to current user', async () => {
+    //       const {accessToken, blogId2} = expect.getState()
+    //
+    //       await request(server)
+    //         .post(`/blogger/blogs/${blogId2}/posts`)
+    //         .send(preparedPost.valid)
+    //         .auth(accessToken, {type: "bearer"})
+    //         .expect(403)
+    //     })
+    //
+    //     it('Try create post without authorization', async () => {
+    //       const {blogId1} = expect.getState()
+    //
+    //       await request(server)
+    //         .post(`/blogger/blogs/${blogId1}/posts`)
+    //         .send(preparedPost.valid)
+    //         .expect(401)
+    //     })
+    //
+    //     it('Try create post with incorrect input data', async () => {
+    //       const {accessToken, blogId1} = expect.getState()
+    //       const errorsMessages = getErrorMessage(['title', 'shortDescription', 'content'])
+    //
+    //       const response = await request(server)
+    //         .post(`/blogger/blogs/${blogId1}/posts`)
+    //         .send(preparedPost.long)
+    //         .auth(accessToken, {type: "bearer"})
+    //         .expect(400)
+    //
+    //       expect(response.body).toEqual({ errorsMessages })
+    //     })
+    //
+    //     it('Should create post', async () => {
+    //       const {accessToken, blog} = expect.getState()
+    //
+    //       const response = await request(server)
+    //         .post(`/blogger/blogs/${blog.id}/posts`)
+    //         .send(preparedPost.valid)
+    //         .auth(accessToken, {type: "bearer"})
+    //         .expect(201)
+    //       console.log(response.body);
+    //       expect(response.body).toEqual(getPosts(preparedPost.valid, blog))
+    //     })
+    //   })
     //
     //   describe('Update exist post by id', () => {
     //     it('Drop all data.', async () => {

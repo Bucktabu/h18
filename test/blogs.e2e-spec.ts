@@ -290,7 +290,8 @@ describe('e2e tests', () => {
           id: expect.any(String),
           name: blog.name,
           description: blog.description,
-          websiteUrl: blog.websiteUrl
+          websiteUrl: blog.websiteUrl,
+          isMembership: expect.any(Boolean)
         })
       })
     })
