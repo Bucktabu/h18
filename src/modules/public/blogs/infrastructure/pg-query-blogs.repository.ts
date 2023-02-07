@@ -22,8 +22,7 @@ export class PgQueryBlogsRepository {
     const filter = this.getFilter(userId, queryDto);
 
     const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt",
-                   EXISTS(SELECT "userId" FROM public.membership WHERE membership."blogId" = blogs.id) AS "isMembership"
+            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
               FROM public.blogs
              WHERE ${filter}
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}

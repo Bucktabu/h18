@@ -12,7 +12,13 @@ import { PostReactions } from '../../../public/likes/infrastructure/entity/post-
 export class Users {
   @PrimaryColumn('uuid') id: string;
 
-  @Column() login: string;
+  @Column({
+    type: 'character varying',
+    length: 15,
+    nullable: false,
+    collation: 'C'
+  })
+  login: string;
 
   @Column() email: string;
 

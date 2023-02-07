@@ -25,7 +25,7 @@ export class SaBlogsController {
   ) {}
 
   @Get()
-  getUsers(
+  getBlogs(
     @Query()
     query: QueryParametersDto,
   ): Promise<ContentPageModel> {

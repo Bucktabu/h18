@@ -13,6 +13,7 @@ export const toBlogWithAdditionalInfoModel = (
     description: blog.description,
     websiteUrl: blog.websiteUrl,
     createdAt: blog.createdAt,
+    isMembership: blog.isMembership,
     blogOwnerInfo: {
       userId: blog.userId,
       userLogin: blog.userLogin,

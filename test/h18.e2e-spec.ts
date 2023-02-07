@@ -151,4 +151,39 @@ describe('e2e tests', () => {
             expect(response.body.items).toHaveLength(1)
         })
     })
+
+    describe('GET -> "blogger/blogs": should return blogs created by blogger. Shouldn\'t return' +
+      'blogs created by other bloggers; status 200; content: blog array with pagination; used additional' +
+      'methods: POST -> /blogger/blogs, POST -> /sa/users, POST -> /auth/login;', () => {
+
+        it('Drop all data.', async () => {
+            await request(server)
+              .delete('/testing/all-data')
+              .expect(204)
+        })
+
+        it('Create data', async  () => {
+            const [token1, token2] = await factories.createAndLoginUsers(2)
+            const [blog1] = await factories.createBlogs(token1.accessToken, 1)
+            const [blog2] = await factories.createBlogs(token2.accessToken, 1)
+
+            expect.setState({
+                accessToken1: token1.accessToken,
+                accessToken2: token2.accessToken,
+                blog1,
+                blog2
+            })
+        })
+
+        it('GET -> "blogger/blogs"', async () => {
+            const { accessToken1 } = expect.getState()
+
+            const response = await request(server)
+              .get(`/blogger/blogs`)
+              .auth(accessToken1, {type: 'bearer'})
+              .expect(200)
+
+            console.log(response.body);
+        })
+    })
 })
