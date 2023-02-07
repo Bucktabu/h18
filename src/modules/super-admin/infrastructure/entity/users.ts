@@ -7,7 +7,6 @@ import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/
 import { Comments } from '../../../public/comments/infrastructure/entity/comments.entity';
 import { CommentReactions } from '../../../public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from '../../../public/likes/infrastructure/entity/post-reactions.entity';
-import {Membership} from "../../../public/blogs/infrastructure/entity/membership.entity";
 
 @Entity()
 export class Users {
@@ -46,7 +45,4 @@ export class Users {
 
   @OneToMany(() => CommentReactions, (r) => r.user)
   pReactions: PostReactions[];
-
-  @OneToMany(() => Membership, (m) => m.user)
-  membership: Membership[];
 }

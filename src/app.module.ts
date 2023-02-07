@@ -56,7 +56,6 @@ import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
-import {Membership} from "./modules/public/blogs/infrastructure/entity/membership.entity";
 
 const controllers = [
   AuthController,
@@ -78,7 +77,6 @@ const entity = [
   Comments,
   CommentReactions,
   EmailConfirmation,
-  Membership,
   Posts,
   PostReactions,
   TokenBlackList,

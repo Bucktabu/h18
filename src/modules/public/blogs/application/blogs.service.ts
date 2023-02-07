@@ -20,6 +20,7 @@ export class BlogsService {
       inputModel.websiteUrl,
       new Date().toISOString(),
       userId,
+      false
     );
 
     return await this.blogsRepository.createBlog(newBlog);

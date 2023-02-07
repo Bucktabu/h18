@@ -11,7 +11,6 @@ import { Users } from '../../../../super-admin/infrastructure/entity/users';
 import { BannedUsersForBlog } from './banned-users-for-blog.entity';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned_blog.entity';
-import {Membership} from "./membership.entity";
 
 @Entity()
 export class Blogs {
@@ -24,6 +23,8 @@ export class Blogs {
   @Column() websiteUrl: string;
 
   @Column() createdAt: string;
+
+  @Column({default: false}) isMembership: boolean;
 
   @ManyToOne(() => Users, (u) => u.blogs)
   @JoinColumn()
@@ -38,7 +39,4 @@ export class Blogs {
 
   @OneToOne(() => BannedBlog, (bb) => bb.blog)
   isBanned: BannedBlog;
-
-  @OneToMany(() => Membership, (m) => m.blog)
-  membership: Membership;
 }

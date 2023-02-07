@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { BlogDto } from '../../../blogger/api/dto/blog.dto';
-import { BanStatusModel } from '../../../../global-model/ban-status.model';
 import { BindBlogDto } from '../../../super-admin/api/dto/bind-blog.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -14,9 +13,9 @@ export class PgBlogsRepository {
   async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
     const query = `
       INSERT INTO public.blogs
-             (id, name, description, "websiteUrl", "createdAt", "userId")
-      VAlUES ($1, $2, $3, $4, $5, $6)  
-             RETURNING id, name, description, "websiteUrl", "createdAt"
+             (id, name, description, "websiteUrl", "createdAt", "userId", "isMembership")
+      VAlUES ($1, $2, $3, $4, $5, $6, $7)  
+             RETURNING id, name, description, "websiteUrl", "createdAt", "isMembership"
     `;
     const result = await this.dataSource.query(query, [
       newBlog.id,
@@ -25,6 +24,7 @@ export class PgBlogsRepository {
       newBlog.websiteUrl,
       newBlog.createdAt,
       newBlog.userId,
+      newBlog.isMembership
     ]);
 
     return result[0];
