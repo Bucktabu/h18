@@ -16,7 +16,13 @@ import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned
 export class Blogs {
   @PrimaryColumn('uuid') id: string;
 
-  @Column() name: string;
+  @Column({
+    type: "character varying",
+    length: 15,
+    nullable: false,
+    collation: "C"
+  })
+  name: string;
 
   @Column() description: string;
 
