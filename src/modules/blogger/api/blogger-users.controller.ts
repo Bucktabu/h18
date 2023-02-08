@@ -48,6 +48,7 @@ export class BloggerUsersController {
     @Body() dto: BanUserDto,
     @Param('id') userId: string,
   ) {
+    console.log(dto, 'banUserDTO');
     const result = await this.blogsService.updateUserBanStatus(userId, dto);
 
     if (!result) {
