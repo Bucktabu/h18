@@ -111,6 +111,20 @@ describe('e2e tests', () => {
             expect(response.body.items).toHaveLength(1)
             expect(response.body.items[0]).toEqual(bannedUser(user2))
         })
+
+        it('Unban. PUT -> "/blogger/users/:id/ban"', async () => {
+            const { accessToken, user2, blog } = expect.getState()
+
+            await request(server)
+                .put(`/blogger/users/${user2.id}/ban`)
+                .send({
+                    isBanned: false,
+                    banReason: faker.lorem.words(5),
+                    blogId: blog.id
+                })
+                .auth(accessToken, {type: 'bearer'})
+                .expect(204)
+        })
     })
 
     describe('PUT -> "/sa/blogs/:id/ban": should ban blog; status 204; used additional methods:' +
@@ -150,7 +164,7 @@ describe('e2e tests', () => {
             expect(response.body.items).toHaveLength(1)
         })
 
-        it('PUT -> "/sa/blogs/:id/ban"', async () => {
+        it('PUT -> "/sa/blogs/:id/ban", should unban blog', async () => {
             const { blogId } = expect.getState()
 
             await request(server)
@@ -162,14 +176,13 @@ describe('e2e tests', () => {
               .expect(404)
         })
 
-        it('GET => /sa/blogs, should return 0 blog', async () => {
+        it('GET => /sa/blogs, should return 1 blog', async () => {
             const response = await request(server)
               .get(`/sa/blogs`)
               .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
               .expect(200)
 
-            console.log('Banned blog:', response.body)
-            expect(response.body.items).toHaveLength(0)
+            expect(response.body.items).toHaveLength(1)
         })
     })
 
@@ -205,6 +218,67 @@ describe('e2e tests', () => {
               .expect(200)
 
             console.log(response.body);
+        })
+    })
+
+    describe('PUT -> "/sa/blogs/:id/ban": should ban blog; status 204; used additional methods:' +
+        'POST => /blogger/blogs, GET => /blogs, GET => /blogs/:id, GET => /sa/blogs;', () => {
+
+        it('Drop all data.', async () => {
+            await request(server)
+                .delete('/testing/all-data')
+                .expect(204)
+        })
+
+        it('Create data', async  () => {
+            const [token1, token2] = await factories.createAndLoginUsers(2)
+            const [blog1] = await factories.createBlogs(token1.accessToken, 1)
+            const [blog2] = await factories.createBlogs(token2.accessToken, 1)
+
+            expect.setState({
+                blog1,
+                blog2,
+                blogId: blog2.id
+            })
+        })
+
+        it('PUT -> "/sa/blogs/:id/ban"', async () => {
+            const { blogId } = expect.getState()
+            await request(server)
+                .put(`/sa/blogs/${blogId}/ban`)
+                .send({
+                    isBanned: true
+                })
+                .auth(superUser.valid.login, superUser.valid.password, {type: 'basic'})
+                .expect(204)
+        })
+
+        it('Should return 1 blog, GET => /blogs', async () => {
+            const response = await request(server)
+                .get(`/blogs`)
+                .expect(200)
+
+            console.log('Public get blogs:',response.body.items)
+            expect(response.body.items).toHaveLength(1)
+        })
+
+        it('Shouldn`t return banned blog, GET => /blogs/:id', async () => {
+            const { blogId } = expect.getState()
+
+            await request(server)
+                .get(`/blogs/${blogId}`)
+                .expect(404)
+        })
+
+
+        it('Should return all blog, GET => /sa/blogs;', async () => {
+            const response = await request(server)
+                .get(`/sa/blogs`)
+                .auth(superUser.valid.login, superUser.valid.password, {type: 'basic'})
+                .expect(200)
+
+            console.log('SA get blogs:', response.body.items)
+            expect(response.body.items).toHaveLength(2)
         })
     })
 })

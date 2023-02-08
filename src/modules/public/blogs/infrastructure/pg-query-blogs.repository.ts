@@ -24,7 +24,9 @@ export class PgQueryBlogsRepository {
     const query = `
             SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
               FROM public.blogs
-             WHERE ${filter}
+             WHERE ${filter} AND (NOT EXISTS (SELECT "blogId" 
+                                                FROM public.banned_blog
+                                               WHERE banned_blog."blogId" = blogs.id))
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
