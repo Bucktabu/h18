@@ -69,13 +69,14 @@ export class PgQueryUsersRepository {
          queryDto.pageSize,
        )};
     `;
+    console.log();
     const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(
       usersQuery,
       [queryDto.pageSize],
     );
 
     const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
-
+    console.log(bannedUsers, 'bannedUsers');
     const totalCountQuery = `
       SELECT COUNT("blogId")
         FROM public.banned_users_for_blog b

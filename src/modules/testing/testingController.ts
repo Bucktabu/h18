@@ -81,7 +81,7 @@ export class TestingController {
       DELETE FROM security;
       DELETE FROM email_confirmation;
       DELETE FROM token_black_list;
-      DELETE FROM users;
+      DELETE FROM users; 
     `);
   }
 
