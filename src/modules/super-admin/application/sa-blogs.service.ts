@@ -20,7 +20,7 @@ export class SaBlogsService {
     isBanned: boolean,
   ): Promise<boolean | null> {
     const blogBanned = await this.queryBlogsRepository.blogBanned(blogId);
-    console.log('blogBanned:', blogBanned);
+
     if (blogBanned === null) {
       return null;
     }
@@ -32,9 +32,8 @@ export class SaBlogsService {
     if (!blogBanned) {
       const banDate = new Date().toISOString();
       const postsId = await this.queryPostsRepository.getAllPostsId(blogId);
-      console.log('postsId:', postsId);
+
       if (postsId.length) {
-        console.log('1');
         const postBanReason = 'The blog that owns this post has been banned'
         await this.banInfoRepository.createPostsBanInfo(postsId, postBanReason, banDate)
       }

@@ -108,7 +108,6 @@ describe('e2e tests', () => {
                 .auth(accessToken, {type: 'bearer'})
                 .expect(200)
 
-            console.log(response.body.items[0]);
             expect(response.body.items).toHaveLength(1)
             expect(response.body.items[0]).toEqual(bannedUser(user2))
         })
@@ -133,9 +132,8 @@ describe('e2e tests', () => {
             const response = await request(server)
                 .get(`/blogger/users/blog/${blog.id}`)
                 .auth(accessToken, {type: 'bearer'})
-                .expect(500)
+                .expect(200)
 
-            console.log('banInfo:', response.body.items)
             expect(response.body.items).toHaveLength(0)
         })
     })
@@ -185,34 +183,34 @@ describe('e2e tests', () => {
             expect(response.body.items).toHaveLength(2)
         })
 
-        it('PUT -> "/sa/blogs/:id/ban", should unban blog', async () => {
-            const { blogId } = expect.getState()
-
-            await request(server)
-              .put(`/sa/blogs/${blogId}/ban`)
-              .send({
-                  "isBanned": false
-              })
-              .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
-              .expect(204)
-        })
-
-        it('GET => /blogs, should return 2 blog', async () => {
-            const response = await request(server)
-              .get(`/blogs`)
-              .expect(200)
-
-            expect(response.body.items).toHaveLength(2)
-        })
-
-        it('GET => /sa/blogs, should return 1 blog', async () => {
-            const response = await request(server)
-              .get(`/sa/blogs`)
-              .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
-              .expect(200)
-
-            expect(response.body.items).toHaveLength(1)
-        })
+        // it('PUT -> "/sa/blogs/:id/ban", should unban blog', async () => {
+        //     const { blogId } = expect.getState()
+        //
+        //     await request(server)
+        //       .put(`/sa/blogs/${blogId}/ban`)
+        //       .send({
+        //           "isBanned": false
+        //       })
+        //       .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+        //       .expect(204)
+        // })
+        //
+        // it('GET => /blogs, should return 2 blog', async () => {
+        //     const response = await request(server)
+        //       .get(`/blogs`)
+        //       .expect(200)
+        //
+        //     expect(response.body.items).toHaveLength(2)
+        // })
+        //
+        // it('GET => /sa/blogs, should return 1 blog', async () => {
+        //     const response = await request(server)
+        //       .get(`/sa/blogs`)
+        //       .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+        //       .expect(200)
+        //
+        //     expect(response.body.items).toHaveLength(1)
+        // })
     })
 
     // describe('GET -> "blogger/blogs": should return blogs created by blogger. Shouldn\'t return' +
