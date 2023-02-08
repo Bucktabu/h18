@@ -76,8 +76,9 @@ export class PgBanInfoRepository {
       VALUES ($1, $2)
              RETURNING "blogId"
     `;
+    console.log(query);
     const result = await this.dataSource.query(query, [blogId, banDate]);
-
+    console.log(result);
     if (!result.length) {
       return false;
     }
