@@ -73,7 +73,7 @@ export class PgQueryUsersRepository {
     const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(
       usersQuery,
       [queryDto.pageSize],
-    );
+    ); // TODO поиск забаненых юзеров по !конткретному блогу! этого блогера
 
     const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
     console.log(bannedUsers, 'bannedUsers');
@@ -103,7 +103,7 @@ export class PgQueryUsersRepository {
         FROM public.users u
         LEFT JOIN public.user_ban_info b
           ON u.id = b."userId"
-       ${filter}
+       ${filter} 
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
          queryDto.pageNumber,

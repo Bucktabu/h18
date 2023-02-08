@@ -33,10 +33,13 @@ export class BloggerBlogService {
       dto.blogId,
     );
 
+
+    // юзер для блога не в бане, но мы хотим его забанить
+    // false        true
     if (youBanned === dto.isBanned) {
       return true;
     }
-
+    // !true         false
     if (!youBanned) {
 
       const banDate = new Date().toISOString();
