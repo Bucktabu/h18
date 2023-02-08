@@ -4,12 +4,14 @@ import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-blogs.re
 import { PgBanInfoRepository } from '../infrastructure/pg-ban-info.repository';
 import { PgPostsRepository } from '../../public/posts/infrastructure/pg-posts.repository';
 import { PgQueryBlogsRepository } from '../../public/blogs/infrastructure/pg-query-blogs.repository';
+import {PgQueryPostsRepository} from "../../public/posts/infrastructure/pg-query-posts.repository";
 
 @Injectable()
 export class SaBlogsService {
   constructor(
     protected banInfoRepository: PgBanInfoRepository,
     protected queryBlogsRepository: PgQueryBlogsRepository,
+    protected queryPostsRepository: PgQueryPostsRepository,
     protected blogsRepository: PgBlogsRepository,
   ) {}
 
@@ -18,7 +20,7 @@ export class SaBlogsService {
     isBanned: boolean,
   ): Promise<boolean | null> {
     const blogBanned = await this.queryBlogsRepository.blogBanned(blogId);
-    console.log(blogBanned)
+
     if (blogBanned === null) {
       return null;
     }
@@ -29,9 +31,16 @@ export class SaBlogsService {
 
     if (!blogBanned) {
       const banDate = new Date().toISOString();
+      const postsId = await this.queryPostsRepository.getAllPostsId(blogId);
+
+      if (postsId.length) {
+        const postBanReason = 'The blog that owns this post has been banned'
+        await this.banInfoRepository.createPostsBanInfo(postsId, postBanReason, banDate)
+      }
+
       return await this.banInfoRepository.createBlogBanStatus(blogId, banDate);
     }
-    console.log('here')
+
     return await this.banInfoRepository.deleteBlogBanStatus(blogId);
   }
 

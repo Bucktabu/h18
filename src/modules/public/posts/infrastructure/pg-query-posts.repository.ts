@@ -107,7 +107,6 @@ export class PgQueryPostsRepository {
                    queryDto.pageSize,
                  )}; 
     `
-    console.log('postQuery', postQuery)
     const posts: PostForBlogViewModel[] = await this.dataSource.query(postQuery)
 
     const totalCountQuery = `
@@ -115,7 +114,6 @@ export class PgQueryPostsRepository {
             FROM public.posts
            ${blogIdFilter}
     `;
-    console.log('totalCountQuery', totalCountQuery)
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
@@ -124,6 +122,15 @@ export class PgQueryPostsRepository {
         posts,
         Number(totalCount[0].count),
     );
+  }
+
+  async getAllPostsId(blogId: string): Promise<{id: string}[]> {
+    const query = `
+      SELECT id
+        FROM public.posts
+       WHERE "blogId" = $1;
+    `;
+    return await this.dataSource.query(query, [blogId])
   }
 
   async postExist(id: string): Promise<boolean> {

@@ -4,6 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BanUserDto } from '../../blogger/api/dto/ban-user.dto';
 import { query } from 'express';
+import {blogsForCurrentUser} from "../../../../test/helper/exect-blogger.model";
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -76,6 +77,22 @@ export class PgBanInfoRepository {
              RETURNING "blogId"
     `;
     const result = await this.dataSource.query(query, [blogId, banDate]);
+
+    if (!result.length) {
+      return false;
+    }
+    return true;
+  }
+
+  async createPostsBanInfo(postsId: { id: string }[], banReason: string, banDate: string): Promise<boolean> {
+    const values = this.getValues(postsId, banReason, banDate)
+
+    const query = `
+      INSERT INTO public.banned_post 
+             ("postId", "banReason", "banDate")
+      VALUES ${values};       
+    `
+    const result = await this.dataSource.query(query)
 
     if (!result.length) {
       return false;
@@ -165,5 +182,19 @@ export class PgBanInfoRepository {
       return (filter = `"banStatus" = '${banStatus}', "banDate" = '${banDate}', "banReason" = '${banReason}'`);
     }
     return filter;
+  }
+
+  private getValues(postsId: { id: string }[], banReason: string, banDate: string): string {
+    let values = ''
+
+    // for(let p in postsId) {
+    //   values += `('${id}', '${banReason}', '${banDate}'), `
+    // } // TODO
+
+    for(let i = 0, l = postsId.length; i < l; i++) {
+      values += `('${postsId[i].id}', '${banReason}', '${banDate}'), `
+    }
+
+    return values.slice(0, -2)
   }
 }

@@ -68,8 +68,7 @@ describe('e2e tests', () => {
             expect.setState({
                 user1: user1.body,
                 user2: user2.body,
-                accessToken: token.body.accessToken,
-                refreshToken: (token.headers['set-cookie'][0].split(';')[0]).slice(13)
+                accessToken: token.body.accessToken
             })
         })
 
@@ -124,6 +123,18 @@ describe('e2e tests', () => {
                 })
                 .auth(accessToken, {type: 'bearer'})
                 .expect(204)
+        })
+
+        it('0 banned user. GET => "blogger/users/blog/:id;"', async () => {
+            const { accessToken, blog } = expect.getState()
+
+            const response = await request(server)
+                .get(`/blogger/users/blog/${blog.id}`)
+                .auth(accessToken, {type: 'bearer'})
+                .expect(200)
+
+            console.log('banInfo:', response.body.items)
+            expect(response.body.items).toHaveLength(0)
         })
     })
 
@@ -279,6 +290,48 @@ describe('e2e tests', () => {
 
             console.log('SA get blogs:', response.body.items)
             expect(response.body.items).toHaveLength(2)
+        })
+    })
+
+    describe('GET -> "/posts/:id": Shouldn\'t return banned blog post. Should return unbanned blog' +
+        'post; status 404; used additional methods: PUT => /sa/blogs/:id/ban, POST => /auth/login,' +
+        'POST => /blogger/blogs, POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
+
+        it('Drop all data.', async () => {
+            await request(server)
+                .delete('/testing/all-data')
+                .expect(204)
+        })
+
+        it('Create data', async  () => {
+            const [token] = await factories.createAndLoginUsers(2)
+            const [blog] = await factories.createBlogs(token.accessToken, 1)
+            const [post0, post1, post2] = await factories.createPostsForBlog(token.accessToken, blog.id, 3)
+
+            expect.setState({
+                blogId: blog.id,
+                post0, post1, post2
+            })
+        })
+
+        it('SA ban blog', async () => {
+            const { blogId } = expect.getState()
+
+            await request(server)
+                .put(`/sa/blogs/${blogId}/ban`)
+                .send({
+                    "isBanned": true
+                })
+                .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+                .expect(204)
+        })
+
+        it('Shouldn`t return post if owned blog was banned', async () => {
+            const {post0} = expect.getState()
+            console.log(post0)
+            await request(server)
+                .get(`/posts/${post0.id}`)
+                .expect(404)
         })
     })
 })

@@ -71,6 +71,7 @@ export class TestingController {
       DELETE FROM post_reactions;
       DELETE FROM security;    
       DELETE FROM banned_blog;
+      DELETE FROM banned_post;
       DELETE FROM banned_users_for_blog;
       DELETE FROM comments;
       DELETE FROM comment_reactions;
