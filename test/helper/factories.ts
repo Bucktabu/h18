@@ -33,7 +33,7 @@ export class Factories {
     return users;
   }
 
-  async createAndLoginUsers(userCount: number): Promise<{ accessToken: string }[]> {
+  async createAndLoginUsers(userCount: number): Promise<{ userId: string, accessToken: string }[]> {
     const users = await this.createUsers(userCount);
 
     const tokens = [];
@@ -51,7 +51,7 @@ export class Factories {
 
       const accessToken = response.body.accessToken;
       //const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
-      tokens.push({ accessToken });
+      tokens.push({ userId: users[i].id, accessToken });
     }
     return tokens;
   }

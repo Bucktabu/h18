@@ -47,94 +47,96 @@ describe('e2e tests', () => {
         })
 
         it('Create data', async () => {
-            const user1 = await request(server)
-                .post(`/sa/users`)
-                .send(preparedUser.valid1)
-                .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-                .expect(201)
-
-            const token = await request(server)
-                .post(`/auth/login`)
-                .send(preparedUser.login1)
-                .set('User-Agent', faker.internet.userAgent())
-                .expect(200)
-
-            const user2 = await request(server)
-                .post(`/sa/users`)
-                .send(preparedUser.valid2)
-                .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-                .expect(201)
+            const [user1, user2] = await factories.createAndLoginUsers(2)
+            const [blog1, blog2] = await factories.createBlogs(user1.accessToken, 2)
 
             expect.setState({
-                user1: user1.body,
-                user2: user2.body,
-                accessToken: token.body.accessToken
+                userId2: user2.userId,
+                user2,
+                accessToken: user1.accessToken,
+                blogId1: blog1.id,
+                blogId2: blog2.id,
             })
         })
 
-        it('POST => blogger/blogs', async () => {
-            const { accessToken } = expect.getState()
+        it('Ban user2 for two blogs, PUT -> "/blogger/users/:id/ban"', async () => {
+            const { accessToken, userId2, blogId1, blogId2 } = expect.getState()
 
-            const response = await request(server)
-                .post(`/blogger/blogs`)
-                .send(preparedBlog.valid)
-                .auth(accessToken, {type: 'bearer'})
-                .expect(201)
-
-            expect.setState({blog: response.body})
-        })
-
-        it('PUT -> "/blogger/users/:id/ban"', async () => {
-            const { accessToken, user2, blog } = expect.getState()
-            console.log(accessToken);
-            console.log(user2.id);
-            console.log(blog.id);
             await request(server)
-                .put(`/blogger/users/${user2.id}/ban`)
+                .put(`/blogger/users/${userId2}/ban`)
                 .send({
                     isBanned: true,
                     banReason: faker.lorem.words(5),
-                    blogId: blog.id
+                    blogId: blogId1
+                })
+                .auth(accessToken, {type: 'bearer'})
+                .expect(204)
+
+            await request(server)
+                .put(`/blogger/users/${userId2}/ban`)
+                .send({
+                    isBanned: true,
+                    banReason: faker.lorem.words(5),
+                    blogId: blogId2
                 })
                 .auth(accessToken, {type: 'bearer'})
                 .expect(204)
         })
 
-        it('1 banned user. GET => "blogger/users/blog/:id;"', async () => {
-            const { accessToken, blog, user2 } = expect.getState()
+        it('Should get one banned user for each blog, GET => "blogger/users/blog/:id;"', async () => {
+            const { accessToken, blogId1, blogId2, user2 } = expect.getState()
 
-            const response = await request(server)
-                .get(`/blogger/users/blog/${blog.id}`)
+            const response1 = await request(server)
+                .get(`/blogger/users/blog/${blogId1}`)
                 .auth(accessToken, {type: 'bearer'})
                 .expect(200)
 
-            expect(response.body.items).toHaveLength(1)
-            expect(response.body.items[0]).toEqual(bannedUser(user2))
+            expect(response1.body.items).toHaveLength(1)
+            expect(response1.body.items[0]).toEqual(bannedUser(user2))
+
+            const response2 = await request(server)
+                .get(`/blogger/users/blog/${blogId2}`)
+                .auth(accessToken, {type: 'bearer'})
+                .expect(200)
+
+            expect(response2.body.items).toHaveLength(1)
+            expect(response2.body.items[0]).toEqual(bannedUser(user2))
         })
 
-        it('Unban. PUT -> "/blogger/users/:id/ban"', async () => {
-            const { accessToken, user2, blog } = expect.getState()
+        it('Unban user2 for blog2, PUT -> "/blogger/users/:id/ban"', async () => {
+            const { accessToken, userId2, blogId2 } = expect.getState()
 
             await request(server)
-                .put(`/blogger/users/${user2.id}/ban`)
+                .put(`/blogger/users/${userId2}/ban`)
                 .send({
                     isBanned: false,
                     banReason: faker.lorem.words(5),
-                    blogId: blog.id
+                    blogId: blogId2
                 })
                 .auth(accessToken, {type: 'bearer'})
                 .expect(204)
         })
 
-        it('0 banned user. GET => "blogger/users/blog/:id;"', async () => {
-            const { accessToken, blog } = expect.getState()
+        it('Should get one banned user for blog1 and shouldn`t get unbanned user for blog2,' +
+            'GET => "blogger/users/blog/:id;"', async () => {
 
-            const response = await request(server)
-                .get(`/blogger/users/blog/${blog.id}`)
+            const { accessToken, blogId1, blogId2, user2 } = expect.getState()
+
+            const response1 = await request(server)
+                .get(`/blogger/users/blog/${blogId1}`)
                 .auth(accessToken, {type: 'bearer'})
                 .expect(200)
 
-            expect(response.body.items).toHaveLength(0)
+            expect(response1.body.items).toHaveLength(1)
+            expect(response1.body.items[0]).toEqual(bannedUser(user2))
+
+            const response2 = await request(server)
+                .get(`/blogger/users/blog/${blogId2}`)
+                .auth(accessToken, {type: 'bearer'})
+                .expect(200)
+
+            expect(response2.body.items).toHaveLength(1)
+            expect(response2.body.items[0]).toEqual(bannedUser(user2))
         })
     })
 
@@ -213,40 +215,40 @@ describe('e2e tests', () => {
         // })
     })
 
-    // describe('GET -> "blogger/blogs": should return blogs created by blogger. Shouldn\'t return' +
-    //   'blogs created by other bloggers; status 200; content: blog array with pagination; used additional' +
-    //   'methods: POST -> /blogger/blogs, POST -> /sa/users, POST -> /auth/login;', () => {
-    //
-    //     it('Drop all data.', async () => {
-    //         await request(server)
-    //           .delete('/testing/all-data')
-    //           .expect(204)
-    //     })
-    //
-    //     it('Create data', async  () => {
-    //         const [token1, token2] = await factories.createAndLoginUsers(2)
-    //         const [blog1] = await factories.createBlogs(token1.accessToken, 1)
-    //         const [blog2] = await factories.createBlogs(token2.accessToken, 1)
-    //
-    //         expect.setState({
-    //             accessToken1: token1.accessToken,
-    //             accessToken2: token2.accessToken,
-    //             blog1,
-    //             blog2
-    //         })
-    //     })
-    //
-    //     it('GET -> "blogger/blogs"', async () => {
-    //         const { accessToken1 } = expect.getState()
-    //
-    //         const response = await request(server)
-    //           .get(`/blogger/blogs`)
-    //           .auth(accessToken1, {type: 'bearer'})
-    //           .expect(200)
-    //
-    //         console.log(response.body);
-    //     })
-    // })
+    describe('GET -> "blogger/blogs": should return blogs created by blogger. Shouldn\'t return' +
+      'blogs created by other bloggers; status 200; content: blog array with pagination; used additional' +
+      'methods: POST -> /blogger/blogs, POST -> /sa/users, POST -> /auth/login;', () => {
+
+        it('Drop all data.', async () => {
+            await request(server)
+              .delete('/testing/all-data')
+              .expect(204)
+        })
+
+        it('Create data', async  () => {
+            const [token1, token2] = await factories.createAndLoginUsers(2)
+            const [blog1] = await factories.createBlogs(token1.accessToken, 1)
+            const [blog2] = await factories.createBlogs(token2.accessToken, 1)
+
+            expect.setState({
+                accessToken1: token1.accessToken,
+                accessToken2: token2.accessToken,
+                blog1,
+                blog2
+            })
+        })
+
+        it('GET -> "blogger/blogs"', async () => {
+            const { accessToken1 } = expect.getState()
+
+            const response = await request(server)
+              .get(`/blogger/blogs`)
+              .auth(accessToken1, {type: 'bearer'})
+              .expect(200)
+
+            console.log(response.body);
+        })
+    })
 
     describe('GET -> "/posts/:id": Shouldn\'t return banned blog post. Should return unbanned blog' +
         'post; status 404; used additional methods: PUT => /sa/blogs/:id/ban, POST => /auth/login,' +

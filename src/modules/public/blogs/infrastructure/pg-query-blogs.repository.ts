@@ -33,9 +33,8 @@ export class PgQueryBlogsRepository {
                queryDto.pageSize,
              )};
         `;
-    console.log(query);
     const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
-    console.log(blogs, 'from blogs repo');
+
     const totalCountQuery = `
           SELECT COUNT(id)
             FROM public.blogs
