@@ -34,7 +34,7 @@ export class PgQueryBlogsRepository {
              )};
         `;
     const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
-
+    console.log('return all blog:', blogs.body)
     const totalCountQuery = `
           SELECT COUNT(id)
             FROM public.blogs
@@ -74,7 +74,7 @@ export class PgQueryBlogsRepository {
     );
 
     const blogs = blogsDB.map((b) => toBlogWithAdditionalInfoModel(b));
-
+    console.log('SA get blogs:', blogs)
     const totalCountQuery = `
           SELECT COUNT(b.id)
             FROM public.blogs b
@@ -99,7 +99,7 @@ export class PgQueryBlogsRepository {
              WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')
         `;
     const result = await this.dataSource.query(query);
-
+    console.log('return blog by id:', result.body)
     if (!result.length) {
       return null
     }

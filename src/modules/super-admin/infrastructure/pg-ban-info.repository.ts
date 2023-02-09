@@ -165,12 +165,19 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  // private getCreateFilter(banInfo: BanInfoModel): string {
-  //   if (banInfo.banReason !== null) {
-  //     return `'${banInfo.parentId}', '${banInfo.isBanned}', '${banInfo.banReason}', '${banInfo.banDate}'`;
-  //   }
-  //   return `'${banInfo.parentId}', '${banInfo.isBanned}', null, null`;
-  // }
+  async deletePostsBanStatus(postId: string): Promise<boolean> {
+    const query = `
+      DELETE
+        FROM public.banned_post
+       WHERE (SELECT "blogId" FROM posts WHERE id = $1)
+    `;
+    const result = await this.dataSource.query(query, [postId])
+
+    if (result[1] === 0) {
+      return false;
+    }
+    return true;
+  }
 
   private getUpdateFilter(
     banStatus: boolean,

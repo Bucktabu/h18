@@ -35,6 +35,7 @@ export class SaBlogsController {
   @Put(':id/ban')
   @HttpCode(204)
   updateBlogStatus(@Body() dto: BanBlogDto, @Param('id') blogId: string) {
+    console.log('ban blog')
     this.blogsService.updateBlogBanStatus(blogId, dto.isBanned);
 
     return

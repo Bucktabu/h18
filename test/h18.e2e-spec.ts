@@ -150,10 +150,13 @@ describe('e2e tests', () => {
         })
 
         it('Create data', async  () => {
-            const [token] = await factories.createAndLoginUsers(1)
-            const [blog, blog2] = await factories.createBlogs(token.accessToken, 2)
+            const [user] = await factories.createAndLoginUsers(1)
+            const [blog1, blog2] = await factories.createBlogs(user.accessToken, 2)
 
-            expect.setState({blogId: blog.id})
+            expect.setState({
+                user: user.user,
+                blogId: blog2.id
+            })
         })
 
         it('PUT -> "/sa/blogs/:id/ban"', async () => {
@@ -176,7 +179,7 @@ describe('e2e tests', () => {
             expect(response.body.items).toHaveLength(1)
         })
 
-        it('GET => /sa/blogs, should return 1 blog', async () => {
+        it('GET => /sa/blogs, should return 2 blog', async () => {
             const response = await request(server)
               .get(`/sa/blogs`)
               .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})

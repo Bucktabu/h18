@@ -24,21 +24,23 @@ export class SaBlogsService {
     if (blogBanned === null) {
       return null;
     }
-
     if (blogBanned === isBanned) {
       return true;
     }
 
+    const postsId = await this.queryPostsRepository.getAllPostsId(blogId);
     if (!blogBanned) {
       const banDate = new Date().toISOString();
-      const postsId = await this.queryPostsRepository.getAllPostsId(blogId);
-
       if (postsId.length) {
         const postBanReason = 'The blog that owns this post has been banned'
         await this.banInfoRepository.createPostsBanInfo(postsId, postBanReason, banDate)
       }
 
       return await this.banInfoRepository.createBlogBanStatus(blogId, banDate);
+    }
+
+    if(postsId.length) {
+      await this.banInfoRepository.deletePostsBanStatus(blogId)
     }
 
     return await this.banInfoRepository.deleteBlogBanStatus(blogId);
