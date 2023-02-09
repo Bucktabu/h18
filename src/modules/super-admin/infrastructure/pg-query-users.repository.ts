@@ -54,26 +54,25 @@ export class PgQueryUsersRepository {
     blogId: string,
     queryDto: QueryParametersDto,
   ): Promise<ContentPageModel> {
-    const filter = this.userFilter(queryDto)
+    const filter = this.bannedUserFilter(blogId, queryDto)
 
     const usersQuery = `
       SELECT b."banDate", b."banReason",
              u.id, u.login
         FROM public.banned_users_for_blog b
         LEFT JOIN public.users u  
-          ON b."userId" = u.id
-       WHERE ${filter} 
+          ON b."userId" = u.id    
+       ${filter} 
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
          queryDto.pageNumber,
          queryDto.pageSize,
        )};
     `;
-    console.log(usersQuery);
     const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(
       usersQuery,
       [queryDto.pageSize],
-    ); // TODO поиск забаненых юзеров по !конткретному блогу! этого блогера
+    );
 
     const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
 
@@ -145,12 +144,14 @@ export class PgQueryUsersRepository {
     return '';
   }
 
-  private filterForBannedUser(blogId: string, query: QueryParametersDto): string {
+  private bannedUserFilter(blogId: string, query: QueryParametersDto): string {
     const userFilter = this.userFilter(query);
 
     if (!userFilter) {
-      return ''
+      return `WHERE b."blogId" = '${blogId}'`
     }
+
+    return `WHERE b."blogId" = '${blogId}' AND ${userFilter}`
   }
 
   private banFilter(query: QueryParametersDto): string {

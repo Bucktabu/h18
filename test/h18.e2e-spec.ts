@@ -51,9 +51,9 @@ describe('e2e tests', () => {
             const [blog1, blog2] = await factories.createBlogs(user1.accessToken, 2)
 
             expect.setState({
-                userId2: user2.userId,
-                user2,
                 accessToken: user1.accessToken,
+                user2: user2.user,
+                userId2: user2.user.id,
                 blogId1: blog1.id,
                 blogId2: blog2.id,
             })
@@ -135,8 +135,8 @@ describe('e2e tests', () => {
                 .auth(accessToken, {type: 'bearer'})
                 .expect(200)
 
-            expect(response2.body.items).toHaveLength(1)
-            expect(response2.body.items[0]).toEqual(bannedUser(user2))
+            expect(response2.body.items).toHaveLength(0)
+            expect(response2.body.items[0]).toBeUndefined()
         })
     })
 
