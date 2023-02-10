@@ -4,11 +4,7 @@ import {
   NotFoundException,
   Param,
   Query,
-  Req,
 } from '@nestjs/common';
-import { BlogsService } from '../application/blogs.service';
-import { PostsService } from '../../posts/application/posts.service';
-import { Request } from 'express';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import { PgQueryBlogsRepository } from '../infrastructure/pg-query-blogs.repository';
 import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';

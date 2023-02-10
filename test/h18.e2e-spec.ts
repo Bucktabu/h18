@@ -188,14 +188,12 @@ describe('e2e tests', () => {
             expect(response.body.items).toHaveLength(2)
         })
 
-        it('GET => /sa/blogs, should return 2 blog', async () => {
+        it('GET => /blogs/:id, shouldn`t return banned blog', async () => {
+            const { blogId } = expect.getState()
 
             const response = await request(server)
-                .get(`/sa/blogs`)
-                .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
-                .expect(200)
-
-            expect(response.body.items).toHaveLength(2)
+                .get(`/blogs/${blogId}`)
+                .expect(404)
         })
 
 
