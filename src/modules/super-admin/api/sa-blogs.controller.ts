@@ -25,24 +25,21 @@ export class SaBlogsController {
   ) {}
 
   @Get()
-  getBlogs(
+  async getBlogs(
     @Query()
     query: QueryParametersDto,
   ): Promise<ContentPageModel> {
-    return this.queryBlogsRepository.saGetBlogs(query);
+    return await this.queryBlogsRepository.saGetBlogs(query);
   }
 
   @Put(':id/ban')
   @HttpCode(204)
-  updateBlogStatus(@Body() dto: BanBlogDto, @Param('id') blogId: string) {
-    console.log('ban blog')
-    this.blogsService.updateBlogBanStatus(blogId, dto.isBanned);
-
-    return
+  async updateBlogStatus(@Body() dto: BanBlogDto, @Param('id') blogId: string) {
+    return await this.blogsService.updateBlogBanStatus(blogId, dto.isBanned);
   }
 
   @Put(':id/bind-with-user/:userId')
-  bindBlog(@Param() params: BindBlogDto) {
-    return this.blogsService.bindBlog(params);
+  async bindBlog(@Param() params: BindBlogDto) {
+    return await this.blogsService.bindBlog(params);
   }
 }

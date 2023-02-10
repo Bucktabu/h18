@@ -81,6 +81,7 @@ export class PgBanInfoRepository {
     if (!result.length) {
       return false;
     }
+    console.log('blog banned');
     return true;
   }
 

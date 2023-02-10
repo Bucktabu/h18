@@ -38,11 +38,14 @@ export class BloggerBlogsController {
   ) {}
 
   @Get()
-  getBlogs(
+  async getBlogs(
     @Query() query: QueryParametersDto,
     @User() user: UserDBModel,
   ): Promise<ContentPageModel> {
-    return this.queryBlogsRepository.getBlogs(query, user.id);
+    console.log('getBlogs');
+    const blogs = await this.queryBlogsRepository.getBlogs(query, user.id);
+
+    return blogs
   }
 
   @Get('comments')
