@@ -7,6 +7,9 @@ import { PostDto } from "../../src/modules/blogger/api/dto/post.dto";
 import { PostWithBlogIdDTO } from "../../src/modules/public/posts/api/dto/postDTO";
 import { faker } from "@faker-js/faker";
 import { BlogDto } from "../../src/modules/blogger/api/dto/blog.dto";
+import {endpoints, getUrlForComment, getUrlForEndpointPostByBlogger} from "./routing";
+import {CreatedComment} from "../../src/modules/public/comments/infrastructure/entity/db_comment.model";
+import {CommentDTO} from "../../src/modules/public/comments/api/dto/commentDTO";
 
 export class Factories {
   constructor(private readonly server: any) {
@@ -23,7 +26,7 @@ export class Factories {
       };
 
       const response = await request(this.server)
-        .post(`/sa/users`)
+        .post(endpoints.sa.users)
         .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
         .send(inputUserData);
 
@@ -33,7 +36,7 @@ export class Factories {
     return users;
   }
 
-  async createAndLoginUsers(userCount: number): Promise<{ user: UserViewModelWithBanInfo, accessToken: string }[]> {
+  async createAndLoginUsers(userCount: number): Promise<{ user: UserViewModelWithBanInfo, accessToken: string, refreshToken: string }[]> {
     const users = await this.createUsers(userCount);
 
     const tokens = [];
@@ -45,13 +48,14 @@ export class Factories {
       };
 
       const response = await request(this.server)
-        .post(`/auth/login`)
+        .post(endpoints.authController.login)
         .set('User-Agent', faker.internet.userAgent())
         .send(userLoginData);
 
       const accessToken = response.body.accessToken;
-      //const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
-      tokens.push({ user: users[i], accessToken });
+      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+      tokens.push({ user: users[i], accessToken, refreshToken });
     }
     return tokens;
   }
@@ -67,7 +71,7 @@ export class Factories {
       };
 
       const response = await request(this.server)
-        .post(`/blogger/blogs`)
+        .post(endpoints.bloggerController.blogs)
         .auth(accessToken, { type: 'bearer' })
         .send(inputBlogData)
 
@@ -88,8 +92,10 @@ export class Factories {
         blogId: blogId,
       };
 
+      const url = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blogId)
+
       const response = await request(this.server)
-        .post(`/blogger/blogs/${blogId}/posts`)
+        .post(url)
         .auth(accessToken, { type: 'bearer' })
         .send(inputPostData);
       posts.push(response.body);
@@ -97,4 +103,25 @@ export class Factories {
 
     return posts;
   }
+
+  async createComments(accessToken: string, postId: string, postsCount: number) : Promise<CreatedComment[]> {
+    const comment = [];
+
+    for (let i = 0; i < postsCount; i++) {
+      const inputPostData: CommentDTO = {
+        content: faker.lorem.words(5)
+      };
+
+      const url = getUrlForComment(endpoints.postController, postId)
+
+      const response = await request(this.server)
+          .post(url)
+          .auth(accessToken, { type: 'bearer' })
+          .send(inputPostData);
+      comment.push(response.body);
+    }
+
+    return comment
+  }
+
 }

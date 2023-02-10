@@ -6,6 +6,7 @@ import { toActiveSessionsViewModel } from '../../../../data-mapper/to-active-ses
 import { PgSecurityRepository } from '../infrastructure/pg-security.repository';
 import { PgQuerySecurityRepository } from '../infrastructure/pg-query-security.repository';
 import { v4 as uuidv4 } from 'uuid';
+import {TokenPayloadModel} from "../../../../global-model/token-payload.model";
 
 @Injectable()
 export class SecurityService {
@@ -62,7 +63,7 @@ export class SecurityService {
     return token;
   }
 
-  async createNewRefreshToken(refreshToken: string, tokenPayload: any) {
+  async createNewRefreshToken(refreshToken: string, tokenPayload: TokenPayloadModel) {
     await this.jwtService.addTokenInBlackList(refreshToken);
     const token = await this.jwtService.createToken(
       tokenPayload.userId,
@@ -73,7 +74,7 @@ export class SecurityService {
     );
     const iat = new Date(newTokenPayload.iat).toISOString()
     const exp = new Date(newTokenPayload.exp).toISOString()
-    
+    console.log(exp)
     await this.securityRepository.updateCurrentActiveSessions(
       newTokenPayload.deviceId,
       iat,

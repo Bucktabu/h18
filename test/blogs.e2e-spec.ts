@@ -6,6 +6,7 @@ import request from "supertest";
 import {preparedPost, preparedUser, superUser} from "./helper/prepeared-data";
 import { v4 as uuidv4 } from 'uuid';
 import {getPostsByBlogId} from "./helper/expect-post-models";
+import {endpoints, getUrlForEndpointPostByBlogger, getUrlWithId} from "./helper/routing";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -38,19 +39,19 @@ describe('e2e tests', () => {
 
     it('Creat blogs', async () => {
       await request(server)
-        .post(`/sa/users`)
+        .post(endpoints.sa.users)
         .send(preparedUser.valid1)
         .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
         .expect(201)
 
       const token = await request(server)
-        .post(`/auth/login`)
+        .post(endpoints.authController.login)
         .send(preparedUser.login1)
         .set({ 'user-agent': 'chrome/0.1' })
         .expect(200)
 
       const blog1 = await request(server)
-        .post(`/blogger/blogs`)
+        .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName5',
           description: 'valid description',
@@ -60,7 +61,7 @@ describe('e2e tests', () => {
         .expect(201)
 
       const blog2 = await request(server)
-        .post(`/blogger/blogs`)
+        .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName4',
           description: 'valid description',
@@ -70,7 +71,7 @@ describe('e2e tests', () => {
         .expect(201)
 
       const blog3 = await request(server)
-        .post(`/blogger/blogs`)
+        .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName3',
           description: 'valid description',
@@ -80,7 +81,7 @@ describe('e2e tests', () => {
         .expect(201)
 
       const blog4 = await request(server)
-        .post(`/blogger/blogs`)
+        .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName2',
           description: 'valid description',
@@ -90,7 +91,7 @@ describe('e2e tests', () => {
         .expect(201)
 
       const blog5 = await request(server)
-        .post(`/blogger/blogs`)
+        .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName1',
           description: 'valid description',
@@ -172,15 +173,17 @@ describe('e2e tests', () => {
     describe('Return all posts for specified blog', () => {
       it('Create posts', async () => {
         const { token, blog1, blog5 } = expect.getState()
+        const url1 = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blog5.id)
+        const url2 = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blog1.id)
 
         await request(server)
-          .post(`/blogger/blogs/${blog5.id}/posts`)
+          .post(url1)
           .send(preparedPost.valid)
           .auth(token.accessToken, {type: 'bearer'})
           .expect(201)
 
         const post1 = await request(server)
-          .post(`/blogger/blogs/${blog1.id}/posts`)
+          .post(url2)
           .send({
             title: 'PostName1',
             shortDescription: 'SomeOneShortDescription1',
@@ -190,7 +193,7 @@ describe('e2e tests', () => {
           .expect(201)
 
         const post2 = await request(server)
-          .post(`/blogger/blogs/${blog1.id}/posts`)
+          .post(url2)
           .send({
             title: 'PostName2',
             shortDescription: 'SomeOneShortDescription2',
@@ -200,7 +203,7 @@ describe('e2e tests', () => {
           .expect(201)
 
         const post3 = await request(server)
-          .post(`/blogger/blogs/${blog1.id}/posts`)
+          .post(url2)
           .send({
             title: 'PostName3',
             shortDescription: 'SomeOneShortDescription3',
@@ -214,9 +217,10 @@ describe('e2e tests', () => {
 
       it('Return all post without query', async () => {
         const { blog1 } = expect.getState()
+        const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog1.id)
 
         const response = await request(server)
-          .get(`/blogs/${blog1.id}/posts`)
+          .get(url)
           .expect(200)
 
         expect(response.body).toStrictEqual({
@@ -234,9 +238,10 @@ describe('e2e tests', () => {
 
       it('Return all post with sorting and pagination', async () => {
         const blog = expect.getState().blog1
+        const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog.id)
 
         const response = await request(server)
-          .get(`/blogs/${blog.id}/posts?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
+          .get(`${url}?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
           .expect(200)
 
         expect(response.body).toStrictEqual({
@@ -251,10 +256,11 @@ describe('e2e tests', () => {
       })
 
       it('Return all post with sorting and pagination', async () => {
-        const blog1 = expect.getState().blog1
+        const {blog1} = expect.getState()
+        const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog1.id)
 
         const response = await request(server)
-          .get(`/blogs/${blog1.id}/posts?sortBy=content&sortDirection=desc&pageSize=2`)
+          .get(`${url}?sortBy=content&sortDirection=desc&pageSize=2`)
           .expect(200)
 
         expect(response.body).toBe({
@@ -272,18 +278,20 @@ describe('e2e tests', () => {
 
     describe('Return blog by id', () => {
       const randomUuid = uuidv4()
+      const url = getUrlWithId(endpoints.blogController, randomUuid)
 
       it('Try find not exist blog', async () => {
         await request(server)
-          .get(`/blogs/${randomUuid}`)
+          .get(url)
           .expect(404)
       })
 
       it('Should return blog by id', async () => {
         const blog = expect.getState().blog1
+        const url = getUrlWithId(endpoints.blogController, blog.id)
 
         const response = await request(server)
-          .get(`/blogs/${blog.id}`)
+          .get(url)
           .expect(200)
 
         expect(response.body).toStrictEqual({
@@ -291,6 +299,7 @@ describe('e2e tests', () => {
           name: blog.name,
           description: blog.description,
           websiteUrl: blog.websiteUrl,
+          createdAt: expect.any(String),
           isMembership: expect.any(Boolean)
         })
       })

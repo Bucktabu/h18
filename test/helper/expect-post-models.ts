@@ -1,6 +1,7 @@
 import { BlogViewModel } from "../../src/modules/public/blogs/api/dto/blogView.model";
 import {preparedPost} from "./prepeared-data";
 import { PostDto } from "../../src/modules/blogger/api/dto/post.dto";
+import {PostViewModel} from "../../src/modules/public/posts/api/dto/postsView.model";
 
 export const getPostsByBlogId = (num: number, count: number, blog: BlogViewModel) => {
   return {
@@ -13,12 +14,12 @@ export const getPostsByBlogId = (num: number, count: number, blog: BlogViewModel
   }
 }
 
-export const getPosts = (dto: PostDto, blog: BlogViewModel) => {
+export const getPosts = (post: PostViewModel, blog: BlogViewModel) => {
   return {
     id: expect.any(String),
-    title: dto.title,
-    shortDescription: dto.shortDescription,
-    content: dto.content,
+    title: post.title,
+    shortDescription: post.shortDescription,
+    content: post.content,
     blogId: blog.id,
     blogName: blog.name,
     createdAt: expect.any(String),

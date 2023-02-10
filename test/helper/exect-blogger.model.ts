@@ -21,6 +21,7 @@ export const createdBlog = (dto: BlogDto) => {
     description: dto.description,
     websiteUrl: dto.websiteUrl,
     createdAt: expect.any(String),
+    isMembership: false
   }
 }
 
