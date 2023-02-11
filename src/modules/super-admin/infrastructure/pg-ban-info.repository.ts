@@ -166,7 +166,7 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  async deletePostsBanStatus(blogId: string): Promise<boolean> {
+  async deletePostsBanStatus(blogId: string): Promise<number> {
     const query = `
       DELETE
         FROM public.banned_post
@@ -174,10 +174,7 @@ export class PgBanInfoRepository {
     `;
     const result = await this.dataSource.query(query, [blogId])
 
-    if (result[1] === 0) {
-      return false;
-    }
-    return true;
+    return result[1];
   }
 
   private getUpdateFilter(

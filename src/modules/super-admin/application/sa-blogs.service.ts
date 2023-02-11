@@ -40,7 +40,11 @@ export class SaBlogsService {
     }
 
     if(postsId.length) {
-      await this.banInfoRepository.deletePostsBanStatus(blogId)
+      const numberOfDeleted = await this.banInfoRepository.deletePostsBanStatus(blogId)
+
+      if (numberOfDeleted !== postsId.length) {
+        console.log('Not all posts are unbanded');
+      }
     }
 
     return await this.banInfoRepository.deleteBlogBanStatus(blogId);
