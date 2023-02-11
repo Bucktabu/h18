@@ -264,7 +264,7 @@ describe('e2e tests', () => {
         })
 
         it('Create data', async  () => {
-            const [token] = await factories.createAndLoginUsers(2)
+            const [token] = await factories.createAndLoginUsers(1)
             const [blog] = await factories.createBlogs(token.accessToken, 1)
             const [post0, post1, post2] = await factories.createPostsForBlog(token.accessToken, blog.id, 3)
 
@@ -288,10 +288,15 @@ describe('e2e tests', () => {
 
         it('Shouldn`t return post if owned blog was banned', async () => {
             const {post0} = expect.getState()
-            console.log(post0)
+
             await request(server)
                 .get(`/posts/${post0.id}`)
                 .expect(404)
+
+            const res = await request(server)
+              .get(`/posts`)
+              .expect(200)
+            console.log(res.body)
         })
     })
 })
