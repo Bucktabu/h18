@@ -292,11 +292,26 @@ describe('e2e tests', () => {
             await request(server)
                 .get(`/posts/${post0.id}`)
                 .expect(404)
+        })
 
-            const res = await request(server)
-              .get(`/posts`)
+        it('SA unban blog', async () => {
+            const { blogId } = expect.getState()
+
+            await request(server)
+              .put(`/sa/blogs/${blogId}/ban`)
+              .send({
+                  "isBanned": false
+              })
+              .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
+              .expect(204)
+        })
+
+        it('Shouldn`t return post if owned blog was banned', async () => {
+            const {post0} = expect.getState()
+
+            await request(server)
+              .get(`/posts/${post0.id}`)
               .expect(200)
-            console.log(res.body)
         })
     })
 })

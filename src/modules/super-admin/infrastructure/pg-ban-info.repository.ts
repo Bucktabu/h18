@@ -166,13 +166,13 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  async deletePostsBanStatus(postId: string): Promise<boolean> {
+  async deletePostsBanStatus(blogId: string): Promise<boolean> {
     const query = `
       DELETE
         FROM public.banned_post
-       WHERE (SELECT "blogId" FROM posts WHERE id = $1)
+       WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1)
     `;
-    const result = await this.dataSource.query(query, [postId])
+    const result = await this.dataSource.query(query, [blogId])
 
     if (result[1] === 0) {
       return false;
